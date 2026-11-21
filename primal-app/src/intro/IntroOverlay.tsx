@@ -3,6 +3,8 @@ import { AccessibilityInfo, Animated, Easing, Image, Platform, Pressable, StyleS
 import * as Haptics from 'expo-haptics';
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
 import { glow, useTheme } from '../lib/theme';
+import { FONTS } from '../lib/fonts';
+import { I18nText as Text } from '../components/I18nText';
 import { useAppIcon } from '../lib/appAssets';
 import { useNeonOptional } from '../neon/NeonProvider';
 import { LOGO_POINTS } from './logoPoints';
@@ -50,6 +52,9 @@ function Intro({ onDone }: { onDone: () => void }) {
   const finished = useRef(false);
   const sequence = useRef<Animated.CompositeAnimation | null>(null);
   const sound = useRef<AudioPlayer | null>(null);
+  // On the web, browsers only allow sound after a tap: wait for one before starting.
+  const [armed, setArmed] = useState(Platform.OS !== 'web');
+  const waitPulse = useRef(new Animated.Value(0)).current;
 
   const finish = () => { if (finished.current) return; finished.current = true; onDone(); };
 
@@ -76,6 +81,17 @@ function Intro({ onDone }: { onDone: () => void }) {
   }), [burst, cx, cy, size, theme.primary, width]);
 
   useEffect(() => {
+    if (armed) return;
+    const loop = Animated.loop(Animated.sequence([
+      Animated.timing(waitPulse, { toValue: 1, duration: 1300, easing: Easing.inOut(Easing.sin), useNativeDriver: false }),
+      Animated.timing(waitPulse, { toValue: 0, duration: 1300, easing: Easing.inOut(Easing.sin), useNativeDriver: false }),
+    ]));
+    loop.start();
+    return () => loop.stop();
+  }, [armed, waitPulse]);
+
+  useEffect(() => {
+    if (!armed) return;
     let cancelled = false;
     const native = Platform.OS !== 'web';
     const run = (reduced: boolean) => {
@@ -89,7 +105,7 @@ function Intro({ onDone }: { onDone: () => void }) {
         sequence.current.start(finish);
         return;
       }
-      if (ambience.introSound) playIntroSound();
+      if (ambience.introSound && native) playIntroSound(); // web: already started in the tap handler
       sequence.current = Animated.sequence([
         Animated.timing(appear, { toValue: 1, duration: APPEAR, easing: Easing.out(Easing.back(1.4)), useNativeDriver: native }),
         Animated.delay(HOLD),
@@ -107,7 +123,7 @@ function Intro({ onDone }: { onDone: () => void }) {
     AccessibilityInfo.isReduceMotionEnabled?.().then(run).catch(() => run(false)) ?? run(false);
     return () => { cancelled = true; sequence.current?.stop(); stopSound(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [armed]);
 
   // Launch sound (assets/sounds/intro.m4a, made by tools/make-intro-sound.py), timed to the animation.
   // Muted by the phone's silent switch and mixed with any music already playing.
@@ -146,6 +162,21 @@ function Intro({ onDone }: { onDone: () => void }) {
   const flashScale = burst.interpolate({ inputRange: [0, 0.2], outputRange: [0.5, 1.8], extrapolate: 'clamp' });
   const curtain = burst.interpolate({ inputRange: [0, 0.1, 0.55], outputRange: [1, 1, 0], extrapolate: 'clamp' });
 
+  if (!armed) {
+    // Web entry screen: the tap is the user gesture that unlocks sound.
+    const enter = () => { if (ambience.introSound) playIntroSound(); setArmed(true); };
+    const waitOpacity = waitPulse.interpolate({ inputRange: [0, 1], outputRange: [0.55, 1] });
+    const waitScale = waitPulse.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1.02] });
+    const small = size * 0.62;
+    return <Pressable accessibilityRole="button" accessibilityLabel="Entrer dans PRIMAL" onPress={enter} style={[StyleSheet.absoluteFill, styles.gate]}>
+      <Animated.View style={[{ width: small, height: small, borderRadius: small / 2, overflow: 'hidden', opacity: waitOpacity, transform: [{ scale: waitScale }] }, glow(theme.neon, 0.8)]}>
+        <Image source={logo} style={{ width: small, height: small }} />
+      </Animated.View>
+      <Animated.Text style={[FONTS.text.semibold, styles.gateText, { color: theme.text, opacity: waitOpacity }]}>Touchez pour entrer</Animated.Text>
+      <Text style={[FONTS.text.regular, styles.gateHint, { color: theme.sub }]}>{ambience.introSound ? 'Avec le son' : 'Son désactivé dans les réglages'}</Text>
+    </Pressable>;
+  }
+
   return <Animated.View style={[StyleSheet.absoluteFill, { opacity: exit, zIndex: 1000, elevation: 1000 }]}>
     <Pressable accessibilityRole="button" accessibilityLabel="Passer l'introduction" onPress={skip} style={StyleSheet.absoluteFill}>
       <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: '#050505', opacity: curtain }]} />
@@ -162,6 +193,9 @@ function Intro({ onDone }: { onDone: () => void }) {
 }
 
 const styles = StyleSheet.create({
+  gate: { backgroundColor: '#050505', alignItems: 'center', justifyContent: 'center', zIndex: 1000, elevation: 1000 },
+  gateText: { fontSize: 17, letterSpacing: 0.6, marginTop: 34 },
+  gateHint: { fontSize: 12, marginTop: 8 },
   halo: { position: 'absolute' },
   particle: { position: 'absolute' },
 });
