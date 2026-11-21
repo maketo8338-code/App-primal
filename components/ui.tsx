@@ -38,7 +38,7 @@ export function PrimaryButton({ label, onPress, disabled, color }: { label: stri
   const textColor = disabled ? theme.sub : color ? '#FFFFFF' : theme.onPrimary;
   return <Pressable3D onPress={onPress} disabled={disabled} tilt={10} sink={0.97} style={[styles.button, disabled ? { backgroundColor: theme.cardAlt } : { backgroundColor: color || theme.primary, ...shadow(theme, 2, color || theme.primary) }]}>
     {!disabled ? <LinearGradient colors={color ? [color, color] : theme.primaryGradient} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: RADIUS.pill }]} /> : null}
-    {!disabled ? <View style={[styles.buttonSheen, { opacity: theme.mode === 'dark' ? 0.14 : 0.2 }]} /> : null}
+    {!disabled ? <LinearGradient colors={['rgba(255,255,255,0.16)', 'rgba(255,255,255,0)']} start={{ x: 0, y: 0 }} end={{ x: 0, y: 0.6 }} style={[StyleSheet.absoluteFill, { borderRadius: RADIUS.pill }]} /> : null}
     <Text style={[styles.buttonLabel, FONTS.text.semibold, { color: textColor }]}>{label}</Text>
   </Pressable3D>;
 }
@@ -52,7 +52,6 @@ const styles = StyleSheet.create({
   sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, marginTop: 14 },
   sectionTitle: { fontSize: 21, letterSpacing: -0.3 }, actionPress: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingVertical: 6, paddingHorizontal: 12, borderRadius: RADIUS.pill, borderWidth: 1 }, action: { fontSize: 13 },
   button: { borderRadius: RADIUS.pill, paddingVertical: 17, alignItems: 'center', justifyContent: 'center', overflow: 'visible' },
-  buttonSheen: { position: 'absolute', top: 2, left: 18, right: 18, height: '42%', borderRadius: RADIUS.pill, backgroundColor: '#FFFFFF' },
   buttonLabel: { fontSize: 16, letterSpacing: 0.2 },
   chip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: RADIUS.pill, borderWidth: 1.5 },
 });

@@ -84,7 +84,7 @@ export default function HydrationScreen({ onBack }: { onBack: () => void }) {
         <View style={[styles.manualRow, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <TextInput value={waterInput} onChangeText={setWaterInput} keyboardType="decimal-pad" placeholder="1800" placeholderTextColor={theme.sub} style={[FONTS.mono.semibold, styles.manualInput, { color: theme.text }]} />
           <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 14 }]}>ml</Text>
-          <Pressable onPress={addManualWater} style={[styles.manualButton, { backgroundColor: theme.primary }]}><Text style={[FONTS.text.semibold, { color: '#FFFFFF', fontSize: 14 }]}>Ajouter</Text></Pressable>
+          <Pressable onPress={addManualWater} style={[styles.manualButton, { backgroundColor: theme.primary }]}><Text style={[FONTS.text.semibold, { color: theme.onPrimary, fontSize: 14 }]}>Ajouter</Text></Pressable>
         </View>
 
         <Text style={[styles.sectionTitle, FONTS.display.semibold, { color: theme.text, marginTop: 22 }]}>Objectif quotidien</Text>

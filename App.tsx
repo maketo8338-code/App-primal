@@ -110,5 +110,5 @@ const styles = StyleSheet.create({
   tabDock: { paddingHorizontal: 14, paddingTop: 6, backgroundColor: 'transparent' },
   tabBar: { flexDirection: 'row', alignItems: 'flex-end', borderRadius: RADIUS.xl, borderWidth: StyleSheet.hairlineWidth, paddingTop: 9, paddingBottom: 9, paddingHorizontal: 4 },
   tabButton: { flex: 1, alignItems: 'center', justifyContent: 'flex-end', minHeight: 50 }, tabIcon: { width: 48, height: 30, borderRadius: RADIUS.pill, alignItems: 'center', justifyContent: 'center' }, tabLabel: { fontSize: 11, marginTop: 4 },
-  addButton: { width: 68, alignItems: 'center', justifyContent: 'flex-end', marginTop: -30 }, addOrb: { width: 60, height: 60, borderRadius: 30, borderWidth: 4, alignItems: 'center', justifyContent: 'center' }, addGloss: { position: 'absolute', top: 4, left: 10, right: 10, height: 20, borderRadius: 12, backgroundColor: '#FFFFFF', opacity: 0.22 }, addLabel: { fontSize: 11, marginTop: 4 },
+  addButton: { width: 68, alignItems: 'center', justifyContent: 'flex-end', marginTop: -30 }, addOrb: { width: 60, height: 60, borderRadius: 30, borderWidth: 4, alignItems: 'center', justifyContent: 'center' }, addGloss: { position: 'absolute', top: 5, left: 14, right: 14, height: 14, borderRadius: 10, backgroundColor: '#FFFFFF', opacity: 0.16 }, addLabel: { fontSize: 11, marginTop: 4 },
 });
