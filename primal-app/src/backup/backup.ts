@@ -25,6 +25,8 @@ export function buildBackup(data: State, ambience: unknown): BackupFile {
   return { format: BACKUP_FORMAT, version: BACKUP_VERSION, exportedAt: new Date().toISOString(), data, ambience };
 }
 
+const MAX_BACKUP_BYTES = 25 * 1024 * 1024;
+
 /** Reads a backup file's text. Returns null when it is not a PRIMAL backup. */
 export function parseBackup(text: string): BackupFile | null {
   try {
@@ -62,7 +64,10 @@ export async function pickBackup(): Promise<{ ok: true; backup: BackupFile } | {
     const result = await DocumentPicker.getDocumentAsync({ type: ['application/json', 'text/plain', '*/*'], copyToCacheDirectory: true, multiple: false });
     if (result.canceled || !result.assets?.[0]) return { ok: false, reason: 'cancelled' };
     const asset = result.assets[0];
+    // A real backup is a few MB at most; refuse huge files instead of freezing the app.
+    if (typeof asset.size === 'number' && asset.size > MAX_BACKUP_BYTES) return { ok: false, reason: 'invalid' };
     const text = Platform.OS === 'web' && asset.file ? await asset.file.text() : await new File(asset.uri).text();
+    if (text.length > MAX_BACKUP_BYTES) return { ok: false, reason: 'invalid' };
     const backup = parseBackup(text);
     return backup ? { ok: true, backup } : { ok: false, reason: 'invalid' };
   } catch {

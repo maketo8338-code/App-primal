@@ -4,7 +4,7 @@ import { I18nText as Text } from './I18nText';
 import { Card, PrimaryButton } from './ui';
 import { IconBadge, SectionHeading } from './PrimalVisuals';
 import { Pressable3D } from './motion';
-import { useTheme, RADIUS } from '../lib/theme';
+import { useTheme, RADIUS, sanitizeAmbience } from '../lib/theme';
 import { useStore } from '../lib/store';
 import { FONTS } from '../lib/fonts';
 import { useI18n } from '../lib/i18n';
@@ -35,7 +35,7 @@ export default function BackupSettings() {
   const confirmRestore = () => {
     if (!pending) return;
     const ok = restoreBackup(pending.data);
-    if (ok && pending.ambience && typeof pending.ambience === 'object') setAmbience(pending.ambience as never);
+    if (ok && pending.ambience && typeof pending.ambience === 'object') setAmbience(sanitizeAmbience(pending.ambience));
     setPending(null);
     setMessage(ok ? { text: 'Données restaurées.', tone: 'ok' } : { text: 'Cette sauvegarde ne contient aucune donnée utilisable.', tone: 'error' });
   };

@@ -115,16 +115,21 @@ const AMBIENCE_KEY = 'primal.ambience.v1';
 
 function readAmbience(raw: string | null): Ambience {
   if (!raw) return DEFAULT_AMBIENCE;
-  try {
-    const v = JSON.parse(raw) as Partial<Ambience>;
+  try { return sanitizeAmbience(JSON.parse(raw)); } catch { return DEFAULT_AMBIENCE; }
+}
+
+/** Keeps only valid ambience values (used for saved settings and imported backups). */
+export function sanitizeAmbience(input: unknown): Ambience {
+  const v = (input && typeof input === 'object' ? input : {}) as Partial<Ambience>;
+  {
     return {
       enabled: typeof v.enabled === 'boolean' ? v.enabled : DEFAULT_AMBIENCE.enabled,
       intensity: v.intensity === 'soft' || v.intensity === 'normal' || v.intensity === 'intense' ? v.intensity : DEFAULT_AMBIENCE.intensity,
-      accent: v.accent && v.accent in PALETTES ? v.accent : DEFAULT_AMBIENCE.accent,
+      accent: typeof v.accent === 'string' && Object.prototype.hasOwnProperty.call(PALETTES, v.accent) ? v.accent : DEFAULT_AMBIENCE.accent,
       introSound: typeof v.introSound === 'boolean' ? v.introSound : DEFAULT_AMBIENCE.introSound,
       introHaptics: typeof v.introHaptics === 'boolean' ? v.introHaptics : DEFAULT_AMBIENCE.introHaptics,
     };
-  } catch { return DEFAULT_AMBIENCE; }
+  }
 }
 
 interface ThemeCtx { theme: Theme; mode: ThemeMode; themeReady: boolean; needsThemeChoice: boolean; setMode: (mode: ThemeMode) => void; completeThemeChoice: (mode: ThemeMode) => void; ambience: Ambience; setAmbience: (patch: Partial<Ambience>) => void; }
