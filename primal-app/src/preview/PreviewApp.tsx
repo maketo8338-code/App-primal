@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { I18nProvider, useI18n } from '../lib/i18n';
-import { ThemeProvider } from '../lib/theme';
+import { ThemeProvider, useTheme } from '../lib/theme';
 import { StoreProvider, useStore } from '../lib/store';
 import { syncSmartNotifications } from '../lib/notificationEngine';
 import { useAppFonts } from '../lib/fonts';
@@ -50,6 +50,7 @@ function Root() {
   const { ready: i18nReady, languageChosen } = useI18n();
   const { ready, entries, habits, profile, notificationPreferences, addEntry } = useStore();
   const session = useSession();
+  const { ambience } = useTheme();
   const [tab, setTab] = useState<Tab>('index');
   const [overlay, setOverlay] = useState<Overlay>('none');
 
@@ -97,7 +98,7 @@ function Root() {
 
   return <View style={styles.black}>
     <StatusBar style="light" />
-    <NeonBackground />
+    {ambience.enabled ? <NeonBackground /> : null}
     <View style={{ flex: 1 }}>{content}</View>
   </View>;
 }

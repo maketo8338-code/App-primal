@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { I18nText as Text } from '../components/I18nText';
 import { Icon } from '../components/Icon';
 import { Pressable3D } from '../components/motion';
-import { glow, MOTION, NEON, RADIUS, useTheme } from '../lib/theme';
+import { glow, MOTION, RADIUS, useTheme } from '../lib/theme';
 import { FONTS } from '../lib/fonts';
 import { useI18n } from '../lib/i18n';
 import { todayKey } from '../lib/nutrition';
@@ -57,12 +57,12 @@ export default function NeonTabBar({ state, navigation }: BottomTabBarProps) {
   const order = ['index', 'foods', 'add', 'journal', 'profile'];
 
   return <View style={[styles.dock, { paddingBottom: Math.max(insets.bottom, 12) }]} pointerEvents="box-none">
-    <View style={[styles.bar, { backgroundColor: '#0D0809F2', borderColor: theme.border }]}>
-      <LinearGradient colors={['#FF3B4E22', '#FF3B4E00']} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: RADIUS.xl }]} pointerEvents="none" />
+    <View style={[styles.bar, { backgroundColor: `${theme.cardSolid}F2`, borderColor: theme.border }]}>
+      <LinearGradient colors={[`${theme.primary}22`, `${theme.primary}00`]} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: RADIUS.xl }]} pointerEvents="none" />
       {order.map((name) => name === 'add'
         ? <Pressable3D key="add" accessibilityLabel={t('foods.addTitle')} onPress={add} tilt={16} sink={0.9} style={styles.addButton}>
-            <Animated.View style={[styles.addHalo, { backgroundColor: NEON.neon, opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.18, 0.42] }), transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.9, 1.15] }) }] }]} />
-            <View style={[styles.addOrb, { borderColor: '#0D0809' }, glow(theme.neon, 1)]}>
+            <Animated.View style={[styles.addHalo, { backgroundColor: theme.neon, opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.18, 0.42] }), transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.9, 1.15] }) }] }]} />
+            <View style={[styles.addOrb, { borderColor: theme.cardSolid, backgroundColor: theme.neon }, glow(theme.neon, 1)]}>
               <LinearGradient colors={theme.primaryGradient} start={{ x: 0.2, y: 0 }} end={{ x: 0.8, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: 27 }]} />
               <View style={styles.addGloss} />
               <Icon android="add" size={28} color={theme.onPrimary} />
@@ -84,6 +84,6 @@ const styles = StyleSheet.create({
   dot: { width: 4, height: 4, borderRadius: 2, marginTop: 3 },
   addButton: { width: 70, alignItems: 'center', justifyContent: 'flex-end', marginTop: -34 },
   addHalo: { position: 'absolute', top: -6, width: 74, height: 74, borderRadius: 37 },
-  addOrb: { width: 62, height: 62, borderRadius: 31, borderWidth: 4, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FF2D44' },
+  addOrb: { width: 62, height: 62, borderRadius: 31, borderWidth: 4, alignItems: 'center', justifyContent: 'center' },
   addGloss: { position: 'absolute', top: 5, left: 14, right: 14, height: 14, borderRadius: 10, backgroundColor: '#FFFFFF', opacity: 0.28 },
 });

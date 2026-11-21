@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { IMPULSE_SHAKE, PARTICLE_COUNT as N, STRIDE, useNeon } from './NeonProvider';
+import { useTheme } from '../lib/theme';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Web version of the neon particle field.
@@ -21,6 +22,7 @@ function makeSprite(stops: Array<[number, string]>): HTMLCanvasElement {
 export default function NeonBackground() {
   const host = useRef<HTMLDivElement | null>(null);
   const { impulses, flow, tilt, intensity } = useNeon();
+  const { light } = useTheme().theme;
 
   useEffect(() => {
     const root = host.current; if (!root) return;
@@ -28,8 +30,10 @@ export default function NeonBackground() {
     Object.assign(canvas.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', pointerEvents: 'none' });
     root.appendChild(canvas);
     const ctx = canvas.getContext('2d')!;
-    const halo = makeSprite([[0, 'rgba(255,45,68,1)'], [0.22, 'rgba(255,45,68,0.44)'], [0.55, 'rgba(255,26,52,0.09)'], [1, 'rgba(255,26,52,0)']]);
-    const core = makeSprite([[0, 'rgba(255,242,236,1)'], [0.4, 'rgba(255,154,122,0.63)'], [1, 'rgba(255,90,74,0)']]);
+    const rgba = ([r, g, b]: [number, number, number], a: number) => `rgba(${r},${g},${b},${a})`;
+    const halo = makeSprite([[0, rgba(light.halo, 1)], [0.22, rgba(light.halo, 0.44)], [0.55, rgba(light.edge, 0.09)], [1, rgba(light.edge, 0)]]);
+    const core = makeSprite([[0, 'rgba(255,246,240,1)'], [0.4, rgba(light.core, 0.63)], [1, rgba(light.core, 0)]]);
+    const hz = light.haze; const hz2: [number, number, number] = [Math.round(hz[0] / 2), Math.round(hz[1] / 2), Math.round(hz[2] / 2)]; const hz3: [number, number, number] = [Math.round(hz[0] / 3), Math.round(hz[1] / 3), Math.round(hz[2] / 3)];
 
     let W = 0; let H = 0;
     const resize = () => {
@@ -105,17 +109,18 @@ export default function NeonBackground() {
       ctx.fillStyle = '#050505'; ctx.fillRect(0, 0, W, H);
       const haze = 0.55 + Math.min(0.9, energy * 2.2);
       const big = Math.max(W, H);
-      for (const [cx, cy, r, c0, c1] of [[W * 0.82, -H * 0.02, big * 0.62, 'rgba(90,10,20,0.33)', 'rgba(42,5,10,0.13)'], [W * 0.1, H * 1.02, big * 0.55, 'rgba(74,8,18,0.27)', 'rgba(30,4,8,0.09)']] as Array<[number, number, number, string, string]>) {
+      for (const [cx, cy, r, c0, c1] of [[W * 0.82, -H * 0.02, big * 0.62, rgba(hz, 0.33), rgba(hz2, 0.13)], [W * 0.1, H * 1.02, big * 0.55, rgba(hz, 0.27), rgba(hz3, 0.09)]] as Array<[number, number, number, string, string]>) {
         const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r); g.addColorStop(0, c0); g.addColorStop(0.5, c1); g.addColorStop(1, 'rgba(5,5,5,0)');
         ctx.globalAlpha = Math.min(1, haze); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
       }
       ctx.globalCompositeOperation = 'lighter';
       if (flash[2] > 0.01) { ctx.globalAlpha = Math.min(0.5, flash[2] * 0.38); ctx.drawImage(halo, flash[0] - 190, flash[1] - 190, 380, 380); }
+      const glowK = 0.5 + 0.5 * Math.min(1.6, intensity.value);
       for (let i = 0; i < N; i++) {
         const o = i * STRIDE; const depth = d[o + 7]; const heat = d[o + 5];
         const speed = Math.sqrt(d[o + 2] * d[o + 2] + d[o + 3] * d[o + 3]);
         const flicker = 0.72 + 0.28 * Math.sin(t * (1.4 + depth * 1.6) + d[o + 6] * 3);
-        const alpha = Math.min(1, (0.22 + depth * 0.5) * flicker + heat * 0.45 + Math.min(0.3, speed * 0.0005));
+        const alpha = Math.min(1, (0.22 + depth * 0.5) * flicker * glowK + heat * 0.45 + Math.min(0.3, speed * 0.0005));
         const r = d[o + 4] * (1 + Math.min(1.6, heat) * 0.55);
         ctx.globalAlpha = alpha; ctx.drawImage(halo, d[o] - r, d[o + 1] - r, r * 2, r * 2);
         const coreAlpha = Math.min(1, heat * 0.6 + (depth - 0.55) * 0.9);
@@ -124,7 +129,7 @@ export default function NeonBackground() {
     };
     raf = requestAnimationFrame(step);
     return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); canvas.remove(); };
-  }, [flow, impulses, intensity, tilt]);
+  }, [flow, impulses, intensity, tilt, light]);
 
   return <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: '#050505' }]}>
     <View ref={(node) => { host.current = node as unknown as HTMLDivElement | null; }} style={StyleSheet.absoluteFill} />

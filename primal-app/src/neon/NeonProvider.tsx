@@ -1,4 +1,5 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { INTENSITY_FACTOR, useTheme } from '../lib/theme';
 import { AccessibilityInfo, GestureResponderEvent, Platform, StyleSheet, View } from 'react-native';
 import { makeMutable, type SharedValue } from 'react-native-reanimated';
 import { Accelerometer } from 'expo-sensors';
@@ -60,8 +61,12 @@ export function NeonProvider({ children }: { children: React.ReactNode }) {
     tilt: makeMutable<number[]>([0, 0]),
     intensity: makeMutable(1),
   }), []);
+  const { ambience } = useTheme();
+  const enabled = ambience.enabled;
 
+  const enabledRef = useRef(true);
   const impulse = useCallback((x: number, y: number, strength = 1) => {
+    if (!enabledRef.current) return;
     if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(strength)) return;
     const queue = inputs.impulses.value;
     // Keep the queue short: a burst of taps between two frames merges naturally.
@@ -104,7 +109,7 @@ export function NeonProvider({ children }: { children: React.ReactNode }) {
 
   // Phone motion: tilt drifts the dust, a shake blows it everywhere.
   useEffect(() => {
-    if (Platform.OS === 'web') return;
+    if (Platform.OS === 'web' || !enabled) return; // no sensor work while particles are off
     let sub: { remove: () => void } | undefined; let cancelled = false;
     const base = { x: 0, y: 0, z: 0, ready: false }; let lastShake = 0;
     Accelerometer.isAvailableAsync().then((ok) => {
@@ -125,17 +130,20 @@ export function NeonProvider({ children }: { children: React.ReactNode }) {
       });
     }).catch(() => undefined);
     return () => { cancelled = true; sub?.remove(); };
-  }, [inputs]);
+  }, [inputs, enabled]);
 
-  // Respect « reduce motion ».
+  // Intensity = the user's choice (Settings › Ambiance) × « reduce motion ».
+  const [reduced, setReduced] = useState(false);
   useEffect(() => {
     let mounted = true;
-    const apply = (reduced: boolean) => { if (mounted) inputs.intensity.value = reduced ? 0.35 : 1; };
+    const apply = (value: boolean) => { if (mounted) setReduced(value); };
     AccessibilityInfo.isReduceMotionEnabled?.().then(apply).catch(() => undefined);
     const sub = AccessibilityInfo.addEventListener?.('reduceMotionChanged', apply);
     return () => { mounted = false; sub?.remove?.(); };
-  }, [inputs]);
+  }, []);
+  useEffect(() => { inputs.intensity.value = INTENSITY_FACTOR[ambience.intensity] * (reduced ? 0.35 : 1); }, [ambience.intensity, inputs, reduced]);
 
+  enabledRef.current = enabled;
   const api = useMemo<NeonApi>(() => ({ ...inputs, impulse, scrollTo }), [inputs, impulse, scrollTo]);
 
   return <Ctx.Provider value={api}>

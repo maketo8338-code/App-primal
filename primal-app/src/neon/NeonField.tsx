@@ -3,6 +3,7 @@ import { StyleSheet, useWindowDimensions } from 'react-native';
 import { BlendMode, Canvas, createPicture, Group, Picture, RadialGradient, Rect, Skia, TileMode, vec } from '@shopify/react-native-skia';
 import { useDerivedValue, useFrameCallback, useSharedValue } from 'react-native-reanimated';
 import { IMPULSE_SHAKE, PARTICLE_COUNT as N, STRIDE, useNeon } from './NeonProvider';
+import { useTheme } from '../lib/theme';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Neon particle field — simulation + rendering, entirely on the UI thread.
@@ -15,6 +16,7 @@ const TAU = Math.PI * 2;
 export default function NeonField() {
   const { width, height } = useWindowDimensions();
   const { impulses, flow, tilt, intensity } = useNeon();
+  const { light } = useTheme().theme;
   const dims = useSharedValue([width, height]);
   useEffect(() => { dims.value = [width, height]; }, [dims, width, height]);
 
@@ -29,11 +31,13 @@ export default function NeonField() {
   // and a small white-hot core. Additive blending makes overlapping light add up.
   const brushes = useMemo(() => {
     const halo = Skia.Paint(); halo.setAntiAlias(true); halo.setBlendMode(BlendMode.Plus);
-    halo.setShader(Skia.Shader.MakeRadialGradient(vec(0, 0), 1, [Skia.Color('#FF2D44FF'), Skia.Color('#FF2D4470'), Skia.Color('#FF1A3418'), Skia.Color('#FF1A3400')], [0, 0.22, 0.55, 1], TileMode.Clamp));
+    const [hr, hg, hb] = light.halo; const [er, eg, eb] = light.edge; const [cr, cg, cb] = light.core;
+    const rgba = (r: number, g: number, b: number, a: number) => Skia.Color(`rgba(${r}, ${g}, ${b}, ${a})`);
+    halo.setShader(Skia.Shader.MakeRadialGradient(vec(0, 0), 1, [rgba(hr, hg, hb, 1), rgba(hr, hg, hb, 0.44), rgba(er, eg, eb, 0.09), rgba(er, eg, eb, 0)], [0, 0.22, 0.55, 1], TileMode.Clamp));
     const core = Skia.Paint(); core.setAntiAlias(true); core.setBlendMode(BlendMode.Plus);
-    core.setShader(Skia.Shader.MakeRadialGradient(vec(0, 0), 1, [Skia.Color('#FFF2ECFF'), Skia.Color('#FF9A7AA0'), Skia.Color('#FF5A4A00')], [0, 0.4, 1], TileMode.Clamp));
+    core.setShader(Skia.Shader.MakeRadialGradient(vec(0, 0), 1, [rgba(255, 246, 240, 1), rgba(cr, cg, cb, 0.63), rgba(cr, cg, cb, 0)], [0, 0.4, 1], TileMode.Clamp));
     return { halo, core };
-  }, []);
+  }, [light]);
 
   useFrameCallback((frame) => {
     'worklet';
@@ -121,6 +125,8 @@ export default function NeonField() {
     'worklet';
     const d = data.value; if (d.length !== N * STRIDE) return;
     const t = clock.value; const { halo, core } = brushes;
+    // Chosen intensity also sets how bright the dust glows at rest.
+    const glowK = 0.5 + 0.5 * Math.min(1.6, intensity.value);
     // Impact flash: a short-lived glow that lights the room around the finger.
     const f = flash.value;
     if (f[2] > 0.01) { canvas.save(); canvas.translate(f[0], f[1]); canvas.scale(190, 190); halo.setAlphaf(Math.min(0.5, f[2] * 0.38)); canvas.drawCircle(0, 0, 1, halo); canvas.restore(); }
@@ -128,7 +134,7 @@ export default function NeonField() {
       const o = i * STRIDE; const depth = d[o + 7]; const heat = d[o + 5];
       const speed = Math.sqrt(d[o + 2] * d[o + 2] + d[o + 3] * d[o + 3]);
       const flicker = 0.72 + 0.28 * Math.sin(t * (1.4 + depth * 1.6) + d[o + 6] * 3);
-      const alpha = Math.min(1, (0.22 + depth * 0.5) * flicker + heat * 0.45 + Math.min(0.3, speed * 0.0005));
+      const alpha = Math.min(1, (0.22 + depth * 0.5) * flicker * glowK + heat * 0.45 + Math.min(0.3, speed * 0.0005));
       const radius = d[o + 4] * (1 + Math.min(1.6, heat) * 0.55);
       canvas.save(); canvas.translate(d[o], d[o + 1]); canvas.scale(radius, radius);
       halo.setAlphaf(alpha); canvas.drawCircle(0, 0, 1, halo);
@@ -148,10 +154,10 @@ export default function NeonField() {
     <Rect x={0} y={0} width={width} height={height} color="#050505" />
     <Group opacity={hazeOpacity}>
       <Rect x={0} y={0} width={width} height={height}>
-        <RadialGradient c={hazeTop} r={Math.max(width, height) * 0.62} colors={['#5A0A1455', '#2A050A22', '#05050500']} />
+        <RadialGradient c={hazeTop} r={Math.max(width, height) * 0.62} colors={[`rgba(${light.haze[0]}, ${light.haze[1]}, ${light.haze[2]}, 0.33)`, `rgba(${Math.round(light.haze[0] / 2)}, ${Math.round(light.haze[1] / 2)}, ${Math.round(light.haze[2] / 2)}, 0.13)`, '#05050500']} />
       </Rect>
       <Rect x={0} y={0} width={width} height={height}>
-        <RadialGradient c={hazeBottom} r={Math.max(width, height) * 0.55} colors={['#4A081244', '#1E040818', '#05050500']} />
+        <RadialGradient c={hazeBottom} r={Math.max(width, height) * 0.55} colors={[`rgba(${light.haze[0]}, ${light.haze[1]}, ${light.haze[2]}, 0.27)`, `rgba(${Math.round(light.haze[0] / 3)}, ${Math.round(light.haze[1] / 3)}, ${Math.round(light.haze[2] / 3)}, 0.09)`, '#05050500']} />
       </Rect>
     </Group>
     <Picture picture={picture} />
