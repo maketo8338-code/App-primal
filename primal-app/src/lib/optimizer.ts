@@ -1,5 +1,5 @@
 import { Food, JournalEntry, NutrientKey, Nutrients, Targets } from '../types';
-import { PRIMAL_FOOD_BASE } from './foodSources';
+import { SUGGESTIBLE_FOOD_BASE } from './foodSources';
 import { completeTotalForEntries, micronutrientStatuses, NUTRIENT_BY_KEY, scaleNutrients } from './nutrition';
 
 export interface OptimizerImpact {
@@ -69,7 +69,7 @@ export function optimizeDay(entries: JournalEntry[], targets: Targets): DayOptim
   const consumedNames = new Set(entries.map((entry) => entry.foodName.trim().toLocaleLowerCase()));
   const maxKcal = remaining.kcal ?? 0;
 
-  const scored = PRIMAL_FOOD_BASE
+  const scored = SUGGESTIBLE_FOOD_BASE
     .filter((food) => !consumedNames.has(food.name.trim().toLocaleLowerCase()))
     .map((food) => {
       const nutrition = scaleNutrients(food.per100, food.portionGrams);

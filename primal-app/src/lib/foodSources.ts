@@ -1,6 +1,7 @@
 import { Food, NutrientKey, Nutrients } from '../types';
 import { normalizeFood } from './safeStorage';
-import { FOOD_CORE } from './foodCore';
+import { CIQUAL_PROCESSED, FOOD_CORE } from './foodCore';
+import { EXTRA_ALIASES } from './foodExtras';
 import { CIQUAL_2025 } from './ciqual2025';
 
 // Recherche multi-sources : noyau local instantané, USDA pour les génériques et Open Food Facts pour les produits de marque.
@@ -72,20 +73,30 @@ const ADDED_PRIMAL_ALIASES: Record<string, string[]> = {
   'primal-146': ['goyave'],
 };
 
+// The base has ~2 500 foods: normalise each food's text once, not on every keystroke.
+const SEARCH_TEXT = new Map<string, { text: string; tokens: string[] }>();
+function searchIndex(food: Food): { text: string; tokens: string[] } {
+  let entry = SEARCH_TEXT.get(food.id);
+  if (!entry) { const text = searchableText(food); entry = { text, tokens: text.split(' ') }; SEARCH_TEXT.set(food.id, entry); }
+  return entry;
+}
+
 function searchableText(food: Food): string {
-  return normalize([food.name, food.category, ...(CORE_ALIASES[food.id.replace('core-', '')] || []), ...(ADDED_PRIMAL_ALIASES[food.id] || [])].join(' '));
+  return normalize([food.name, food.category, ...(CORE_ALIASES[food.id.replace('core-', '')] || []), ...(ADDED_PRIMAL_ALIASES[food.id] || []), ...(EXTRA_ALIASES[food.id] || [])].join(' '));
 }
 
 const PRIMAL_CIQUAL_CODES = new Set(FOOD_CORE.map((food) => food.ciqualCode).filter((code): code is number => code !== undefined));
 const CIQUAL_WITHOUT_PRIMAL_DUPLICATES = CIQUAL_2025.filter((food) => food.ciqualCode === undefined || !PRIMAL_CIQUAL_CODES.has(food.ciqualCode));
 
-export const PRIMAL_FOOD_BASE: Food[] = [...FOOD_CORE, ...CIQUAL_WITHOUT_PRIMAL_DUPLICATES];
+export const PRIMAL_FOOD_BASE: Food[] = [...FOOD_CORE, ...CIQUAL_WITHOUT_PRIMAL_DUPLICATES, ...CIQUAL_PROCESSED];
+/** Foods the day optimiser may suggest (per 100 g portion): whole foods only — no processed products, herbs/spices or flours. */
+export const SUGGESTIBLE_FOOD_BASE: Food[] = PRIMAL_FOOD_BASE.filter((food) => food.category !== 'PROCESSED' && food.category !== 'HERBS_SPICES' && !/^(farine|fécule|amidon)\b/i.test(food.name));
 
 export function searchCore(query: string): Food[] {
   const queryTokens = normalize(query).split(' ').filter(Boolean);
   if (!queryTokens.length) return PRIMAL_FOOD_BASE;
   return PRIMAL_FOOD_BASE.map((food) => {
-    const text = searchableText(food); const tokens = text.split(' ');
+    const { text, tokens } = searchIndex(food);
     const total = queryTokens.reduce((score, term) => score + Math.max(...tokens.map((token) => tokenScore(term, token)), 0), 0);
     const matched = queryTokens.filter((term) => tokens.some((token) => tokenScore(term, token) > 0)).length;
     const exactPhrase = text.includes(normalize(query));

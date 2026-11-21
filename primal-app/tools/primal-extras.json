@@ -1,0 +1,104 @@
+{
+  "_comment": "Foods missing from Ciqual 2025, added as estimates. Kept only when enough nutrients are reliably known (same rule as the Ciqual import). Values per 100 g. USDA = USDA FoodData Central, SR Legacy.",
+  "foods": [
+    {
+      "id": "primal-x-corossol",
+      "name": "Corossol (soursop), chair crue (estimation)",
+      "category": "FRUITS",
+      "source": "Estimation PRIMAL (USDA SR Legacy 09315, Soursop, raw)",
+      "values": {
+        "kcal": 66,
+        "water": 81.16,
+        "protein": 1.0,
+        "carbs": 16.84,
+        "fat": 0.3,
+        "fiber": 3.3,
+        "sugar": 13.54,
+        "calcium": 14,
+        "iron": 0.6,
+        "magnesium": 21,
+        "phosphorus": 27,
+        "potassium": 278,
+        "sodium": 14,
+        "zinc": 0.1,
+        "copper": 0.086,
+        "selenium": 0.6,
+        "vitC": 20.6,
+        "vitB1": 0.07,
+        "vitB2": 0.05,
+        "vitB3": 0.9,
+        "vitB5": 0.253,
+        "vitB6": 0.059,
+        "vitB9": 14,
+        "vitE": 0.08,
+        "vitK": 0.4
+      },
+      "aliases": [
+        "corossol",
+        "soursop",
+        "graviola"
+      ]
+    },
+    {
+      "id": "primal-x-sapotille",
+      "name": "Sapotille, chair crue (estimation)",
+      "category": "FRUITS",
+      "source": "Estimation PRIMAL (USDA SR Legacy 09313, Sapodilla, raw)",
+      "values": {
+        "kcal": 83,
+        "water": 78.0,
+        "protein": 0.44,
+        "carbs": 19.96,
+        "fat": 1.1,
+        "fiber": 5.3,
+        "calcium": 21,
+        "iron": 0.8,
+        "magnesium": 12,
+        "phosphorus": 12,
+        "potassium": 193,
+        "sodium": 12,
+        "zinc": 0.1,
+        "copper": 0.086,
+        "vitA": 3,
+        "vitC": 14.7,
+        "vitB1": 0,
+        "vitB2": 0.02,
+        "vitB3": 0.2,
+        "vitB5": 0.252,
+        "vitB6": 0.037,
+        "vitB9": 14
+      },
+      "aliases": [
+        "sapotille",
+        "sapodilla",
+        "chiku"
+      ]
+    },
+    {
+      "id": "primal-x-faisselle-lait-cru",
+      "name": "Faisselle au lait cru (estimation)",
+      "category": "DAIRY",
+      "source": "Estimation PRIMAL (d'après Ciqual 2025 : Faisselle, 6% MG environ — même composition, lait non pasteurisé)",
+      "basedOnCiqual": 19641,
+      "aliases": [
+        "faisselle lait cru",
+        "faisselle fermière"
+      ]
+    }
+  ],
+  "aliases": {
+    "_comment": "Same food as an existing PRIMAL entry: searchable under these names, no duplicate.",
+    "primal-98": [
+      "quetsche",
+      "quetsches"
+    ],
+    "primal-86": [
+      "orange sanguine",
+      "sanguine"
+    ],
+    "primal-97": [
+      "pêche plate",
+      "peche plate"
+    ]
+  }
+}
