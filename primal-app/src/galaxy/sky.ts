@@ -34,7 +34,7 @@ const MS = 5;            // x, y, vx, vy, life
 const H0 = 16;           // header
 const STARS = H0; const BLOBS = STARS + NS * SS; const DISK = BLOBS + NB * BS; const METEORS = DISK + ND * DS;
 export const STATE_LEN = METEORS + NM * MS;
-// Header: 0 init W, 1 init H, 2 offX, 3 offY, 4 pvx, 5 pvy, 6 energy, 7 meteor timer, 8 ring x, 9 ring y, 10 ring age, 11 kind
+// Header: 0 init W, 1 init H, 2 offX, 3 offY, 4 pvx, 5 pvy, 6 energy, 7 meteor timer, 8 ring x, 9 ring y, 10 ring age, 11 kind, 12 last shock time
 
 function op(s: number[], type: number, x: number, y: number, rx: number, ry: number, alpha: number, color: number, angle: number) {
   'worklet';
@@ -69,7 +69,7 @@ function init(s: number[], W: number, H: number, kind: number) {
   'worklet';
   s.length = 0;
   for (let i = 0; i < STATE_LEN; i++) s.push(0);
-  s[0] = W; s[1] = H; s[7] = 2 + Math.random() * 3; s[10] = 9; s[11] = kind;
+  s[0] = W; s[1] = H; s[7] = 2 + Math.random() * 3; s[10] = 9; s[11] = kind; s[12] = -10;
   for (let i = 0; i < NS; i++) spawnStar(s, i, W, H, kind, true);
   const big = Math.max(W, H);
   for (let i = 0; i < NB; i++) {
@@ -110,7 +110,8 @@ export function stepSky(s: number[], dt: number, t: number, W: number, H: number
     if (!Number.isFinite(ix) || !Number.isFinite(iy)) { if (!shake) continue; }
     if (shake) { s[6] = Math.min(2.5, s[6] + 0.8 * st); continue; }
     s[6] = Math.min(2.5, s[6] + 0.5 * st);
-    if (kind === KIND.supernova) { s[8] = ix; s[9] = iy; s[10] = 0; }
+    // Supernova: one shock wave every 2.5 s at most, so scrolling doesn't spam it.
+    if (kind === KIND.supernova) { if (t - s[12] < 2.5) continue; s[12] = t; s[8] = ix; s[9] = iy; s[10] = 0; }
     const R = Math.max(130, Math.min(W, H) * 0.4);
     for (let i = 0; i < NS; i++) {
       const o = STARS + i * SS; const dx = s[o] - ix; const dy = s[o + 1] - iy; const d2 = dx * dx + dy * dy;
