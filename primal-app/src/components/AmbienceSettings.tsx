@@ -34,6 +34,13 @@ export default function AmbienceSettings() {
         <Text style={[FONTS.text.semibold, styles.label, { color: theme.sub }]}>Intensité</Text>
         <View style={styles.chips}>{INTENSITIES.map((item) => <Chip key={item.id} label={item.label} selected={ambience.intensity === item.id} onPress={() => setAmbience({ intensity: item.id })} />)}</View>
       </View> : null}
+      <View style={[styles.row, styles.block, { borderTopColor: theme.border }]}>
+        <View style={{ flex: 1 }}>
+          <Text style={[FONTS.text.semibold, { color: theme.text, fontSize: 15 }]}>Son de l'intro</Text>
+          <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, marginTop: 2, lineHeight: 17 }]}>Un son léger au lancement. Muet si le téléphone est en silencieux.</Text>
+        </View>
+        <Switch accessibilityLabel="Son de l'intro" value={ambience.introSound} onValueChange={(introSound) => setAmbience({ introSound })} trackColor={{ false: theme.cardAlt, true: theme.primary }} thumbColor="#FFFFFF" {...({ activeThumbColor: '#FFFFFF' } as object)} />
+      </View>
       <View style={[styles.block, { borderTopColor: theme.border }]}>
         <Text style={[FONTS.text.semibold, styles.label, { color: theme.sub }]}>Couleur</Text>
         <View style={styles.swatches}>{(Object.keys(PALETTES) as AccentId[]).map((id) => {

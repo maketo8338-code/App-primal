@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, Image, Platform, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
 import { glow, useTheme } from '../lib/theme';
 import { useAppIcon } from '../lib/appAssets';
 import { useNeonOptional } from '../neon/NeonProvider';
@@ -35,7 +36,7 @@ export default function IntroOverlay() {
 }
 
 function Intro({ onDone }: { onDone: () => void }) {
-  const { theme } = useTheme();
+  const { theme, ambience } = useTheme();
   const logo = useAppIcon();
   const neon = useNeonOptional();
   const { width, height } = useWindowDimensions();
@@ -48,6 +49,7 @@ function Intro({ onDone }: { onDone: () => void }) {
   const exit = useRef(new Animated.Value(1)).current;
   const finished = useRef(false);
   const sequence = useRef<Animated.CompositeAnimation | null>(null);
+  const sound = useRef<AudioPlayer | null>(null);
 
   const finish = () => { if (finished.current) return; finished.current = true; onDone(); };
 
@@ -87,6 +89,7 @@ function Intro({ onDone }: { onDone: () => void }) {
         sequence.current.start(finish);
         return;
       }
+      if (ambience.introSound) playIntroSound();
       sequence.current = Animated.sequence([
         Animated.timing(appear, { toValue: 1, duration: APPEAR, easing: Easing.out(Easing.back(1.4)), useNativeDriver: native }),
         Animated.delay(HOLD),
@@ -102,11 +105,30 @@ function Intro({ onDone }: { onDone: () => void }) {
       });
     };
     AccessibilityInfo.isReduceMotionEnabled?.().then(run).catch(() => run(false)) ?? run(false);
-    return () => { cancelled = true; sequence.current?.stop(); };
+    return () => { cancelled = true; sequence.current?.stop(); stopSound(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Launch sound (assets/sounds/intro.m4a, made by tools/make-intro-sound.py), timed to the animation.
+  // Muted by the phone's silent switch and mixed with any music already playing.
+  function playIntroSound() {
+    try {
+      setAudioModeAsync({ playsInSilentMode: false, interruptionMode: 'mixWithOthers' }).catch(() => undefined);
+      const player = createAudioPlayer(require('../../assets/sounds/intro.m4a'));
+      player.volume = 0.8;
+      player.play();
+      sound.current = player;
+    } catch { /* never block the app for a sound (e.g. browser autoplay rules) */ }
+  }
+  function stopSound() {
+    const player = sound.current; sound.current = null;
+    if (!player) return;
+    // Let the tail ring out briefly before releasing the player.
+    setTimeout(() => { try { player.pause(); player.remove(); } catch { /* already released */ } }, 1500);
+  }
+
   const skip = () => {
+    sound.current?.pause();
     sequence.current?.stop();
     Animated.timing(exit, { toValue: 0, duration: 220, useNativeDriver: Platform.OS !== 'web' }).start(finish);
   };

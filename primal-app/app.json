@@ -49,7 +49,9 @@
           "motionPermission": "PRIMAL utilise les mouvements du téléphone pour animer les particules lumineuses."
         }
       ],
-      "expo-notifications"
+      "expo-notifications",
+      "expo-audio",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": false
