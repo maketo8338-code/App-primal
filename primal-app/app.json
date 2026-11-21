@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "PRIMAL",
+    "slug": "primal",
+    "scheme": "primal",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#050505",
+    "newArchEnabled": true,
+    "splash": { "backgroundColor": "#050505", "image": "./assets/icon.png", "resizeMode": "contain" },
+    "ios": { "supportsTablet": false, "bundleIdentifier": "app.primal.nutrition" },
+    "android": { "package": "app.primal.nutrition", "adaptiveIcon": { "foregroundImage": "./assets/icon.png", "backgroundColor": "#050505" } },
+    "web": { "bundler": "metro", "output": "single", "backgroundColor": "#050505" },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      ["expo-camera", { "cameraPermission": "PRIMAL utilise l'appareil photo pour scanner les codes-barres des produits." }],
+      ["expo-image-picker", { "photosPermission": "PRIMAL accède à tes photos pour choisir ta photo de profil." }],
+      ["expo-sensors", { "motionPermission": "PRIMAL utilise les mouvements du téléphone pour animer les particules lumineuses." }],
+      "expo-notifications"
+    ],
+    "experiments": { "typedRoutes": false }
+  }
+}
