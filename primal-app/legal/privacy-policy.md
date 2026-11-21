@@ -6,9 +6,9 @@ PRIMAL is designed to work without an account and without a server. This page ex
 
 ## 1. Controller
 
-App publisher: [TO COMPLETE: name or organisation].
+App publisher: Suella.
 
-Contact for any question about your data: [TO COMPLETE: email address].
+Contact for any question about your data: primal.health.app@gmail.com.
 
 ## 2. Data you enter
 

@@ -6,9 +6,9 @@ PRIMAL est conçu pour fonctionner sans compte et sans serveur. Cette page expli
 
 ## 1. Responsable
 
-Éditeur de l’app : [À COMPLÉTER : nom ou structure].
+Éditeur de l’app : Suella.
 
-Contact pour toute question sur tes données : [À COMPLÉTER : adresse e-mail].
+Contact pour toute question sur tes données : primal.health.app@gmail.com.
 
 ## 2. Données que tu saisis
 

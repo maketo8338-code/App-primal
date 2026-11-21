@@ -4,7 +4,7 @@
  * `node tools/export-privacy.mjs` → legal/politique-confidentialite.md.
  *
  * ⚠️ Brouillon rédigé à partir du fonctionnement réel du code : à faire relire
- * avant publication sur les stores, et compléter les champs [À COMPLÉTER].
+ * avant publication sur les stores,.
  */
 export interface PolicySection { title: string; body: string[] }
 export interface Policy { title: string; updated: string; intro: string; sections: PolicySection[] }
@@ -16,7 +16,7 @@ export const PRIVACY_FR: Policy = {
   updated: 'Dernière mise à jour : 21 novembre 2026',
   intro: 'PRIMAL est conçu pour fonctionner sans compte et sans serveur. Cette page explique, simplement, quelles données l’app utilise, où elles sont conservées et ce qui sort de ton téléphone.',
   sections: [
-    { title: '1. Responsable', body: ['Éditeur de l’app : [À COMPLÉTER : nom ou structure].', 'Contact pour toute question sur tes données : [À COMPLÉTER : adresse e-mail].'] },
+    { title: '1. Responsable', body: ['Éditeur de l’app : Suella.', 'Contact pour toute question sur tes données : primal.health.app@gmail.com.'] },
     { title: '2. Données que tu saisis', body: [
       'Profil : prénom, âge, sexe biologique, taille, poids, masse grasse (facultative), objectif, style alimentaire, activité habituelle, photo de profil (facultative).',
       'Journal : aliments et quantités, eau, pas, activités, sommeil, temps passé dehors.',
@@ -69,7 +69,7 @@ export const PRIVACY_EN: Policy = {
   updated: 'Last updated: 21 November 2026',
   intro: 'PRIMAL is designed to work without an account and without a server. This page explains, simply, which data the app uses, where it is kept and what leaves your phone.',
   sections: [
-    { title: '1. Controller', body: ['App publisher: [TO COMPLETE: name or organisation].', 'Contact for any question about your data: [TO COMPLETE: email address].'] },
+    { title: '1. Controller', body: ['App publisher: Suella.', 'Contact for any question about your data: primal.health.app@gmail.com.'] },
     { title: '2. Data you enter', body: [
       'Profile: first name, age, biological sex, height, weight, body fat (optional), goal, eating style, usual activity, profile photo (optional).',
       'Journal: foods and amounts, water, steps, activities, sleep, time outdoors.',
