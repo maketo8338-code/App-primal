@@ -39,16 +39,16 @@ export default function PrimalAtmosphere() {
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       <LinearGradient colors={theme.atmosphere} locations={[0, 0.55, 1]} start={{ x: 0.1, y: 0 }} end={{ x: 0.9, y: 1 }} style={StyleSheet.absoluteFill} />
       <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ translateX: drift.interpolate({ inputRange: [0, 1], outputRange: [-travel, travel] }) }, { translateY: drift.interpolate({ inputRange: [0, 1], outputRange: [0, height * 0.04] }) }] }]}>
-        <Svg width={width} height={height}>
+        <Svg width={width + travel * 2} height={height + travel * 2} style={{ position: 'absolute', left: -travel, top: -travel }}>
           <Defs>{glow('gTerracotta', terracotta, dark ? 0.5 : 0.45)}{glow('gOchre', ochre, dark ? 0.4 : 0.4)}</Defs>
-          <Ellipse cx={width * 0.9} cy={height * 0.08} rx={width * 0.7} ry={width * 0.6} fill="url(#gTerracotta)" />
-          <Ellipse cx={width * 0.05} cy={height * 0.55} rx={width * 0.6} ry={width * 0.55} fill="url(#gOchre)" />
+          <Ellipse cx={travel + width * 0.9} cy={travel + height * 0.08} rx={width * 0.7} ry={width * 0.6} fill="url(#gTerracotta)" />
+          <Ellipse cx={travel + width * 0.05} cy={travel + height * 0.55} rx={width * 0.6} ry={width * 0.55} fill="url(#gOchre)" />
         </Svg>
       </Animated.View>
       <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ translateX: counter.interpolate({ inputRange: [0, 1], outputRange: [travel, -travel] }) }, { translateY: counter.interpolate({ inputRange: [0, 1], outputRange: [height * 0.03, -height * 0.02] }) }] }]}>
-        <Svg width={width} height={height}>
+        <Svg width={width + travel * 2} height={height + travel * 2} style={{ position: 'absolute', left: -travel, top: -travel }}>
           <Defs>{glow('gOlive', olive, dark ? 0.45 : 0.4)}</Defs>
-          <Ellipse cx={width * 0.85} cy={height * 0.92} rx={width * 0.7} ry={width * 0.55} fill="url(#gOlive)" />
+          <Ellipse cx={travel + width * 0.85} cy={travel + height * 0.92} rx={width * 0.7} ry={width * 0.55} fill="url(#gOlive)" />
         </Svg>
       </Animated.View>
     </View>

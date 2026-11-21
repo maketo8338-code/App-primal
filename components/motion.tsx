@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Animated, Easing, Pressable, StyleProp, ViewStyle } from 'react-native';
+import { AccessibilityInfo, Animated, Easing, Pressable, PressableProps, StyleProp, ViewStyle } from 'react-native';
 import { MOTION } from '../lib/theme';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -59,12 +59,12 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
  * A Pressable that tilts back in 3D perspective and sinks slightly when touched.
  * Drop-in replacement for `<Pressable onPress style>`: same press behaviour.
  */
-export function Pressable3D({ children, onPress, disabled, style, tilt = 6, sink = 0.975, accessibilityLabel }: { children: React.ReactNode; onPress?: () => void; disabled?: boolean; style?: StyleProp<ViewStyle>; tilt?: number; sink?: number; accessibilityLabel?: string }) {
+export function Pressable3D({ children, style, tilt = 6, sink = 0.975, onPressIn, onPressOut, ...rest }: Omit<PressableProps, 'style' | 'children'> & { children?: React.ReactNode; style?: StyleProp<ViewStyle>; tilt?: number; sink?: number }) {
   const reduced = useReducedMotion();
   const pressed = useRef(new Animated.Value(0)).current;
   const to = (value: number) => Animated.spring(pressed, { toValue: value, useNativeDriver: true, ...MOTION.spring }).start();
   const scale = pressed.interpolate({ inputRange: [0, 1], outputRange: [1, sink] });
   const rotateX = pressed.interpolate({ inputRange: [0, 1], outputRange: ['0deg', `${tilt}deg`] });
   const transform = reduced ? [{ scale }] : [{ perspective: 900 }, { rotateX }, { scale }];
-  return <AnimatedPressable accessibilityRole="button" accessibilityLabel={accessibilityLabel} onPress={onPress} disabled={disabled} onPressIn={() => to(1)} onPressOut={() => to(0)} style={[style, { transform }]}>{children}</AnimatedPressable>;
+  return <AnimatedPressable accessibilityRole="button" {...rest} onPressIn={(event) => { to(1); onPressIn?.(event); }} onPressOut={(event) => { to(0); onPressOut?.(event); }} style={[style, { transform }]}>{children}</AnimatedPressable>;
 }
