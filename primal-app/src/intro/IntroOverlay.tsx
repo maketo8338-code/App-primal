@@ -107,7 +107,7 @@ function Intro({ onDone }: { onDone: () => void }) {
         return;
       }
       if (ambience.introSound && native) playIntroSound(); // web: already started in the tap handler
-      if (ambience.introHaptics && native) scheduleIntroHaptics();
+      if (ambience.introHaptics) scheduleIntroHaptics();
       sequence.current = Animated.sequence([
         Animated.timing(appear, { toValue: 1, duration: APPEAR, easing: Easing.out(Easing.back(1.4)), useNativeDriver: native }),
         Animated.delay(HOLD),
@@ -147,6 +147,15 @@ function Intro({ onDone }: { onDone: () => void }) {
   // Light haptics timed to the animation: a tick when the logo appears, three soft
   // pulses while it charges, a rounded « soft » hit at the burst. Phones only.
   function scheduleIntroHaptics() {
+    const chargeAt = APPEAR + HOLD;
+    if (Platform.OS === 'web') {
+      // Web preview: the browser Vibration API (Android + Chrome only; iPhone Safari has none).
+      // Same rhythm as the phone: a tick, three light pulses while charging, a longer pulse at the burst.
+      const buzz = (ms: number) => { try { navigator.vibrate?.(ms); } catch { /* blocked by the host page */ } };
+      hapticTimers.current = ([[0, 8], [chargeAt + CHARGE * 0.25, 12], [chargeAt + CHARGE * 0.55, 12], [chargeAt + CHARGE * 0.8, 12], [chargeAt + CHARGE, 30]] as Array<[number, number]>)
+        .map(([delay, ms]) => setTimeout(() => buzz(ms), delay));
+      return;
+    }
     const tap = (fn: () => Promise<void>) => () => { fn().catch(() => undefined); };
     const chargeStart = APPEAR + HOLD;
     const plan: Array<[number, () => void]> = [
