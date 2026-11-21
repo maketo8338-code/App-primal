@@ -1,0 +1,14 @@
+{
+  "name": "primal",
+  "version": "1.0.0",
+  "main": "node_modules/expo/AppEntry.js",
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "*",
+    "expo-linear-gradient": "*",
+    "expo-status-bar": "*",
+    "expo-camera": "*",
+    "expo-image-picker": "*",
+    "expo-image-manipulator": "*",
+    "react-native-svg": "*"
+  }
+}
