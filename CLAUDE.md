@@ -9,3 +9,7 @@
 - Application dans `primal-app/` (Expo SDK 54, Expo Router). Aperçu web partageable : `npm run preview:web`.
 - La logique métier (`src/lib/`, sauf `theme.tsx`, `fonts.ts`, `appAssets.ts`) vient de la v1 : ne pas la modifier sans demande explicite.
 - Base d'aliments : `tools/import-ciqual.py` (table Ciqual 2025, ANSES, Licence Ouverte — citer la source).
+
+## Économie de jetons
+- Faire uniquement ce qui est demandé : pas d'extras, pas de vérifications ou captures non nécessaires.
+- Lire seulement les parties de fichiers utiles ; réponses courtes.
