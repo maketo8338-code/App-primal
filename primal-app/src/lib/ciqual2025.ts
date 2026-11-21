@@ -75,18 +75,16 @@ const MAPPING: Array<[keyof Ciqual2025Record, NutrientKey]> = [
 
 function numeric(value: CiqualValue): number | undefined { return typeof value === 'number' && Number.isFinite(value) ? value : undefined; }
 function category(name: string): string {
-  const text = name.toLowerCase();
-  if (text.includes('foie') || text.includes('cervelle') || text.includes('coeur') || text.includes('cœur') || text.includes('rognon')) return 'MEAT';
-  if (text.includes('saumon') || text.includes('sardine') || text.includes('maquereau') || text.includes('hareng') || text.includes('truite') || text.includes('anchois') || text.includes('thon')) return 'Poissons';
-  if (text.includes('crevette') || text.includes('crabe') || text.includes('huître') || text.includes('moule') || text.includes('homard') || text.includes('coquille saint-jacques')) return 'Fruits de mer';
-  if (text.includes('oeuf')) return 'Œufs';
-  if (text.includes('lait') || text.includes('camembert')) return text.includes('camembert') ? 'Fromages' : 'Produits laitiers';
-  if (text.includes('banane') || text.includes('ananas') || text.includes('avocat') || text.includes('mangue') || text.includes('kiwi') || text.includes('fraise') || text.includes('framboise') || text.includes('orange')) return 'Fruits';
-  if (text.includes('carotte') || text.includes('chou-fleur') || text.includes('brocoli') || text.includes('épinard') || text.includes('haricot vert') || text.includes('poivron') || text.includes('oignon')) return 'Légumes';
-  if (text.includes('boeuf') || text.includes('bœuf') || text.includes('porc') || text.includes('agneau') || text.includes('mouton') || text.includes('veau') || text.includes('foie') || text.includes('coeur') || text.includes('cœur') || text.includes('rognon') || text.includes('langue') || text.includes('cervelle') || text.includes('moelle')) return 'MEAT';
-  if (text.includes('poulet') || text.includes('dinde') || text.includes('canard')) return 'MEAT';
-  if (text.includes('lapin') || text.includes('cheval') || text.includes('cerf') || text.includes('sanglier')) return 'MEAT';
-  return 'Aliments bruts';
+  // Whole words on an accent-free name (« boeuf » must not be read as « oeuf »), PRIMAL category codes.
+  const text = ` ${name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/œ/g, 'oe').replace(/[^a-z0-9]+/g, ' ').trim()} `;
+  const has = (...words: string[]) => words.some((w) => text.includes(` ${w} `) || text.includes(` ${w}s `) || text.includes(` ${w}x `));
+  if (has('foie', 'cervelle', 'coeur', 'rognon', 'boeuf', 'porc', 'agneau', 'mouton', 'veau', 'poulet', 'dinde', 'canard', 'lapin', 'cheval', 'cerf', 'sanglier')) return 'MEAT';
+  if (has('saumon', 'sardine', 'maquereau', 'hareng', 'truite', 'anchois', 'thon', 'crevette', 'crabe', 'huitre', 'moule', 'homard') || text.includes(' coquille saint jacques ')) return 'FISH_SEAFOOD';
+  if (has('oeuf')) return 'EGGS';
+  if (has('lait', 'camembert', 'fromage')) return 'DAIRY';
+  if (has('banane', 'ananas', 'avocat', 'mangue', 'kiwi', 'fraise', 'framboise', 'orange')) return 'FRUITS';
+  if (has('carotte', 'brocoli', 'epinard', 'poivron', 'oignon') || text.includes(' chou fleur ') || text.includes(' haricot vert ')) return 'VEGETABLES';
+  return 'OTHER';
 }
 
 export function ciqualRecordToFood(record: Ciqual2025Record): Food {

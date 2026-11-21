@@ -2,6 +2,7 @@ import { Food, NutrientKey, Nutrients } from '../types';
 import { normalizeFood } from './safeStorage';
 import { CIQUAL_PROCESSED, FOOD_CORE } from './foodCore';
 import { EXTRA_ALIASES } from './foodExtras';
+import { withUsualPortion } from './portions';
 import { CIQUAL_2025 } from './ciqual2025';
 
 // Recherche multi-sources : noyau local instantané, USDA pour les génériques et Open Food Facts pour les produits de marque.
@@ -88,7 +89,8 @@ function searchableText(food: Food): string {
 const PRIMAL_CIQUAL_CODES = new Set(FOOD_CORE.map((food) => food.ciqualCode).filter((code): code is number => code !== undefined));
 const CIQUAL_WITHOUT_PRIMAL_DUPLICATES = CIQUAL_2025.filter((food) => food.ciqualCode === undefined || !PRIMAL_CIQUAL_CODES.has(food.ciqualCode));
 
-export const PRIMAL_FOOD_BASE: Food[] = [...FOOD_CORE, ...CIQUAL_WITHOUT_PRIMAL_DUPLICATES, ...CIQUAL_PROCESSED];
+// Every food gets its usual portion (« 1 pomme ≈ 150 g ») instead of the generic 100 g.
+export const PRIMAL_FOOD_BASE: Food[] = [...FOOD_CORE, ...CIQUAL_WITHOUT_PRIMAL_DUPLICATES, ...CIQUAL_PROCESSED].map(withUsualPortion);
 /** Foods the day optimiser may suggest (per 100 g portion): whole foods only — no processed products, herbs/spices or flours. */
 export const SUGGESTIBLE_FOOD_BASE: Food[] = PRIMAL_FOOD_BASE.filter((food) => food.category !== 'PROCESSED' && food.category !== 'HERBS_SPICES' && !/^(farine|fécule|amidon)\b/i.test(food.name));
 
