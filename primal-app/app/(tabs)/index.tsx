@@ -19,6 +19,7 @@ export default function HomeRoute() {
     onOpenStats={() => router.push('/stats')}
     onOptimizeDay={() => router.push('/optimize')}
     onShareDay={() => router.push('/share')}
+    onOpenWeek={() => router.push('/week')}
     onOpenFood={(food) => { session.setFoodDate(todayKey()); session.setPending({ food, meal: 'snack' }); router.push('/food'); }}
   /></TabScene>;
 }
