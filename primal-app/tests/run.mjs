@@ -14,7 +14,7 @@ const stub = join(here, 'stub-native.js');
 const tests = readdirSync(here).filter((f) => f.endsWith('.test.ts'));
 for (const file of tests) {
   await build({ entryPoints: [join(here, file)], bundle: true, platform: 'node', format: 'cjs', outfile: join(out, file.replace('.ts', '.cjs')), logLevel: 'warning',
-    alias: { '@react-native-async-storage/async-storage': stub, 'react-native': stub, 'expo-notifications': stub } });
+    alias: { '@react-native-async-storage/async-storage': stub, 'react-native': stub, 'expo-notifications': stub, 'expo-file-system': stub, 'expo-document-picker': stub, 'expo-sharing': stub } });
 }
 const env = { ...process.env, UPDATE_GOLDEN: process.argv.includes('--update') ? '1' : '' };
 const res = spawnSync(process.execPath, ['--test', ...tests.map((f) => join(out, f.replace('.ts', '.cjs')))], { stdio: 'inherit', env });

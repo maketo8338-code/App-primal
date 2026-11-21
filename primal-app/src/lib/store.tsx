@@ -35,7 +35,7 @@ export const EMPTY_HABITS: DayHabits = { waterMl: 0, waterEntries: [], steps: 0,
 
 export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = { hydration: false, meal: false, activity: false, sleep: false, insight: false, quietStart: 22, quietEnd: 7 };
 
-interface State {
+export interface State {
   profile: Profile;
   entries: JournalEntry[];
   habits: Record<string, DayHabits>;
@@ -64,6 +64,10 @@ interface StoreCtx extends State {
   updateProfile: (patch: Partial<Profile>) => void;
   updateTargets: (patch: Partial<Targets>) => void;
   setDietStyle: (style: DietStyleId) => void;
+  /** Everything to put in a backup file. */
+  snapshot: () => State;
+  /** Replaces all data with a backup's content (validated like on start-up). Returns false if unusable. */
+  restoreBackup: (data: unknown) => boolean;
 }
 
 const Ctx = createContext<StoreCtx | null>(null);
@@ -72,6 +76,22 @@ let idSeq = 0;
 function uid(): string {
   idSeq += 1;
   return `${Date.now().toString(36)}-${idSeq}`;
+}
+
+/** Validates saved data (from storage or from a backup file) exactly as on start-up. */
+function stateFromPersisted(parsed: unknown): State {
+  const restored = normalizePersistedState(parsed, { profile: DEFAULT_PROFILE, targets: DEFAULT_TARGETS, notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES });
+  const completeEnough = Boolean(restored.profile.age && restored.profile.heightCm && restored.profile.weightKg && (restored.profile.sex === 'female' || restored.profile.sex === 'male' || restored.profile.bodyFatPercent));
+  const recalculated = completeEnough ? calculateDietTargets(restored.profile, restored.profile.dietStyle || 'classic') : restored.profile.targets;
+  const overrides = restored.profile.targetOverrides || {};
+  const targets = { ...recalculated, waterMl: overrides.waterMl ?? recalculated.waterMl, steps: overrides.steps ?? recalculated.steps, sleepH: overrides.sleepH ?? recalculated.sleepH, outdoorMin: overrides.outdoorMin ?? recalculated.outdoorMin };
+  return {
+    profile: completeEnough ? { ...restored.profile, targets, targetOverrides: { waterMl: targets.waterMl, steps: targets.steps, sleepH: targets.sleepH, outdoorMin: targets.outdoorMin } } : restored.profile,
+    entries: restored.entries,
+    habits: restored.habits,
+    favoriteFoods: restored.favoriteFoods,
+    notificationPreferences: restored.notificationPreferences,
+  };
 }
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
@@ -88,18 +108,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         } catch {
           return;
         }
-        const restored = normalizePersistedState(parsed, { profile: DEFAULT_PROFILE, targets: DEFAULT_TARGETS, notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES });
-        const completeEnough = Boolean(restored.profile.age && restored.profile.heightCm && restored.profile.weightKg && (restored.profile.sex === 'female' || restored.profile.sex === 'male' || restored.profile.bodyFatPercent));
-        const recalculated = completeEnough ? calculateDietTargets(restored.profile, restored.profile.dietStyle || 'classic') : restored.profile.targets;
-        const overrides = restored.profile.targetOverrides || {};
-        const targets = { ...recalculated, waterMl: overrides.waterMl ?? recalculated.waterMl, steps: overrides.steps ?? recalculated.steps, sleepH: overrides.sleepH ?? recalculated.sleepH, outdoorMin: overrides.outdoorMin ?? recalculated.outdoorMin };
-        setState({
-          profile: completeEnough ? { ...restored.profile, targets, targetOverrides: { waterMl: targets.waterMl, steps: targets.steps, sleepH: targets.sleepH, outdoorMin: targets.outdoorMin } } : restored.profile,
-          entries: restored.entries,
-          habits: restored.habits,
-          favoriteFoods: restored.favoriteFoods,
-          notificationPreferences: restored.notificationPreferences,
-        });
+        setState(stateFromPersisted(parsed));
       })
       .catch(() => {})
       .finally(() => setReady(true));
@@ -260,9 +269,20 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const snapshot = useCallback(() => state, [state]);
+  const restoreBackup = useCallback((data: unknown) => {
+    if (!data || typeof data !== 'object') return false;
+    const next = stateFromPersisted(data);
+    if (!next.profile.onboarded && next.entries.length === 0) return false; // nothing usable in the file
+    setState(next);
+    return true;
+  }, []);
+
   const value = useMemo<StoreCtx>(
     () => ({
       ...state,
+      snapshot,
+      restoreBackup,
       ready,
       entriesForDate,
       habitsForDate,
@@ -283,7 +303,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
        updateTargets,
        setDietStyle,
     }),
-    [state, ready, entriesForDate, habitsForDate, addEntry, updateEntry, removeEntry, toggleFavorite, isFavorite, setNotificationPreference, addWater, addWaterEntry, updateWaterEntry, removeWaterEntry, setHabit, addActivity, removeActivity, updateProfile, updateTargets, setDietStyle],
+    [state, ready, snapshot, restoreBackup, entriesForDate, habitsForDate, addEntry, updateEntry, removeEntry, toggleFavorite, isFavorite, setNotificationPreference, addWater, addWaterEntry, updateWaterEntry, removeWaterEntry, setHabit, addActivity, removeActivity, updateProfile, updateTargets, setDietStyle],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
