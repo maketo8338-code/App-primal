@@ -6,3 +6,4 @@ web-build/
 preview-build/
 public/
 __pycache__/
+tests/.build/

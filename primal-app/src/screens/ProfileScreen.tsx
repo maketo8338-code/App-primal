@@ -73,7 +73,7 @@ export default function ProfileScreen({ onOpenSettings }: { onOpenSettings: () =
   const progression = useMemo(() => calculateProgression(entries, habits, progressionTargets), [entries, habits, progressionTargets]);
   const todaySuccess = progression.history.find((item) => item.date === todayKey());
 
-  const pickPhoto = async () => { const permission = await ImagePicker.requestMediaLibraryPermissionsAsync(); if (!permission.granted) return; const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: false, quality: 0.9 }); const asset = result.assets[0]; if (!result.canceled && asset?.uri) setCropAsset({ uri: asset.uri, width: asset.width || 1, height: asset.height || 1 }); };
+  const pickPhoto = async () => { const permission = await ImagePicker.requestMediaLibraryPermissionsAsync(); if (!permission.granted) return; const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: false, quality: 0.9 }); const asset = result.assets?.[0]; if (!result.canceled && asset?.uri) setCropAsset({ uri: asset.uri, width: asset.width || 1, height: asset.height || 1 }); };
   const addSport = () => { const minutesValue = parseProfileNumber(sportMinutes); const sessionsValue = parseProfileNumber(sportSessions); const sportName = sportType === 'Autre activité' ? customSport.trim() : sportType; if (!sportName || !minutesValue || minutesValue < 1 || !sessionsValue || sessionsValue < 1) return; setSports((current) => [...current, { id: `${Date.now()}-${current.length}`, name: sportName, minutes: Math.round(minutesValue), sessionsPerWeek: Math.round(sessionsValue), intensity: sportIntensity }]); };
   const saveChanges = () => {
     const nextErrors: Record<string, string> = {};

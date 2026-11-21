@@ -50,7 +50,7 @@ export function optimizeDay(entries: JournalEntry[], targets: Targets): DayOptim
   };
 
   const macroPriorities: NutritionPriority[] = MACROS
-    .map((key) => {
+    .map((key): NutritionPriority | null => {
       const target = targets[key];
       const consumed = completeTotalForEntries(entries, key);
       if (!known(consumed)) return null;

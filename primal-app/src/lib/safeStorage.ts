@@ -31,7 +31,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function text(value: unknown, max = STORAGE_LIMITS.text): string | undefined {
+function text(value: unknown, max: number = STORAGE_LIMITS.text): string | undefined {
   if (typeof value !== 'string' || value.length === 0) return undefined;
   return value.length > max ? value.slice(0, max) : value;
 }

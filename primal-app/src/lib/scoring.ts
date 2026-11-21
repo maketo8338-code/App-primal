@@ -80,14 +80,15 @@ export function computeDayScore(totals: Nutrients, habits: DayHabits, targets: T
     makePillar({ key: 'outdoor', label: 'Extérieur', icon: 'sun.max.fill', androidIcon: 'sunny', weight: 0.05, score: outdoorScore ?? 50, available: outdoorScore !== undefined, detail: outdoorScore === undefined ? 'Donnée non renseignée' : `${habits.outdoorMin} / ${targets.outdoorMin} min dehors`, action: 'Enregistre un moment passé dehors aujourd’hui.' }),
   ];
 
-  const availableWeight = pillars.reduce((sum, pillar) => sum + (pillar.available ? pillar.weight : 0), 0);
+  const availableWeight = pillars.reduce((sum, pillar) => sum + (pillar.available ? pillar.weight ?? 0 : 0), 0);
   const score = availableWeight > 0
-    ? Math.round(pillars.reduce((sum, pillar) => sum + (pillar.available ? pillar.score * pillar.weight : 0), 0) / availableWeight)
+    ? Math.round(pillars.reduce((sum, pillar) => sum + (pillar.available ? pillar.score * (pillar.weight ?? 0) : 0), 0) / availableWeight)
     : 0;
   const label = availableWeight === 0 ? 'Pas encore assez de données' : score >= 90 ? 'Excellent' : score >= 75 ? 'Très bien' : score >= 60 ? 'Correct' : score >= 40 ? 'À améliorer' : 'Faible';
   const deficits = microStatuses
     .filter((status) => status.available && !NUTRIENT_BY_KEY[status.key].isLimit && (status.percent || 0) < 75)
     .sort((a, b) => (a.percent || 0) - (b.percent || 0));
 
-  return { score, label, emoji: '', coverage: Math.round(availableWeight * 100), pillars, deficits };
+  // Deficits keep the full micronutrient status (screens read more than key/label/percent).
+  return { score, label, emoji: '', coverage: Math.round(availableWeight * 100), pillars, deficits: deficits as DayScore['deficits'] };
 }
