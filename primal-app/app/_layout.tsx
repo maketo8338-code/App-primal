@@ -36,6 +36,9 @@ function Root() {
   // Same gating as before: language → onboarding → app.
   const gate = !i18nReady || !ready ? 'loading' : !profile.onboarded && !languageChosen ? 'language' : !profile.onboarded ? 'onboarding' : 'app';
 
+  // As before: nothing is mounted until saved data is loaded, so forms start with the real profile.
+  if (gate === 'loading') return <View style={styles.black}><StatusBar style="light" /></View>;
+
   return <View style={styles.black}>
     <StatusBar style="light" />
     {gate === 'app' ? <NeonBackground /> : null}
@@ -43,7 +46,7 @@ function Root() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="scan" options={{ animation: 'slide_from_bottom', contentStyle: { backgroundColor: '#050505' } }} />
     </Stack>
-    {gate !== 'app' ? <View style={[StyleSheet.absoluteFill, styles.black]}>{gate !== 'loading' ? <NeonBackground /> : null}{gate === 'language' ? <LanguageSelectionScreen /> : gate === 'onboarding' ? <OnboardingScreen /> : null}</View> : null}
+    {gate !== 'app' ? <View style={[StyleSheet.absoluteFill, styles.black]}><NeonBackground />{gate === 'language' ? <LanguageSelectionScreen /> : gate === 'onboarding' ? <OnboardingScreen /> : null}</View> : null}
   </View>;
 }
 
