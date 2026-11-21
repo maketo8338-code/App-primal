@@ -18,5 +18,6 @@ export default function HomeRoute() {
     onOpenOutdoor={() => router.push('/outdoor')}
     onOpenStats={() => router.push('/stats')}
     onOptimizeDay={() => router.push('/optimize')}
+    onShareDay={() => router.push('/share')}
   /></TabScene>;
 }

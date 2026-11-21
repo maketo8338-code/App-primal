@@ -29,6 +29,7 @@ import OptimizeDayScreen from '../screens/OptimizeDayScreen';
 import ScanScreen from '../screens/ScanScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import LanguageSelectionScreen from '../screens/LanguageSelectionScreen';
+import ShareDayScreen from '../share/ShareDayScreen';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shareable web preview of PRIMAL 2.
@@ -38,7 +39,7 @@ import LanguageSelectionScreen from '../screens/LanguageSelectionScreen';
 // ─────────────────────────────────────────────────────────────────────────────
 
 type Tab = 'index' | 'foods' | 'journal' | 'profile';
-type Overlay = 'none' | 'food' | 'scan' | 'settings' | 'micros' | 'score' | 'hydration' | 'activity' | 'sleep' | 'outdoor' | 'stats' | 'optimize';
+type Overlay = 'none' | 'share' | 'food' | 'scan' | 'settings' | 'micros' | 'score' | 'hydration' | 'activity' | 'sleep' | 'outdoor' | 'stats' | 'optimize';
 
 export default function PreviewApp() {
   const fontsReady = useAppFonts();
@@ -70,6 +71,7 @@ function Root() {
     content = <FoodDetailScreen food={food} defaultMeal={session.pending.meal} onBack={close} onAdd={(grams, meal) => { addEntry({ date: session.foodDate, meal, foodName: food.name, brand: food.brand, source: food.source, foodId: food.id, grams, per100: food.per100 }); setOverlay('none'); setTab('journal'); }} />;
   }
   else if (overlay === 'scan') content = <ScanScreen onFound={(food) => { session.setPending({ food, meal: session.selectedMeal }); setOverlay('food'); }} onClose={close} onManualSearch={() => { session.setFoodDate(todayKey()); goFoods(); }} />;
+  else if (overlay === 'share') content = <ShareDayScreen onBack={close} />;
   else if (overlay === 'settings') content = <SettingsScreen onBack={close} />;
   else if (overlay === 'micros') content = <MicrosScreen onBack={close} />;
   else if (overlay === 'score') content = <ScoreDetailScreen onBack={close} />;
@@ -81,7 +83,7 @@ function Root() {
   else if (overlay === 'optimize') content = <OptimizeDayScreen onBack={close} onOpenFood={(food) => { session.setFoodDate(todayKey()); session.setPending({ food, meal: 'snack' }); setOverlay('food'); }} />;
   else {
     const screen = tab === 'index'
-      ? <HomeScreen onAddFood={() => { session.setSelectedMeal('snack'); session.setFoodDate(todayKey()); setTab('foods'); }} onOpenJournal={() => setTab('journal')} onOpenMicros={() => setOverlay('micros')} onOpenScore={() => setOverlay('score')} onOpenHydration={() => setOverlay('hydration')} onOpenActivity={() => setOverlay('activity')} onOpenSleep={() => setOverlay('sleep')} onOpenOutdoor={() => setOverlay('outdoor')} onOpenStats={() => setOverlay('stats')} onOptimizeDay={() => setOverlay('optimize')} />
+      ? <HomeScreen onAddFood={() => { session.setSelectedMeal('snack'); session.setFoodDate(todayKey()); setTab('foods'); }} onOpenJournal={() => setTab('journal')} onOpenMicros={() => setOverlay('micros')} onOpenScore={() => setOverlay('score')} onOpenHydration={() => setOverlay('hydration')} onOpenActivity={() => setOverlay('activity')} onOpenSleep={() => setOverlay('sleep')} onOpenOutdoor={() => setOverlay('outdoor')} onOpenStats={() => setOverlay('stats')} onOptimizeDay={() => setOverlay('optimize')} onShareDay={() => setOverlay('share')} />
       : tab === 'foods'
         ? <FoodSearchScreen onSelect={(food) => { session.setPending({ food, meal: session.selectedMeal }); setOverlay('food'); }} onScan={() => { session.setFoodDate(todayKey()); setOverlay('scan'); }} />
         : tab === 'journal'
