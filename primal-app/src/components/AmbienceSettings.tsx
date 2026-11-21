@@ -41,6 +41,13 @@ export default function AmbienceSettings() {
         </View>
         <Switch accessibilityLabel="Son de l'intro" value={ambience.introSound} onValueChange={(introSound) => setAmbience({ introSound })} trackColor={{ false: theme.cardAlt, true: theme.primary }} thumbColor="#FFFFFF" {...({ activeThumbColor: '#FFFFFF' } as object)} />
       </View>
+      <View style={[styles.row, styles.block, { borderTopColor: theme.border }]}>
+        <View style={{ flex: 1 }}>
+          <Text style={[FONTS.text.semibold, { color: theme.text, fontSize: 15 }]}>Vibrations de l'intro</Text>
+          <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, marginTop: 2, lineHeight: 17 }]}>De légères pulsations au rythme de l'animation.</Text>
+        </View>
+        <Switch accessibilityLabel="Vibrations de l'intro" value={ambience.introHaptics} onValueChange={(introHaptics) => setAmbience({ introHaptics })} trackColor={{ false: theme.cardAlt, true: theme.primary }} thumbColor="#FFFFFF" {...({ activeThumbColor: '#FFFFFF' } as object)} />
+      </View>
       <View style={[styles.block, { borderTopColor: theme.border }]}>
         <Text style={[FONTS.text.semibold, styles.label, { color: theme.sub }]}>Couleur</Text>
         <View style={styles.swatches}>{(Object.keys(PALETTES) as AccentId[]).map((id) => {

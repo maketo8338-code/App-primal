@@ -52,6 +52,7 @@ function Intro({ onDone }: { onDone: () => void }) {
   const finished = useRef(false);
   const sequence = useRef<Animated.CompositeAnimation | null>(null);
   const sound = useRef<AudioPlayer | null>(null);
+  const hapticTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
   // On the web, browsers only allow sound after a tap: wait for one before starting.
   const [armed, setArmed] = useState(Platform.OS !== 'web');
   const waitPulse = useRef(new Animated.Value(0)).current;
@@ -106,6 +107,7 @@ function Intro({ onDone }: { onDone: () => void }) {
         return;
       }
       if (ambience.introSound && native) playIntroSound(); // web: already started in the tap handler
+      if (ambience.introHaptics && native) scheduleIntroHaptics();
       sequence.current = Animated.sequence([
         Animated.timing(appear, { toValue: 1, duration: APPEAR, easing: Easing.out(Easing.back(1.4)), useNativeDriver: native }),
         Animated.delay(HOLD),
@@ -115,13 +117,12 @@ function Intro({ onDone }: { onDone: () => void }) {
         if (!done || cancelled) return;
         // The punch: shock wave in the background dust + a short haptic.
         neon?.impulse(cx, cy, 1.8);
-        if (native) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => undefined);
         sequence.current = Animated.timing(burst, { toValue: 1, duration: BURST, easing: Easing.out(Easing.cubic), useNativeDriver: native });
         sequence.current.start(finish);
       });
     };
     AccessibilityInfo.isReduceMotionEnabled?.().then(run).catch(() => run(false)) ?? run(false);
-    return () => { cancelled = true; sequence.current?.stop(); stopSound(); };
+    return () => { cancelled = true; sequence.current?.stop(); stopSound(); clearHaptics(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [armed]);
 
@@ -143,7 +144,24 @@ function Intro({ onDone }: { onDone: () => void }) {
     setTimeout(() => { try { player.pause(); player.remove(); } catch { /* already released */ } }, 1500);
   }
 
+  // Light haptics timed to the animation: a tick when the logo appears, three soft
+  // pulses while it charges, a rounded « soft » hit at the burst. Phones only.
+  function scheduleIntroHaptics() {
+    const tap = (fn: () => Promise<void>) => () => { fn().catch(() => undefined); };
+    const chargeStart = APPEAR + HOLD;
+    const plan: Array<[number, () => void]> = [
+      [0, tap(() => Haptics.selectionAsync())],
+      [chargeStart + CHARGE * 0.25, tap(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light))],
+      [chargeStart + CHARGE * 0.55, tap(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light))],
+      [chargeStart + CHARGE * 0.8, tap(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light))],
+      [chargeStart + CHARGE, tap(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft))],
+    ];
+    hapticTimers.current = plan.map(([delay, fn]) => setTimeout(fn, delay));
+  }
+  function clearHaptics() { hapticTimers.current.forEach(clearTimeout); hapticTimers.current = []; }
+
   const skip = () => {
+    clearHaptics();
     sound.current?.pause();
     sequence.current?.stop();
     Animated.timing(exit, { toValue: 0, duration: 220, useNativeDriver: Platform.OS !== 'web' }).start(finish);

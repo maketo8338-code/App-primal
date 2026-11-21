@@ -108,8 +108,8 @@ export function glow(color: string, intensity = 1): ViewStyle {
 
 // ── Ambience: particles on/off, intensity, accent colour (saved on the phone) ──
 export type AmbienceIntensity = 'soft' | 'normal' | 'intense';
-export interface Ambience { enabled: boolean; intensity: AmbienceIntensity; accent: AccentId; /** Short sound during the launch animation. */ introSound: boolean }
-export const DEFAULT_AMBIENCE: Ambience = { enabled: true, intensity: 'normal', accent: 'braise', introSound: true };
+export interface Ambience { enabled: boolean; intensity: AmbienceIntensity; accent: AccentId; /** Short sound during the launch animation. */ introSound: boolean; /** Light haptics during the launch animation. */ introHaptics: boolean }
+export const DEFAULT_AMBIENCE: Ambience = { enabled: true, intensity: 'normal', accent: 'braise', introSound: true, introHaptics: true };
 export const INTENSITY_FACTOR: Record<AmbienceIntensity, number> = { soft: 0.45, normal: 1, intense: 1.6 };
 const AMBIENCE_KEY = 'primal.ambience.v1';
 
@@ -122,6 +122,7 @@ function readAmbience(raw: string | null): Ambience {
       intensity: v.intensity === 'soft' || v.intensity === 'normal' || v.intensity === 'intense' ? v.intensity : DEFAULT_AMBIENCE.intensity,
       accent: v.accent && v.accent in PALETTES ? v.accent : DEFAULT_AMBIENCE.accent,
       introSound: typeof v.introSound === 'boolean' ? v.introSound : DEFAULT_AMBIENCE.introSound,
+      introHaptics: typeof v.introHaptics === 'boolean' ? v.introHaptics : DEFAULT_AMBIENCE.introHaptics,
     };
   } catch { return DEFAULT_AMBIENCE; }
 }
