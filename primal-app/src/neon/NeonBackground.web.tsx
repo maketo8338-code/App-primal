@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { adaptVisible, IMPULSE_SHAKE, PARTICLE_COUNT as N, STRIDE, useNeon } from './NeonProvider';
-import { useTheme } from '../lib/theme';
+import { isGalaxy, useTheme } from '../lib/theme';
+import GalaxyBackground from '../galaxy/GalaxyBackground.web';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Web version of the neon particle field.
@@ -19,7 +20,13 @@ function makeSprite(stops: Array<[number, string]>): HTMLCanvasElement {
   g.fillStyle = grad; g.fillRect(0, 0, size, size); return c;
 }
 
+/** Galaxy variants get their own starry sky; the classic colours keep the embers. */
 export default function NeonBackground() {
+  const { ambience } = useTheme();
+  return isGalaxy(ambience.accent) ? <GalaxyBackground key={ambience.accent} variant={ambience.accent} /> : <EmberBackground />;
+}
+
+function EmberBackground() {
   const host = useRef<HTMLDivElement | null>(null);
   const { impulses, flow, tilt, intensity } = useNeon();
   const { light } = useTheme().theme;
