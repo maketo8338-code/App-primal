@@ -3,6 +3,20 @@ import { normalizeFood } from './safeStorage';
 import { CIQUAL_PROCESSED, FOOD_CORE } from './foodCore';
 import { EXTRA_ALIASES } from './foodExtras';
 import { withUsualPortion } from './portions';
+import { splitFoodName } from './foodName';
+
+/** Bonus when the short name (« Pomme » in « Pomme, chair et peau, crue ») is what was typed. */
+function titleBonus(food: Food, normalizedQuery: string): number {
+  if (!normalizedQuery) return 0;
+  const title = normalize(splitFoodName(food.name).title.replace(/\([^)]*\)/g, ' '));
+  const name = normalize(food.name);
+  const lengthPenalty = Math.min(12, name.length / 12);
+  const aliases = [...(ADDED_PRIMAL_ALIASES[food.id] || []), ...(EXTRA_ALIASES[food.id] || [])].map(normalize);
+  if (title === normalizedQuery || aliases.includes(normalizedQuery)) return 60 - lengthPenalty;
+  if (title.startsWith(`${normalizedQuery} `) || title.startsWith(normalizedQuery)) return 30 - lengthPenalty;
+  if (name.startsWith(normalizedQuery)) return 15 - lengthPenalty;
+  return -lengthPenalty;
+}
 import { CIQUAL_2025 } from './ciqual2025';
 
 // Recherche multi-sources : noyau local instantané, USDA pour les génériques et Open Food Facts pour les produits de marque.
@@ -102,7 +116,7 @@ export function searchCore(query: string): Food[] {
     const total = queryTokens.reduce((score, term) => score + Math.max(...tokens.map((token) => tokenScore(term, token)), 0), 0);
     const matched = queryTokens.filter((term) => tokens.some((token) => tokenScore(term, token) > 0)).length;
     const exactPhrase = text.includes(normalize(query));
-    return { food, score: total + (exactPhrase ? 6 : 0), matched };
+    return { food, score: total + (exactPhrase ? 6 : 0) + titleBonus(food, normalize(query)) / 6, matched };
   }).filter((item) => item.matched === queryTokens.length || (queryTokens.length === 1 && item.score >= 2)).sort((a, b) => b.score - a.score).map((item) => item.food);
 }
 
@@ -238,7 +252,7 @@ function relevance(food: Food, query: string): number {
   const translatedMatched = translatedWords.filter((word) => text.split(' ').some((candidate) => tokenScore(word, candidate) > 0)).length;
   const exact = text.includes(french) || text.includes(english);
   const sourceBoost = food.source === 'core' ? 8 : food.source === 'usda' ? 5 : 3;
-  return (exact ? 100 : 0) + matched * 14 + translatedMatched * 10 + sourceBoost;
+  return (exact ? 100 : 0) + matched * 14 + translatedMatched * 10 + sourceBoost + titleBonus(food, french);
 }
 
 export interface SearchOutcome { results: Food[]; onlineOk: boolean; }

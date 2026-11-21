@@ -158,5 +158,17 @@ export const EXTRA_ALIASES: Record<string, string[]> = {
   "primal-97": [
     "pêche plate",
     "peche plate"
+  ],
+  "primal-62": [
+    "oeuf",
+    "oeufs",
+    "oeuf entier"
+  ],
+  "primal-12": [
+    "poulet",
+    "blanc de poulet"
+  ],
+  "primal-64": [
+    "lait"
   ]
 };

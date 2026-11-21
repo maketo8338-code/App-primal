@@ -15,6 +15,8 @@ import { ProgressBar } from '../components/ui';
 import { CompactStat, IconBadge, ProgressRing, SectionHeading, Surface } from '../components/PrimalVisuals';
 import { completeTotalForEntries, micronutrientStatuses, pct, scoreTotalsForEntries, shiftDate, todayKey } from '../lib/nutrition';
 import { AdviceCard } from '../components/AdviceCard';
+import CoachCard from '../components/CoachCard';
+import type { Food } from '../types';
 import { nutritionAdvice } from '../lib/advice';
 import { computeDayScore } from '../lib/scoring';
 import { activityDuration, knownActiveCalories } from '../lib/activitySync';
@@ -28,6 +30,8 @@ interface Props {
   onOpenStats: () => void; onOptimizeDay: () => void;
   /** Opens the « Ma journée » share card. */
   onShareDay?: () => void;
+  /** Opens a food card (used by the coach suggestions). */
+  onOpenFood?: (food: Food) => void;
 }
 interface HabitMetric { label: string; value: string; icon: string; android: string; color: string; soft: string; onPress: () => void; }
 
@@ -90,6 +94,8 @@ export default function HomeScreen(props: Props) {
         <View style={styles.heroMain}><Float amplitude={4} rotate={1.2} style={[{ borderRadius: 69, backgroundColor: 'rgba(20,4,6,0.55)' }, glow(theme.neon, 0.7)]}><ProgressRing value={pct(consumed, targets.kcal)} size={138} stroke={11} color="#FFFFFF" trackColor="#FFFFFF" fill="rgba(255,255,255,0.06)"><View style={styles.ringCenter}><Text style={[FONTS.display.bold, styles.ringValue]}>{consumed === undefined ? '—' : Math.round(consumed).toLocaleString('fr-FR')}</Text><Text style={[FONTS.text.semibold, styles.ringUnit]}>kcal</Text></View></ProgressRing></Float><View style={styles.heroCopy}><Text style={[FONTS.text.regular, styles.heroLabel]}>{t('home.dailyTarget')}</Text><Text style={[FONTS.display.semibold, styles.heroTarget]}>{targets.kcal.toLocaleString('fr-FR')} kcal</Text><Text style={[FONTS.text.regular, styles.heroRemaining]}>{remaining === undefined ? 'Donnée indisponible' : remaining > 0 ? `${remaining.toLocaleString('fr-FR')} kcal restantes` : 'Objectif atteint'}</Text></View></View>
         <View style={styles.heroFooter}><Text style={[FONTS.text.regular, styles.heroMeta]}>Dépense estimée {energy.tdee.toLocaleString('fr-FR')} kcal</Text><Text style={[FONTS.text.regular, styles.heroMeta]}>{energy.basisLabel}</Text></View>
       </LinearGradient></View></FadeInUp>
+
+      {props.onOpenFood ? <FadeInUp delay={MOTION.stagger * 1.5}><CoachCard entries={entries} targets={targets} onOpenFood={props.onOpenFood} onOpenDetail={props.onOptimizeDay} /></FadeInUp> : null}
 
       <FadeInUp delay={MOTION.stagger * 2} style={styles.scoreRow}><Surface onPress={props.onOpenScore} style={styles.scoreCard}><View style={[styles.scoreCircle, { borderColor: scoreColor, backgroundColor: theme.cardAlt }]}><Text style={[FONTS.mono.bold, { color: scoreColor, fontSize: 19 }]}>{score.score}</Text><Text style={[FONTS.text.semibold, { color: theme.sub, fontSize: 10 }]}>/100</Text></View><View style={{ flex: 1 }}><Text style={[FONTS.display.semibold, { color: theme.text, fontSize: 17 }]}>PRIMAL Score</Text><Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, marginTop: 3 }]}>{score.label} · {trend}</Text></View><Icon name="chevron.right" android="chevron-forward" size={15} color={theme.sub} /></Surface><Surface onPress={props.onOptimizeDay} style={[styles.optimizeCard, { backgroundColor: theme.accentSoft, borderColor: theme.accentSoft }]}><IconBadge name="sparkles" android="sparkles" size={36} color={theme.accent} backgroundColor={theme.cardSolid} /><Text style={[FONTS.text.semibold, { color: theme.text, fontSize: 13, lineHeight: 17, marginTop: 9 }]}>Optimiser{`\n`}ma journée</Text></Surface></FadeInUp>
 
