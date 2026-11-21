@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text as NativeText, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, StyleSheet, Text as NativeText, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { I18nText as Text } from './components/I18nText';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ThemeProvider, useTheme } from './lib/theme';
+import { LIGHT, MOTION, RADIUS, shadow, ThemeProvider, useTheme } from './lib/theme';
 import { I18nProvider, useI18n } from './lib/i18n';
 import { StoreProvider, useStore } from './lib/store';
 import { useAppFonts, FONTS } from './zzz/fonts';
@@ -30,6 +31,7 @@ import OnboardingScreen from './screens/OnboardingScreen';
 import LanguageSelectionScreen from './screens/LanguageSelectionScreen';
 import ThemeChoiceScreen from './screens/ThemeChoiceScreen';
 import PrimalAtmosphere from './components/PrimalAtmosphere';
+import { Pressable3D } from './components/motion';
 
 type Tab = 'home' | 'foods' | 'add' | 'journal' | 'profile';
 type Overlay = { type: 'none' } | { type: 'food'; food: Food; meal: MealId } | { type: 'scan' } | { type: 'settings' } | { type: 'micros' } | { type: 'score' } | { type: 'hydration' } | { type: 'activity' } | { type: 'sleep' } | { type: 'outdoor' } | { type: 'stats' } | { type: 'optimize' };
@@ -44,18 +46,20 @@ const tabs: TabConfig[] = [
 function TabButton({ tab, active, onPress }: { tab: TabConfig; active: boolean; onPress: () => void }) {
   const { theme } = useTheme();
   const { t } = useI18n();
-  return <Pressable onPress={onPress} style={({ pressed }) => [styles.tabButton, pressed && styles.tabPressed]}><View style={[styles.tabIcon, active && { backgroundColor: theme.primarySoft }]}><Icon name={tab.icon as any} android={tab.android as any} size={19} color={active ? theme.primary : theme.sub} /></View><Text style={[FONTS.text.semibold, styles.tabLabel, { color: active ? theme.primary : theme.sub }]}>{t(tab.labelKey)}</Text></Pressable>;
+  const on = useRef(new Animated.Value(active ? 1 : 0)).current;
+  useEffect(() => { Animated.spring(on, { toValue: active ? 1 : 0, useNativeDriver: true, ...MOTION.spring }).start(); }, [active, on]);
+  return <Pressable3D onPress={onPress} tilt={0} sink={0.92} style={styles.tabButton}><View style={styles.tabIcon}><Animated.View style={[StyleSheet.absoluteFill, { borderRadius: RADIUS.pill, backgroundColor: theme.primarySoft, opacity: on, transform: [{ scaleX: on.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) }] }]} /><Icon name={tab.icon as any} android={tab.android as any} size={19} color={active ? theme.primary : theme.sub} /></View><Text style={[active ? FONTS.text.bold : FONTS.text.semibold, styles.tabLabel, { color: active ? theme.primary : theme.sub }]}>{t(tab.labelKey)}</Text></Pressable3D>;
 }
 
 function TabBar({ active, onTab, onAdd }: { active: Tab; onTab: (tab: Tab) => void; onAdd: () => void }) {
   const { theme } = useTheme();
   const { t } = useI18n();
   const insets = useSafeAreaInsets();
-  return <View style={[styles.tabBar, { backgroundColor: theme.card, borderTopColor: theme.border, paddingBottom: Math.max(insets.bottom, 12) }]}>
+  return <View style={[styles.tabDock, { paddingBottom: Math.max(insets.bottom, 12) }]}><View style={[styles.tabBar, { backgroundColor: theme.cardSolid, borderColor: theme.border }, shadow(theme, 3)]}>
     {tabs.slice(0, 2).map((tab) => <TabButton key={tab.id} tab={tab} active={active === tab.id} onPress={() => onTab(tab.id)} />)}
-    <Pressable accessibilityLabel={t('foods.addTitle')} onPress={onAdd} style={({ pressed }) => [styles.addButton, { backgroundColor: theme.primary }, pressed && styles.addPressed]}><View style={styles.addInner}><Icon name="plus" android="add" size={25} color="#FFFFFF" /></View><Text style={[FONTS.text.semibold, styles.addLabel, { color: theme.primary }]}>{t('nav.add')}</Text></Pressable>
+    <Pressable3D accessibilityLabel={t('foods.addTitle')} onPress={onAdd} tilt={14} sink={0.92} style={styles.addButton}><View style={[styles.addOrb, { backgroundColor: theme.primary, borderColor: theme.cardSolid }, shadow(theme, 2, theme.primary)]}><LinearGradient colors={theme.primaryGradient} start={{ x: 0.2, y: 0 }} end={{ x: 0.8, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: 26 }]} /><View style={styles.addGloss} /><Icon name="plus" android="add" size={26} color={theme.onPrimary} /></View><Text style={[FONTS.text.bold, styles.addLabel, { color: theme.primary }]}>{t('nav.add')}</Text></Pressable3D>
     {tabs.slice(2).map((tab) => <TabButton key={tab.id} tab={tab} active={active === tab.id} onPress={() => onTab(tab.id)} />)}
-  </View>;
+  </View></View>;
 }
 
 function Root() {
@@ -98,12 +102,13 @@ function Root() {
 
 export default function App() {
   const fontsReady = useAppFonts();
-  if (!fontsReady) return <View style={{ flex: 1, backgroundColor: '#F5FAFF' }}><StatusBar style="dark" /></View>;
+  if (!fontsReady) return <View style={{ flex: 1, backgroundColor: LIGHT.bg }}><StatusBar style="dark" /></View>;
   return <SafeAreaProvider><I18nProvider><ThemeProvider><StoreProvider><Root /></StoreProvider></ThemeProvider></I18nProvider></SafeAreaProvider>;
 }
 
 const styles = StyleSheet.create({
-  tabBar: { flexDirection: 'row', alignItems: 'flex-end', borderTopWidth: 1, paddingTop: 8, shadowColor: '#174A7C', shadowOpacity: 0.065, shadowRadius: 22, shadowOffset: { width: 0, height: -7 }, elevation: 8 },
-  tabButton: { flex: 1, alignItems: 'center', justifyContent: 'flex-end', minHeight: 53 }, tabIcon: { width: 38, height: 29, borderRadius: 16, alignItems: 'center', justifyContent: 'center' }, tabLabel: { fontSize: 10, marginTop: 3 }, tabPressed: { opacity: 0.7, transform: [{ scale: 0.96 }] },
-  addButton: { width: 64, height: 69, borderRadius: 32, marginTop: -34, alignItems: 'center', justifyContent: 'flex-start', paddingTop: 4, shadowColor: '#2563EB', shadowOpacity: 0.24, shadowRadius: 17, shadowOffset: { width: 0, height: 7 }, elevation: 6 }, addInner: { width: 55, height: 55, borderRadius: 28, borderWidth: 5, borderColor: '#FFFFFF33', alignItems: 'center', justifyContent: 'center' }, addLabel: { fontSize: 9, marginTop: -1 }, addPressed: { opacity: 0.9, transform: [{ scale: 0.95 }] },
+  tabDock: { paddingHorizontal: 14, paddingTop: 6, backgroundColor: 'transparent' },
+  tabBar: { flexDirection: 'row', alignItems: 'flex-end', borderRadius: RADIUS.xl, borderWidth: StyleSheet.hairlineWidth, paddingTop: 9, paddingBottom: 9, paddingHorizontal: 4 },
+  tabButton: { flex: 1, alignItems: 'center', justifyContent: 'flex-end', minHeight: 50 }, tabIcon: { width: 48, height: 30, borderRadius: RADIUS.pill, alignItems: 'center', justifyContent: 'center' }, tabLabel: { fontSize: 11, marginTop: 4 },
+  addButton: { width: 68, alignItems: 'center', justifyContent: 'flex-end', marginTop: -30 }, addOrb: { width: 60, height: 60, borderRadius: 30, borderWidth: 4, alignItems: 'center', justifyContent: 'center' }, addGloss: { position: 'absolute', top: 4, left: 10, right: 10, height: 20, borderRadius: 12, backgroundColor: '#FFFFFF', opacity: 0.22 }, addLabel: { fontSize: 11, marginTop: 4 },
 });
