@@ -7,9 +7,9 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "setup-skia-web public && expo start --web",
+    "web": "expo start --web",
     "typecheck": "tsc --noEmit",
-    "export:web": "setup-skia-web public && expo export --platform web"
+    "preview:web": "bash preview/build.sh"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
