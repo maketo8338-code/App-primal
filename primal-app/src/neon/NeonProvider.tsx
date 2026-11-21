@@ -10,7 +10,9 @@ import { Accelerometer } from 'expo-sensors';
 // phone motion) into shared values that the UI-thread simulation reads.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const PARTICLE_COUNT = 130;
+export { PARTICLE_COUNT } from './adaptive';
+import { PARTICLE_COUNT } from './adaptive';
+export { adaptVisible, MIN_VISIBLE } from './adaptive';
 /** Per particle: x, y, vx, vy, size, heat, phase, depth */
 export const STRIDE = 8;
 

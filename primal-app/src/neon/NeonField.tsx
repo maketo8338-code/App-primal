@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import { BlendMode, Canvas, createPicture, Group, Picture, RadialGradient, Rect, Skia, TileMode, vec } from '@shopify/react-native-skia';
 import { useDerivedValue, useFrameCallback, useSharedValue } from 'react-native-reanimated';
-import { IMPULSE_SHAKE, PARTICLE_COUNT as N, STRIDE, useNeon } from './NeonProvider';
+import { adaptVisible, IMPULSE_SHAKE, PARTICLE_COUNT as N, STRIDE, useNeon } from './NeonProvider';
 import { useTheme } from '../lib/theme';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -39,9 +39,15 @@ export default function NeonField() {
     return { halo, core };
   }, [light]);
 
+  const quality = useSharedValue<number[]>([16, N, 0]);
+  const visible = useSharedValue(N);
+
   useFrameCallback((frame) => {
     'worklet';
-    const dt = Math.min(0.05, Math.max(0.001, (frame.timeSincePreviousFrame ?? 16) / 1000));
+    const rawDt = Math.max(0.001, (frame.timeSincePreviousFrame ?? 16) / 1000);
+    const q = quality.value.slice(); const v = rawDt > 0.25 ? q[1] : adaptVisible(q, rawDt); quality.value = q;
+    if (v !== visible.value) visible.value = v;
+    const dt = Math.min(0.05, rawDt);
     const W = dims.value[0]; const H = dims.value[1];
     const t = clock.value + dt; clock.value = t;
     const k = intensity.value;
@@ -130,7 +136,8 @@ export default function NeonField() {
     // Impact flash: a short-lived glow that lights the room around the finger.
     const f = flash.value;
     if (f[2] > 0.01) { canvas.save(); canvas.translate(f[0], f[1]); canvas.scale(190, 190); halo.setAlphaf(Math.min(0.5, f[2] * 0.38)); canvas.drawCircle(0, 0, 1, halo); canvas.restore(); }
-    for (let i = 0; i < N; i++) {
+    const count = visible.value;
+    for (let i = 0; i < count; i++) {
       const o = i * STRIDE; const depth = d[o + 7]; const heat = d[o + 5];
       const speed = Math.sqrt(d[o + 2] * d[o + 2] + d[o + 3] * d[o + 3]);
       const flicker = 0.72 + 0.28 * Math.sin(t * (1.4 + depth * 1.6) + d[o + 6] * 3);

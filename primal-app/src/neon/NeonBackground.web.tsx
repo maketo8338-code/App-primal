@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { IMPULSE_SHAKE, PARTICLE_COUNT as N, STRIDE, useNeon } from './NeonProvider';
+import { adaptVisible, IMPULSE_SHAKE, PARTICLE_COUNT as N, STRIDE, useNeon } from './NeonProvider';
 import { useTheme } from '../lib/theme';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -44,11 +44,14 @@ export default function NeonBackground() {
 
     const d: number[] = []; let clock = 0; let energy = 0; let cursor = 0; const flash = [0, 0, 0];
     const spawnSize = (depth: number) => (3 + depth * 13) * (0.55 + Math.random() * 0.7);
-    let last = performance.now(); let raf = 0;
+    let last = performance.now(); let raf = 0; const quality = [16, N, 0];
 
     const step = (now: number) => {
       raf = requestAnimationFrame(step);
-      const dt = Math.min(0.05, Math.max(0.001, (now - last) / 1000)); last = now;
+      const rawDt = Math.max(0.001, (now - last) / 1000); last = now;
+      // Ignore long pauses (hidden tab) so they don't count as slow frames.
+      const visible = rawDt > 0.25 ? quality[1] : adaptVisible(quality, rawDt);
+      const dt = Math.min(0.05, rawDt);
       const t = clock + dt; clock = t;
       const k = intensity.value;
       const queue = impulses.value; if (queue.length) impulses.value = [];
@@ -116,7 +119,7 @@ export default function NeonBackground() {
       ctx.globalCompositeOperation = 'lighter';
       if (flash[2] > 0.01) { ctx.globalAlpha = Math.min(0.5, flash[2] * 0.38); ctx.drawImage(halo, flash[0] - 190, flash[1] - 190, 380, 380); }
       const glowK = 0.5 + 0.5 * Math.min(1.6, intensity.value);
-      for (let i = 0; i < N; i++) {
+      for (let i = 0; i < visible; i++) {
         const o = i * STRIDE; const depth = d[o + 7]; const heat = d[o + 5];
         const speed = Math.sqrt(d[o + 2] * d[o + 2] + d[o + 3] * d[o + 3]);
         const flicker = 0.72 + 0.28 * Math.sin(t * (1.4 + depth * 1.6) + d[o + 6] * 3);
