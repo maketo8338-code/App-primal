@@ -9,11 +9,10 @@ export const APP_ICONS: Record<AccentId, ImageSourcePropType> = {
   foret: require('../../assets/logo/logo-foret.png'),
   glacier: require('../../assets/logo/logo-glacier.png'),
   lune: require('../../assets/logo/logo-lune.png'),
-  // Galaxie: provisional, until their own logos are generated (step 3).
-  nebuleuse: require('../../assets/logo/logo-lune.png'),
-  aurore: require('../../assets/logo/logo-foret.png'),
-  supernova: require('../../assets/logo/logo-ambre.png'),
-  trounoir: require('../../assets/logo/logo-lune.png'),
+  nebuleuse: require('../../assets/logo/logo-nebuleuse.png'),
+  aurore: require('../../assets/logo/logo-aurore.png'),
+  supernova: require('../../assets/logo/logo-supernova.png'),
+  trounoir: require('../../assets/logo/logo-trounoir.png'),
 };
 
 /** Default logo (Braise), kept for code that is not theme-aware. */

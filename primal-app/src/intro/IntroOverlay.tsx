@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, Image, Platform, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
-import { glow, useTheme } from '../lib/theme';
+import { glow, isGalaxy, PALETTES, useTheme } from '../lib/theme';
 import { FONTS } from '../lib/fonts';
 import { I18nText as Text } from '../components/I18nText';
 import { useAppIcon } from '../lib/appAssets';
@@ -61,17 +61,24 @@ function Intro({ onDone }: { onDone: () => void }) {
 
   // Particle trajectories, computed once: left half flies left, right half right,
   // everything drifts upward and fades — like vapour leaving the logo.
+  const gx = isGalaxy(ambience.accent) ? PALETTES[ambience.accent].galaxy : undefined;
+  const galaxy = useMemo(() => (gx ? [gx.a, gx.b, gx.c] : null), [gx]);
   const particles = useMemo(() => LOGO_POINTS.map(([px, py, kind, s], i) => {
     const r1 = rand(i + 1); const r2 = rand(i + 101); const r3 = rand(i + 211);
     const side = px < 0.5 ? -1 : 1;
     const spread = 0.55 + Math.abs(px - 0.5) * 1.4;
-    const dx = side * (width * 0.32 + r1 * width * 0.55) * spread;
-    const dy = (py - 0.5) * size * 0.6 - (70 + r2 * 190);
+    let dx = side * (width * 0.32 + r1 * width * 0.55) * spread;
+    let dy = (py - 0.5) * size * 0.6 - (70 + r2 * 190);
+    if (galaxy) {
+      // Galaxy: the logo swirls out into a spiral of stardust.
+      const a = Math.atan2(py - 0.5, px - 0.5) + 1.1 + r2 * 0.5; const dist = width * (0.35 + r1 * 0.6);
+      dx = Math.cos(a) * dist; dy = Math.sin(a) * dist * 0.8;
+    }
     const delay = Math.min(0.22, r3 * 0.12 + Math.abs(px - 0.5) * 0.12);
     const fadeAt = Math.min(0.94, delay + 0.55 + r1 * 0.3);
     const d = s * (size / 256) * 2.8;
     const x0 = cx - size / 2 + px * size; const y0 = cy - size / 2 + py * size;
-    const color = kind === 1 ? theme.primary : '#FFFFFF';
+    const color = galaxy && kind === 1 ? `rgb(${galaxy[i % 3].join(',')})` : kind === 1 ? theme.primary : '#FFFFFF';
     return {
       key: i, d, x0, y0, color,
       translateX: burst.interpolate({ inputRange: [0, delay, delay + (1 - delay) * 0.35, 1], outputRange: [0, 0, dx * 0.62, dx] }),
@@ -79,7 +86,7 @@ function Intro({ onDone }: { onDone: () => void }) {
       opacity: burst.interpolate({ inputRange: [0, 0.001, delay + 0.05, fadeAt, 1], outputRange: [0, 1, 1, 0.45, 0] }),
       scale: burst.interpolate({ inputRange: [0, delay, 1], outputRange: [1, 1.15, 0.2] }),
     };
-  }), [burst, cx, cy, size, theme.primary, width]);
+  }), [burst, cx, cy, size, theme.primary, width, galaxy]);
 
   useEffect(() => {
     if (armed) return;
