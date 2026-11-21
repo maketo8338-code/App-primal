@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "PRIMAL",
+    "slug": "primal",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "plugins": [
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "PRIMAL utilise l'appareil photo pour scanner les codes-barres."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "PRIMAL accède à tes photos pour choisir ta photo de profil."
+        }
+      ]
+    ],
+    "ios": {
+      "supportsTablet": false
+    },
+    "android": {},
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    }
+  }
+}

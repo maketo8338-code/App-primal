@@ -4,6 +4,7 @@ import { I18nText as Text } from '../components/I18nText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../lib/theme';
+import { Pressable3D } from '../components/motion';
 import { FONTS } from '../zzz/fonts';
 import { Icon } from '../zzz/Icon';
 import { useStore } from '../lib/store';
@@ -30,7 +31,7 @@ export default function ScoreDetailScreen({ onBack }: { onBack: () => void }) {
   const actions = score.pillars.filter((pillar) => pillar.available && pillar.action).sort((a, b) => a.score - b.score).slice(0, 3);
 
   return <View style={{ flex: 1, backgroundColor: 'transparent' }}>
-    <View style={{ paddingTop: insets.top + 8, paddingHorizontal: 16 }}><Pressable onPress={onBack} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]}><Icon name="chevron.left" android="chevron-back" size={20} color={theme.text} /><Text style={[FONTS.text.semibold, { color: theme.text, fontSize: 16 }]}>Retour</Text></Pressable></View>
+    <View style={{ paddingTop: insets.top + 8, paddingHorizontal: 16 }}><Pressable3D onPress={onBack} style={[styles.backBtn, { borderColor: theme.outline, backgroundColor: theme.card }]}><Icon name="chevron.left" android="chevron-back" size={20} color={theme.text} /><Text style={[FONTS.text.semibold, { color: theme.text, fontSize: 16 }]}>Retour</Text></Pressable3D></View>
     <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: Math.max(insets.bottom, 16), paddingTop: 12 }}>
       <View style={{ overflow: 'hidden', borderRadius: 24, marginBottom: 16 }}><LinearGradient colors={[theme.heroGradient[0], theme.heroGradient[1]]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}><Text style={[FONTS.text.semibold, { color: 'rgba(255,255,255,0.85)', fontSize: 14 }]}>Ta Note santé aujourd’hui</Text><Text style={[FONTS.display.bold, { color: '#FFFFFF', fontSize: 64, letterSpacing: -1.5 }]}>{score.score}<Text style={[FONTS.text.semibold, { color: 'rgba(255,255,255,0.8)', fontSize: 18 }]}> /100</Text></Text><Text style={[FONTS.text.semibold, { color: '#FFFFFF', fontSize: 18 }]}>{score.label}</Text><Text style={[FONTS.text.regular, { color: 'rgba(255,255,255,0.78)', fontSize: 12, marginTop: 8 }]}>Données suivies : {score.coverage}% des pondérations</Text></LinearGradient></View>
       <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 14, lineHeight: 20, marginBottom: 16, textAlign: 'center' }]}>Ce score est un indicateur personnel de tes habitudes du jour. Il n’est pas un diagnostic médical : il t’aide à visualiser où tu en es et quoi améliorer.</Text>
@@ -52,7 +53,7 @@ function InsightCard({ title, color, background, icon, android, items, theme }: 
 }
 
 const styles = StyleSheet.create({
-  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', borderWidth: 1.5, borderRadius: 999, paddingLeft: 8, paddingRight: 14 },
   hero: { padding: 24, alignItems: 'center' },
   pillarCard: { borderRadius: 18, padding: 16, borderWidth: 1 },
   pillarHead: { flexDirection: 'row', alignItems: 'center', gap: 12 },

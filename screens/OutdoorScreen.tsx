@@ -4,6 +4,7 @@ import { I18nText as Text } from '../components/I18nText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../lib/theme';
+import { Pressable3D } from '../components/motion';
 import { useI18n } from '../lib/i18n';
 import { FONTS } from '../zzz/fonts';
 import { Icon } from '../zzz/Icon';
@@ -34,21 +35,21 @@ export default function OutdoorScreen({ onBack }: { onBack: () => void }) {
   return (
     <View style={{ flex: 1, backgroundColor: 'transparent' }}>
       <View style={{ paddingTop: insets.top + 8, paddingHorizontal: 16 }}>
-        <Pressable onPress={onBack} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]}>
+        <Pressable3D onPress={onBack} style={[styles.backBtn, { borderColor: theme.outline, backgroundColor: theme.card }]}>
           <Icon name="chevron.left" android="chevron-back" size={20} color={theme.text} />
           <Text style={[FONTS.text.semibold, { color: theme.text, fontSize: 16 }]}>{t('common.back')}</Text>
-        </Pressable>
+        </Pressable3D>
       </View>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: Math.max(insets.bottom, 16), paddingTop: 12 }}>
-        <Text style={[styles.title, FONTS.display.bold, { color: theme.text }]}>Temps extérieur</Text>
+        <Text style={[styles.title, FONTS.display.semibold, { color: theme.text }]}>Temps extérieur</Text>
         <View style={styles.dateNav}>
-          <Pressable onPress={() => setDate(shiftDate(date, -1))}><Icon name="chevron.left" android="chevron-back" size={22} color={theme.primary} /></Pressable>
+          <Pressable3D onPress={() => setDate(shiftDate(date, -1))}><Icon name="chevron.left" android="chevron-back" size={22} color={theme.primary} /></Pressable3D>
           <Text style={[FONTS.text.semibold, { color: theme.text, fontSize: 14, flex: 1, textAlign: 'center', textTransform: 'capitalize' }]}>{isToday ? "Aujourd'hui" : dateLabel}</Text>
-          <Pressable disabled={isToday} onPress={() => setDate(shiftDate(date, 1))} style={{ opacity: isToday ? 0.3 : 1 }}><Icon name="chevron.right" android="chevron-forward" size={22} color={theme.primary} /></Pressable>
+          <Pressable3D disabled={isToday} onPress={() => setDate(shiftDate(date, 1))} style={{ opacity: isToday ? 0.3 : 1 }}><Icon name="chevron.right" android="chevron-forward" size={22} color={theme.primary} /></Pressable3D>
         </View>
 
         <View style={{ overflow: 'hidden', borderRadius: 24, marginBottom: 16 }}>
-          <LinearGradient colors={['#F59E0B', '#FBBF24']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ padding: 24, alignItems: 'center' }}>
+          <LinearGradient colors={theme.outdoorGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ padding: 24, alignItems: 'center' }}>
             <Icon name="sun.max.fill" android="sunny" size={36} color="#FFFFFF" />
             <Text style={[FONTS.display.bold, { color: '#FFFFFF', fontSize: 52, marginTop: 8 }]}>{habits.outdoorMin}</Text>
             <Text style={[FONTS.text.semibold, { color: 'rgba(255,255,255,0.9)', fontSize: 16 }]}>/ {target} min dehors</Text>
@@ -61,34 +62,34 @@ export default function OutdoorScreen({ onBack }: { onBack: () => void }) {
           </LinearGradient>
         </View>
 
-        <Text style={[styles.sectionLabel, FONTS.text.semibold, { color: theme.text }]}>Ajouter du temps</Text>
+        <Text style={[styles.sectionLabel, FONTS.display.semibold, { color: theme.text }]}>Ajouter du temps</Text>
         <View style={styles.quickRow}>
           {QUICK.map((min) => (
-            <Pressable
+            <Pressable3D
               key={min}
               onPress={() => setHabit(date, { outdoorMin: habits.outdoorMin + min })}
-              style={({ pressed }) => [styles.quickBtn, { backgroundColor: theme.card, borderColor: theme.border, opacity: pressed ? 0.85 : 1 }]}
+              style={[styles.quickBtn, { backgroundColor: theme.card, borderColor: theme.border }]}
             >
               <Icon name="plus" android="add" size={18} color={theme.accent} />
               <Text style={[FONTS.text.semibold, { color: theme.text, fontSize: 14 }]}>{min} min</Text>
-            </Pressable>
+            </Pressable3D>
           ))}
         </View>
         {habits.outdoorMin > 0 && (
-          <Pressable onPress={() => setHabit(date, { outdoorMin: Math.max(0, habits.outdoorMin - 10) })}>
+          <Pressable3D onPress={() => setHabit(date, { outdoorMin: Math.max(0, habits.outdoorMin - 10) })}>
             <Text style={[FONTS.text.semibold, { color: theme.danger, fontSize: 14, textAlign: 'center', marginTop: 12 }]}>Retirer 10 min</Text>
-          </Pressable>
+          </Pressable3D>
         )}
-        <View style={[styles.manualRow, { backgroundColor: theme.card, borderColor: theme.border }]}><TextInput value={outdoorInput} onChangeText={setOutdoorInput} onSubmitEditing={() => { const value = Number(outdoorInput.replace(',', '.')); if (Number.isFinite(value) && value >= 0) setHabit(date, { outdoorMin: Math.round(value) }); setOutdoorInput(''); }} placeholder="120" placeholderTextColor={theme.sub} keyboardType="number-pad" style={[FONTS.mono.semibold, styles.manualInput, { color: theme.text }]} /><Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 14 }]}>min</Text><Pressable onPress={() => { const value = Number(outdoorInput.replace(',', '.')); if (Number.isFinite(value) && value >= 0) setHabit(date, { outdoorMin: Math.round(value) }); setOutdoorInput(''); }} style={[styles.manualButton, { backgroundColor: theme.primary }]}><Text style={[FONTS.text.semibold, { color: theme.onPrimary, fontSize: 14 }]}>Appliquer</Text></Pressable></View>
+        <View style={[styles.manualRow, { backgroundColor: theme.card, borderColor: theme.border }]}><TextInput value={outdoorInput} onChangeText={setOutdoorInput} onSubmitEditing={() => { const value = Number(outdoorInput.replace(',', '.')); if (Number.isFinite(value) && value >= 0) setHabit(date, { outdoorMin: Math.round(value) }); setOutdoorInput(''); }} placeholder="120" placeholderTextColor={theme.sub} keyboardType="number-pad" style={[FONTS.mono.semibold, styles.manualInput, { color: theme.text }]} /><Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 14 }]}>min</Text><Pressable3D onPress={() => { const value = Number(outdoorInput.replace(',', '.')); if (Number.isFinite(value) && value >= 0) setHabit(date, { outdoorMin: Math.round(value) }); setOutdoorInput(''); }} style={[styles.manualButton, { backgroundColor: theme.primary }]}><Text style={[FONTS.text.semibold, { color: theme.onPrimary, fontSize: 14 }]}>Appliquer</Text></Pressable3D></View>
 
-        <Text style={[styles.sectionLabel, FONTS.text.semibold, { color: theme.text, marginTop: 24 }]}>Objectif quotidien</Text>
+        <Text style={[styles.sectionLabel, FONTS.display.semibold, { color: theme.text, marginTop: 24 }]}>Objectif quotidien</Text>
         <Card style={styles.goalCard}>
-          <Pressable onPress={() => updateTargets({ outdoorMin: Math.max(10, target - 5) })}><Icon name="minus.circle.fill" android="remove-circle" size={27} color={theme.sub} /></Pressable>
+          <Pressable3D onPress={() => updateTargets({ outdoorMin: Math.max(10, target - 5) })}><Icon name="minus.circle.fill" android="remove-circle" size={27} color={theme.sub} /></Pressable3D>
           <Text style={[FONTS.mono.semibold, { color: theme.text, fontSize: 18, flex: 1, textAlign: 'center' }]}>{target} min</Text>
-          <Pressable onPress={() => updateTargets({ outdoorMin: Math.min(240, target + 5) })}><Icon name="plus.circle.fill" android="add-circle" size={27} color={theme.primary} /></Pressable>
+          <Pressable3D onPress={() => updateTargets({ outdoorMin: Math.min(240, target + 5) })}><Icon name="plus.circle.fill" android="add-circle" size={27} color={theme.primary} /></Pressable3D>
         </Card>
 
-        <Text style={[styles.sectionLabel, FONTS.text.semibold, { color: theme.text, marginTop: 24 }]}>Historique sur 7 jours</Text>
+        <Text style={[styles.sectionLabel, FONTS.display.semibold, { color: theme.text, marginTop: 24 }]}>Historique sur 7 jours</Text>
         <Card>
           <View style={styles.week}>
             {week.map((item) => (
@@ -114,10 +115,10 @@ export default function OutdoorScreen({ onBack }: { onBack: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  title: { fontSize: 26, letterSpacing: -0.4, marginBottom: 12 },
+  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', borderWidth: 1.5, borderRadius: 999, paddingLeft: 8, paddingRight: 14 },
+  title: { fontSize: 29, letterSpacing: -0.4, marginBottom: 12 },
   dateNav: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
-  sectionLabel: { fontSize: 17, marginBottom: 12 },
+  sectionLabel: { fontSize: 21, letterSpacing: -0.3, marginBottom: 12 },
   quickRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 }, manualRow: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderRadius: 16, padding: 10, marginTop: 10 }, manualInput: { flex: 1, fontSize: 16, paddingVertical: 7 }, manualButton: { borderRadius: 999, paddingHorizontal: 14, paddingVertical: 10 },
   quickBtn: { flexGrow: 1, flexBasis: '22%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, paddingVertical: 14, borderRadius: 16, borderWidth: 1.5 },
   goalCard: { flexDirection: 'row', alignItems: 'center' },

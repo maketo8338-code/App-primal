@@ -30,6 +30,10 @@ export interface Theme {
   primaryGradient: [string, string];
   /** Background atmosphere gradient (top → bottom). */
   atmosphere: [string, string, string];
+  /** Feature hero gradients (white text on top, contrast ≥ 4.5:1). */
+  sleepGradient: [string, string]; waterGradient: [string, string]; outdoorGradient: [string, string];
+  /** Series colours for charts (Stats screen). */
+  chart: { micros: string; water: string; steps: string; sleep: string };
 }
 
 export const LIGHT: Theme = {
@@ -44,6 +48,8 @@ export const LIGHT: Theme = {
   outline: '#6B2A2E52', shadow: '#5A2E1E',
   primaryGradient: ['#C04E1E', '#A23A13'],
   atmosphere: ['#FBF6F0', '#F6EBDF', '#F9F0E6'],
+  sleepGradient: ['#2E1B33', '#5A3550'], waterGradient: ['#1F4A50', '#3A7478'], outdoorGradient: ['#8E4413', '#B0621E'],
+  chart: { micros: '#8E4F72', water: '#2F6E75', steps: '#4C7A5C', sleep: '#5E4475' },
 };
 
 export const DARK: Theme = {
@@ -58,6 +64,8 @@ export const DARK: Theme = {
   outline: '#E3A49766', shadow: '#000000',
   primaryGradient: ['#F29D74', '#DB7246'],
   atmosphere: ['#1A1210', '#140E0C', '#1C1411'],
+  sleepGradient: ['#24142A', '#4A2B44'], waterGradient: ['#173A3F', '#2E5F63'], outdoorGradient: ['#7A3A10', '#9C5419'],
+  chart: { micros: '#D49BBE', water: '#7CC3C9', steps: '#8FBC9C', sleep: '#B9A0D6' },
 };
 
 /** Spacing scale (4-pt grid). */

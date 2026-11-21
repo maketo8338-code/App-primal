@@ -4,6 +4,7 @@ import { I18nText as Text } from '../components/I18nText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../lib/theme';
+import { Pressable3D } from '../components/motion';
 import { useI18n } from '../lib/i18n';
 import { FONTS } from '../zzz/fonts';
 import { Icon } from '../zzz/Icon';
@@ -47,23 +48,23 @@ export default function HydrationScreen({ onBack }: { onBack: () => void }) {
   return (
     <View style={{ flex: 1, backgroundColor: 'transparent' }}>
       <View style={{ paddingTop: insets.top + 10, paddingHorizontal: 16, paddingBottom: 8 }}>
-        <Pressable onPress={onBack} style={styles.backButton}>
+        <Pressable3D onPress={onBack} style={[styles.backButton, { borderColor: theme.outline, backgroundColor: theme.card }]}>
           <Icon name="chevron.left" android="chevron-back" size={20} color={theme.text} />
           <Text style={[FONTS.text.semibold, { color: theme.text, fontSize: 16 }]}>{t('common.back')}</Text>
-        </Pressable>
+        </Pressable3D>
       </View>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: Math.max(insets.bottom, 16) }}>
-        <Text style={[styles.title, FONTS.display.bold, { color: theme.text }]}>Hydratation</Text>
+        <Text style={[styles.title, FONTS.display.semibold, { color: theme.text }]}>Hydratation</Text>
         <View style={styles.dateNav}>
-          <Pressable onPress={() => setDate(shiftDate(date, -1))}><Icon name="chevron.left" android="chevron-back" size={19} color={theme.text} /></Pressable>
+          <Pressable3D onPress={() => setDate(shiftDate(date, -1))}><Icon name="chevron.left" android="chevron-back" size={19} color={theme.text} /></Pressable3D>
           <Text style={[FONTS.text.semibold, { color: theme.text, fontSize: 15, textTransform: 'capitalize' }]}>{dateLabel(date)}</Text>
-          <Pressable disabled={date >= todayKey()} onPress={() => setDate(shiftDate(date, 1))}>
+          <Pressable3D disabled={date >= todayKey()} onPress={() => setDate(shiftDate(date, 1))}>
             <Icon name="chevron.right" android="chevron-forward" size={19} color={date >= todayKey() ? theme.border : theme.text} />
-          </Pressable>
+          </Pressable3D>
         </View>
 
         <View style={styles.heroWrap}>
-          <LinearGradient colors={['#38BDF8', '#2563EB']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+          <LinearGradient colors={theme.waterGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <Icon name="drop.fill" android="water" size={30} color="#FFFFFF" />
             <Text style={[FONTS.display.bold, styles.heroAmount]}>{(total / 1000).toFixed(1)} L</Text>
             <Text style={[FONTS.text.semibold, styles.heroTarget]}>sur {(target / 1000).toFixed(1)} L · {progress}%</Text>
@@ -75,30 +76,30 @@ export default function HydrationScreen({ onBack }: { onBack: () => void }) {
         <Text style={[styles.sectionTitle, FONTS.display.semibold, { color: theme.text }]}>Ajouter de l’eau</Text>
         <View style={styles.quickRow}>
           {QUICK_AMOUNTS.map((amount) => (
-            <Pressable key={amount} onPress={() => addWaterEntry(date, amount)} style={({ pressed }) => [styles.quickButton, { backgroundColor: theme.card, borderColor: theme.border, opacity: pressed ? 0.82 : 1 }]}>
+            <Pressable3D key={amount} onPress={() => addWaterEntry(date, amount)} style={[styles.quickButton, { backgroundColor: theme.card, borderColor: theme.border }]}>
               <Icon name="plus" android="add" size={20} color={theme.primary} />
               <Text style={[FONTS.text.semibold, { color: theme.text, fontSize: 14, marginTop: 4 }]}>+{amount} ml</Text>
-            </Pressable>
+            </Pressable3D>
           ))}
         </View>
         <View style={[styles.manualRow, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <TextInput value={waterInput} onChangeText={setWaterInput} keyboardType="decimal-pad" placeholder="1800" placeholderTextColor={theme.sub} style={[FONTS.mono.semibold, styles.manualInput, { color: theme.text }]} />
           <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 14 }]}>ml</Text>
-          <Pressable onPress={addManualWater} style={[styles.manualButton, { backgroundColor: theme.primary }]}><Text style={[FONTS.text.semibold, { color: theme.onPrimary, fontSize: 14 }]}>Ajouter</Text></Pressable>
+          <Pressable3D onPress={addManualWater} style={[styles.manualButton, { backgroundColor: theme.primary }]}><Text style={[FONTS.text.semibold, { color: theme.onPrimary, fontSize: 14 }]}>Ajouter</Text></Pressable3D>
         </View>
 
         <Text style={[styles.sectionTitle, FONTS.display.semibold, { color: theme.text, marginTop: 22 }]}>Objectif quotidien</Text>
         <Card style={styles.targetCard}>
-          <Pressable onPress={() => changeTarget(-250)} style={[styles.targetControl, { backgroundColor: theme.primarySoft }]}>
+          <Pressable3D onPress={() => changeTarget(-250)} style={[styles.targetControl, { backgroundColor: theme.primarySoft }]}>
             <Icon name="minus" android="remove" size={18} color={theme.primary} />
-          </Pressable>
+          </Pressable3D>
           <View style={{ flex: 1, alignItems: 'center' }}>
             <Text style={[FONTS.display.bold, { color: theme.text, fontSize: 24 }]}>{(target / 1000).toFixed(1)} L</Text>
             <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, marginTop: 2 }]}>par jour</Text>
           </View>
-          <Pressable onPress={() => changeTarget(250)} style={[styles.targetControl, { backgroundColor: theme.primarySoft }]}>
+          <Pressable3D onPress={() => changeTarget(250)} style={[styles.targetControl, { backgroundColor: theme.primarySoft }]}>
             <Icon name="plus" android="add" size={18} color={theme.primary} />
-          </Pressable>
+          </Pressable3D>
         </Card>
 
         <Text style={[styles.sectionTitle, FONTS.display.semibold, { color: theme.text, marginTop: 22 }]}>Consommations enregistrées</Text>
@@ -108,15 +109,15 @@ export default function HydrationScreen({ onBack }: { onBack: () => void }) {
               <Card key={entry.id} style={styles.entryCard}>
                 <View style={[styles.entryIcon, { backgroundColor: theme.primarySoft }]}><Icon name="drop.fill" android="water" size={18} color={theme.primary} /></View>
                 <Text style={[FONTS.mono.semibold, { color: theme.text, fontSize: 15, flex: 1 }]}>{entry.ml} ml</Text>
-                <Pressable onPress={() => updateWaterEntry(date, entry.id, Math.max(50, entry.ml - 50))} style={styles.entryAction}>
+                <Pressable3D onPress={() => updateWaterEntry(date, entry.id, Math.max(50, entry.ml - 50))} style={styles.entryAction}>
                   <Icon name="minus" android="remove" size={16} color={theme.sub} />
-                </Pressable>
-                <Pressable onPress={() => updateWaterEntry(date, entry.id, entry.ml + 50)} style={styles.entryAction}>
+                </Pressable3D>
+                <Pressable3D onPress={() => updateWaterEntry(date, entry.id, entry.ml + 50)} style={styles.entryAction}>
                   <Icon name="plus" android="add" size={16} color={theme.primary} />
-                </Pressable>
-                <Pressable onPress={() => removeWaterEntry(date, entry.id)} style={styles.entryAction}>
+                </Pressable3D>
+                <Pressable3D onPress={() => removeWaterEntry(date, entry.id)} style={styles.entryAction}>
                   <Icon name="trash" android="trash" size={16} color={theme.danger} />
-                </Pressable>
+                </Pressable3D>
               </Card>
             ))}
           </View>
@@ -139,8 +140,8 @@ export default function HydrationScreen({ onBack }: { onBack: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  backButton: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 4 },
-  title: { fontSize: 28, letterSpacing: -0.5 },
+  backButton: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 7, borderWidth: 1.5, borderRadius: 999, paddingLeft: 8, paddingRight: 14 },
+  title: { fontSize: 31, letterSpacing: -0.4 },
   dateNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 14, marginBottom: 14, paddingHorizontal: 4 },
   heroWrap: { borderRadius: 24, overflow: 'hidden' },
   hero: { padding: 24, alignItems: 'center' },
