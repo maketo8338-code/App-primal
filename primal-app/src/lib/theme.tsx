@@ -29,15 +29,23 @@ export interface Theme {
 /** Particle light colours, as [r, g, b]. */
 export interface NeonLight { halo: [number, number, number]; edge: [number, number, number]; core: [number, number, number]; haze: [number, number, number] }
 
-export type AccentId = 'braise' | 'ambre' | 'foret' | 'glacier' | 'lune';
+export type ClassicId = 'braise' | 'ambre' | 'foret' | 'glacier' | 'lune';
+/** « Galaxie » variants: each one is unlocked with its own promo code. */
+export type GalaxyId = 'nebuleuse' | 'aurore' | 'supernova' | 'trounoir';
+export type AccentId = ClassicId | GalaxyId;
+export const CLASSIC_IDS: ClassicId[] = ['braise', 'ambre', 'foret', 'glacier', 'lune'];
+export const GALAXY_IDS: GalaxyId[] = ['nebuleuse', 'aurore', 'supernova', 'trounoir'];
+export function isGalaxy(id: AccentId): id is GalaxyId { return (GALAXY_IDS as string[]).includes(id); }
 interface Palette {
   label: string;
   primary: string; primarySoft: string; primaryGradient: [string, string]; deep: string; deepSoft: string; onPrimary: string; neon: string;
   heroGradient: [string, string, string]; card: string; cardAlt: string; cardSolid: string; border: string; atmosphere: [string, string, string];
   light: NeonLight;
+  /** Galaxy variants: two signature colours for the swatch and the sky. */
+  galaxy?: { a: [number, number, number]; b: [number, number, number]; c: [number, number, number] };
 }
 
-/** The five ambiences the user can pick in Settings › Ambiance. */
+/** The ambiences the user can pick in Settings › Ambiance (5 classic + 4 Galaxie). */
 export const PALETTES: Record<AccentId, Palette> = {
   braise: { label: 'Braise', primary: '#FF3B4E', primarySoft: '#3A0D14', primaryGradient: ['#FF6A79', '#FF2D44'], deep: '#FF7A86', deepSoft: '#2A0E12', onPrimary: '#140306', neon: '#FF2D44',
     heroGradient: ['#140406', '#3A0A12', '#6A0F1C'], card: '#110B0CE0', cardAlt: '#1B1214', cardSolid: '#110B0C', border: '#2B1B1D', atmosphere: ['#080405', '#050505', '#0B0506'],
@@ -54,6 +62,23 @@ export const PALETTES: Record<AccentId, Palette> = {
   lune: { label: 'Lune', primary: '#F2F2F2', primarySoft: '#262626', primaryGradient: ['#FFFFFF', '#D6D6D6'], deep: '#FFFFFF', deepSoft: '#1E1E1E', onPrimary: '#0A0A0A', neon: '#E8E8E8',
     heroGradient: ['#0A0A0A', '#1E1E1E', '#353535'], card: '#0E0E0EE0', cardAlt: '#171717', cardSolid: '#0E0E0E', border: '#262626', atmosphere: ['#070707', '#050505', '#090909'],
     light: { halo: [232, 232, 240], edge: [190, 190, 210], core: [255, 255, 255], haze: [60, 60, 70] } },
+  // ── Galaxie (locked behind promo codes) ──
+  nebuleuse: { label: 'Nébuleuse', primary: '#C77DFF', primarySoft: '#2A1240', primaryGradient: ['#E0A8FF', '#B24DFF'], deep: '#E3B8FF', deepSoft: '#1E0E2E', onPrimary: '#14051F', neon: '#B24DFF',
+    heroGradient: ['#0C0518', '#2A0F45', '#5A1A6E'], card: '#0E0A16E0', cardAlt: '#17111F', cardSolid: '#0E0A16', border: '#2A1D38', atmosphere: ['#06040B', '#040308', '#0A050D'],
+    light: { halo: [190, 110, 255], edge: [255, 80, 200], core: [240, 220, 255], haze: [70, 20, 90] },
+    galaxy: { a: [150, 60, 255], b: [255, 70, 190], c: [90, 140, 255] } },
+  aurore: { label: 'Aurore', primary: '#3DF5D0', primarySoft: '#0A2E33', primaryGradient: ['#7DFBE2', '#22D6C0'], deep: '#9CFCE8', deepSoft: '#0B2226', onPrimary: '#02151A', neon: '#22E0C8',
+    heroGradient: ['#030A16', '#06243A', '#0A4A4E'], card: '#080D14E0', cardAlt: '#0F1720', cardSolid: '#080D14', border: '#16252F', atmosphere: ['#030610', '#03050A', '#040A0D'],
+    light: { halo: [60, 240, 200], edge: [40, 180, 255], core: [210, 255, 245], haze: [10, 60, 80] },
+    galaxy: { a: [40, 230, 170], b: [60, 140, 255], c: [170, 90, 255] } },
+  supernova: { label: 'Supernova', primary: '#FFB547', primarySoft: '#3A2008', primaryGradient: ['#FFD27A', '#FF8A1F'], deep: '#FFD9A0', deepSoft: '#2B1708', onPrimary: '#1A0B02', neon: '#FF8A1F',
+    heroGradient: ['#120602', '#3A1404', '#7A2E06'], card: '#120C08E0', cardAlt: '#1C140E', cardSolid: '#120C08', border: '#2E2014', atmosphere: ['#0A0503', '#060404', '#0C0604'],
+    light: { halo: [255, 160, 50], edge: [255, 90, 30], core: [255, 240, 200], haze: [100, 40, 10] },
+    galaxy: { a: [255, 170, 40], b: [255, 70, 30], c: [255, 230, 160] } },
+  trounoir: { label: 'Trou noir', primary: '#CFE3FF', primarySoft: '#1A2230', primaryGradient: ['#FFFFFF', '#A9C8FF'], deep: '#E6F0FF', deepSoft: '#121821', onPrimary: '#05070B', neon: '#B8D4FF',
+    heroGradient: ['#020203', '#0C1018', '#1C2636'], card: '#08090CE0', cardAlt: '#101218', cardSolid: '#08090C', border: '#1E2330', atmosphere: ['#020203', '#010102', '#030305'],
+    light: { halo: [190, 215, 255], edge: [140, 170, 255], core: [255, 255, 255], haze: [30, 40, 60] },
+    galaxy: { a: [200, 225, 255], b: [255, 190, 120], c: [120, 150, 255] } },
 };
 
 /** Builds the full theme for an accent: shared black base + the chosen palette. */
@@ -108,8 +133,8 @@ export function glow(color: string, intensity = 1): ViewStyle {
 
 // ── Ambience: particles on/off, intensity, accent colour (saved on the phone) ──
 export type AmbienceIntensity = 'soft' | 'normal' | 'intense';
-export interface Ambience { enabled: boolean; intensity: AmbienceIntensity; accent: AccentId; /** Short sound during the launch animation. */ introSound: boolean; /** Light haptics during the launch animation. */ introHaptics: boolean }
-export const DEFAULT_AMBIENCE: Ambience = { enabled: true, intensity: 'normal', accent: 'braise', introSound: true, introHaptics: true };
+export interface Ambience { enabled: boolean; intensity: AmbienceIntensity; accent: AccentId; /** Galaxy variants unlocked with a code. */ unlocked: GalaxyId[]; /** Short sound during the launch animation. */ introSound: boolean; /** Light haptics during the launch animation. */ introHaptics: boolean }
+export const DEFAULT_AMBIENCE: Ambience = { enabled: true, intensity: 'normal', accent: 'braise', unlocked: [], introSound: true, introHaptics: true };
 export const INTENSITY_FACTOR: Record<AmbienceIntensity, number> = { soft: 0.45, normal: 1, intense: 1.6 };
 const AMBIENCE_KEY = 'primal.ambience.v1';
 
@@ -121,11 +146,14 @@ function readAmbience(raw: string | null): Ambience {
 /** Keeps only valid ambience values (used for saved settings and imported backups). */
 export function sanitizeAmbience(input: unknown): Ambience {
   const v = (input && typeof input === 'object' ? input : {}) as Partial<Ambience>;
+  const unlocked = Array.isArray(v.unlocked) ? GALAXY_IDS.filter((id) => (v.unlocked as unknown[]).includes(id)) : [];
   {
     return {
       enabled: typeof v.enabled === 'boolean' ? v.enabled : DEFAULT_AMBIENCE.enabled,
       intensity: v.intensity === 'soft' || v.intensity === 'normal' || v.intensity === 'intense' ? v.intensity : DEFAULT_AMBIENCE.intensity,
-      accent: typeof v.accent === 'string' && Object.prototype.hasOwnProperty.call(PALETTES, v.accent) ? v.accent : DEFAULT_AMBIENCE.accent,
+      // A Galaxy variant can only be the active one if it was unlocked.
+      accent: typeof v.accent === 'string' && Object.prototype.hasOwnProperty.call(PALETTES, v.accent) && (!isGalaxy(v.accent as AccentId) || unlocked.includes(v.accent as GalaxyId)) ? v.accent : DEFAULT_AMBIENCE.accent,
+      unlocked,
       introSound: typeof v.introSound === 'boolean' ? v.introSound : DEFAULT_AMBIENCE.introSound,
       introHaptics: typeof v.introHaptics === 'boolean' ? v.introHaptics : DEFAULT_AMBIENCE.introHaptics,
     };

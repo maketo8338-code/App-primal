@@ -5,7 +5,8 @@ import { Card, Chip } from './ui';
 import { IconBadge, SectionHeading } from './PrimalVisuals';
 import { Pressable3D } from './motion';
 import { Icon } from './Icon';
-import { AccentId, AmbienceIntensity, glow, PALETTES, useTheme } from '../lib/theme';
+import { AmbienceIntensity, CLASSIC_IDS, glow, PALETTES, useTheme } from '../lib/theme';
+import GalaxyPicker from '../galaxy/GalaxyPicker';
 import { FONTS } from '../lib/fonts';
 
 const INTENSITIES: Array<{ id: AmbienceIntensity; label: string }> = [
@@ -50,7 +51,7 @@ export default function AmbienceSettings() {
       </View>
       <View style={[styles.block, { borderTopColor: theme.border }]}>
         <Text style={[FONTS.text.semibold, styles.label, { color: theme.sub }]}>Couleur</Text>
-        <View style={styles.swatches}>{(Object.keys(PALETTES) as AccentId[]).map((id) => {
+        <View style={styles.swatches}>{CLASSIC_IDS.map((id) => {
           const palette = PALETTES[id]; const selected = ambience.accent === id;
           return <Pressable3D key={id} accessibilityLabel={`Couleur ${palette.label}`} accessibilityState={{ selected }} onPress={() => setAmbience({ accent: id })} tilt={0} sink={0.9} style={styles.swatchItem}>
             <View style={[styles.swatch, { backgroundColor: palette.primary, borderColor: selected ? theme.text : 'transparent' }, selected ? glow(palette.neon, 0.9) : null]}>
@@ -61,6 +62,7 @@ export default function AmbienceSettings() {
         })}</View>
         <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, lineHeight: 17, marginTop: 12 }]}>La couleur s'applique aux particules et à toute l'app.</Text>
       </View>
+      <View style={[styles.block, { borderTopColor: theme.border }]}><GalaxyPicker /></View>
     </Card>
   </>;
 }
