@@ -10,7 +10,7 @@ import { useI18n } from '../lib/i18n';
 import { useStore } from '../lib/store';
 import { FONTS } from '../lib/fonts';
 import { Icon } from '../components/Icon';
-import { APP_ICON } from '../lib/appAssets';
+import { useAppIcon } from '../lib/appAssets';
 import { ProgressBar } from '../components/ui';
 import { CompactStat, IconBadge, ProgressRing, SectionHeading, Surface } from '../components/PrimalVisuals';
 import { completeTotalForEntries, micronutrientStatuses, pct, scoreTotalsForEntries, shiftDate, todayKey } from '../lib/nutrition';
@@ -32,7 +32,7 @@ interface Props {
 interface HabitMetric { label: string; value: string; icon: string; android: string; color: string; soft: string; onPress: () => void; }
 
 export default function HomeScreen(props: Props) {
-  const { theme } = useTheme();
+  const { theme } = useTheme(); const appIcon = useAppIcon();
   const { t } = useI18n();
   const insets = useSafeAreaInsets();
   const { profile, entriesForDate, habitsForDate } = useStore();
@@ -79,7 +79,7 @@ export default function HomeScreen(props: Props) {
 
   return <View style={{ flex: 1, backgroundColor: 'transparent' }}><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 14 }]}>
     <FadeInUp style={styles.header}>
-      <View style={styles.brandRow}><View style={[styles.appIconWrap, shadow(theme, 1)]}><Image source={APP_ICON} style={styles.appIcon} /></View><View><Text style={[FONTS.text.bold, styles.brand, { color: theme.deep }]}>PRIMAL</Text><Text style={[FONTS.text.regular, styles.brandSub, { color: theme.sub }]}>{t('home.tagline')}</Text></View><Pressable3D onPress={props.onOpenStats} tilt={0} sink={0.92} style={[styles.headerAction, { backgroundColor: theme.card, borderColor: theme.outline }]}><Icon name="chart.bar.fill" android="bar-chart" size={18} color={theme.primary} /></Pressable3D></View>
+      <View style={styles.brandRow}><View style={[styles.appIconWrap, shadow(theme, 1)]}><Image source={appIcon} style={styles.appIcon} /></View><View><Text style={[FONTS.text.bold, styles.brand, { color: theme.deep }]}>PRIMAL</Text><Text style={[FONTS.text.regular, styles.brandSub, { color: theme.sub }]}>{t('home.tagline')}</Text></View><Pressable3D onPress={props.onOpenStats} tilt={0} sink={0.92} style={[styles.headerAction, { backgroundColor: theme.card, borderColor: theme.outline }]}><Icon name="chart.bar.fill" android="bar-chart" size={18} color={theme.primary} /></Pressable3D></View>
       <Text style={[FONTS.display.semibold, styles.title, { color: theme.text }]}>{t('home.greeting')}{profile.firstName ? ` ${profile.firstName}` : ''}</Text>
       <Text style={[FONTS.text.regular, styles.subtitle, { color: theme.sub }]}>{t('home.subtitle')}</Text>
     </FadeInUp>
