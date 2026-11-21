@@ -10,9 +10,7 @@
     "backgroundColor": "#050505",
     "newArchEnabled": true,
     "splash": {
-      "backgroundColor": "#050505",
-      "image": "./assets/logo/logo-braise.png",
-      "resizeMode": "contain"
+      "backgroundColor": "#050505"
     },
     "ios": {
       "supportsTablet": false,
