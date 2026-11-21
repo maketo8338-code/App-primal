@@ -1,15 +1,19 @@
-// Galaxy codes: one code per variant, forgiving input, locked variants cannot be forced.
+// Galaxy codes: forgiving input, one distinct hash per variant, locked variants cannot be forced.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { variantForCode } from '../src/galaxy/codes';
+import { GALAXY_CODE_HASHES, hashCode, normalizeCode, variantForCode } from '../src/galaxy/codes';
 import { sanitizeAmbience } from '../src/lib/theme';
 
-test('codes unlock their own variant', () => {
-  assert.equal(variantForCode('nebula'), 'nebuleuse');
-  assert.equal(variantForCode(' Super-Nova '), 'supernova');
-  assert.equal(variantForCode('horizon'), 'trounoir');
+test('input is normalised: case, accents, spaces and punctuation do not matter', () => {
+  assert.equal(normalizeCode(" L'Étoile, qui  meurt! "), 'LETOILEQUIMEURT');
+  assert.equal(hashCode("L'Étoile qui meurt"), hashCode('l etoile QUI meurt'));
+});
+test('every variant has its own non-empty hash, and wrong codes unlock nothing', () => {
+  const hashes = Object.values(GALAXY_CODE_HASHES);
+  assert.ok(hashes.every((h) => h.length > 0));
+  assert.equal(new Set(hashes).size, hashes.length);
   assert.equal(variantForCode('nope'), null);
-  assert.equal(variantForCode(''), null);
+  assert.equal(variantForCode('   '), null);
 });
 test('a locked galaxy cannot be the active accent', () => {
   assert.equal(sanitizeAmbience({ accent: 'aurore', unlocked: [] }).accent, 'braise');

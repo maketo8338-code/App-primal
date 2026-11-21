@@ -109,7 +109,7 @@ export default function GalaxyPicker() {
             {asking ? <View style={{ alignItems: 'center' }}><GalaxySwatch id={asking} locked selected={false} /></View> : null}
             <Text style={[FONTS.display.semibold, styles.title, { color: theme.text }]}>Variante verrouillée</Text>
             <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 13, lineHeight: 19, textAlign: 'center' }]}>Entre le code secret pour la débloquer.</Text>
-            <TextInput ref={inputRef} value={code} onChangeText={(v) => { setCode(v); setError(false); }} onSubmitEditing={submit} autoCapitalize="characters" autoCorrect={false} placeholder={t('CODE')} placeholderTextColor={theme.sub} maxLength={32} returnKeyType="done"
+            <TextInput ref={inputRef} value={code} onChangeText={(v) => { setCode(v); setError(false); }} onSubmitEditing={submit} autoCapitalize="characters" autoCorrect={false} placeholder={t('CODE')} placeholderTextColor={theme.sub} maxLength={60} returnKeyType="done"
               style={[FONTS.mono.semibold, styles.input, { color: theme.text, borderColor: error ? theme.danger : theme.border, backgroundColor: theme.cardAlt }]} />
             {error ? <Text style={[FONTS.text.semibold, { color: theme.danger, fontSize: 12, textAlign: 'center', marginTop: 8 }]}>Code invalide</Text> : null}
             <View style={{ marginTop: 16 }}><PrimaryButton label={t('Débloquer')} onPress={submit} /></View>

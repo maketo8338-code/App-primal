@@ -19,12 +19,12 @@ export function hashCode(input: string): string {
   return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
 }
 
-// ⚠️ PROVISIONAL codes — replace before publishing.
+// Each code is a short phrase (punctuation, accents and case are ignored). Only hashes are stored.
 export const GALAXY_CODE_HASHES: Record<GalaxyId, string> = {
-  nebuleuse: '114pjf9r4bx', // provisional: NEBULA
-  aurore: '1vn2mz4s8yn',    // provisional: AURORA
-  supernova: '1mo3k5yabxr', // provisional: SUPERNOVA
-  trounoir: '1fi4p0uxnaw',  // provisional: HORIZON
+  nebuleuse: '1uw8d7loj70',
+  aurore: '1802byd5xre',
+  supernova: 'd51evrw5a4',
+  trounoir: '1obz96mi4kf',
 };
 
 /** Returns the variant a code unlocks, or null. */
