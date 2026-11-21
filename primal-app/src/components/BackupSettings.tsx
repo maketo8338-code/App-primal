@@ -7,12 +7,14 @@ import { Pressable3D } from './motion';
 import { useTheme, RADIUS } from '../lib/theme';
 import { useStore } from '../lib/store';
 import { FONTS } from '../lib/fonts';
+import { useI18n } from '../lib/i18n';
 import { buildBackup, exportBackup, pickBackup, type BackupFile } from '../backup/backup';
 
 /** Settings › Mes données: export the journal to a file, restore it on another phone. */
 export default function BackupSettings() {
   const { theme, ambience, setAmbience } = useTheme();
   const { snapshot, restoreBackup, entries } = useStore();
+  const { t, locale } = useI18n();
   const [message, setMessage] = useState<{ text: string; tone: 'ok' | 'error' } | null>(null);
   const [pending, setPending] = useState<BackupFile | null>(null);
   const [busy, setBusy] = useState(false);
@@ -37,7 +39,7 @@ export default function BackupSettings() {
     setPending(null);
     setMessage(ok ? { text: 'Données restaurées.', tone: 'ok' } : { text: 'Cette sauvegarde ne contient aucune donnée utilisable.', tone: 'error' });
   };
-  const when = pending ? new Date(pending.exportedAt).toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+  const when = pending ? new Date(pending.exportedAt).toLocaleString(locale, { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
 
   return <>
     <SectionHeading title="Mes données" eyebrow="SAUVEGARDE" />
@@ -46,12 +48,12 @@ export default function BackupSettings() {
         <IconBadge name="tray.and.arrow.down.fill" android="cloud-download-outline" size={38} color={theme.primary} backgroundColor={theme.primarySoft} />
         <View style={{ flex: 1 }}>
           <Text style={[FONTS.text.semibold, { color: theme.text, fontSize: 15 }]}>Tes données restent sur ce téléphone</Text>
-          <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, marginTop: 2, lineHeight: 17 }]}>Pas de compte, pas de serveur. Exporte une sauvegarde pour ne rien perdre en changeant de téléphone ({entries.length} aliment{entries.length > 1 ? 's' : ''} enregistré{entries.length > 1 ? 's' : ''}).</Text>
+          <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, marginTop: 2, lineHeight: 17 }]}>{t(entries.length > 1 ? 'Pas de compte, pas de serveur. Exporte une sauvegarde pour ne rien perdre en changeant de téléphone ({n} aliments enregistrés).' : 'Pas de compte, pas de serveur. Exporte une sauvegarde pour ne rien perdre en changeant de téléphone ({n} aliment enregistré).').replace('{n}', String(entries.length))}</Text>
         </View>
       </View>
       {pending ? <View style={[styles.confirm, { borderColor: theme.danger, backgroundColor: `${theme.danger}14` }]}>
         <Text style={[FONTS.text.semibold, { color: theme.text, fontSize: 14 }]}>Remplacer toutes tes données actuelles ?</Text>
-        <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, marginTop: 4, lineHeight: 17 }]}>Sauvegarde du {when} : {pending.data.entries?.length ?? 0} aliments enregistrés. Tes données actuelles seront effacées.</Text>
+        <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, marginTop: 4, lineHeight: 17 }]}>{t('Sauvegarde du {when} : {n} aliments enregistrés. Tes données actuelles seront effacées.').replace('{when}', when).replace('{n}', String(pending.data.entries?.length ?? 0))}</Text>
         <View style={styles.confirmRow}>
           <Pressable3D onPress={() => setPending(null)} style={[styles.pill, { borderColor: theme.outline }]}><Text style={[FONTS.text.semibold, { color: theme.text, fontSize: 14 }]}>Annuler</Text></Pressable3D>
           <Pressable3D onPress={confirmRestore} style={[styles.pill, { backgroundColor: theme.danger, borderColor: theme.danger }]}><Text style={[FONTS.text.bold, { color: '#140306', fontSize: 14 }]}>Restaurer</Text></Pressable3D>

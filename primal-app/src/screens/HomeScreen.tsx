@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { glow, MOTION, RADIUS, shadow, useTheme } from '../lib/theme';
 import { FadeInUp, Float, Pressable3D } from '../components/motion';
+import { localizeBasisLabel } from '../lib/i18nUiEn';
 import { useI18n } from '../lib/i18n';
 import { useStore } from '../lib/store';
 import { FONTS } from '../lib/fonts';
@@ -37,7 +38,7 @@ interface HabitMetric { label: string; value: string; icon: string; android: str
 
 export default function HomeScreen(props: Props) {
   const { theme } = useTheme(); const appIcon = useAppIcon();
-  const { t } = useI18n();
+  const { t, language, formatNumber } = useI18n();
   const insets = useSafeAreaInsets();
   const { profile, entriesForDate, habitsForDate } = useStore();
   const entries = entriesForDate(todayKey());
@@ -91,8 +92,8 @@ export default function HomeScreen(props: Props) {
     <View style={styles.content}>
       <FadeInUp delay={MOTION.stagger}><View style={[styles.heroShadow, { backgroundColor: theme.heroGradient[0] }, glow(theme.neon, 0.55)]}><LinearGradient colors={theme.heroGradient} start={{ x: 0.1, y: 0 }} end={{ x: 0.9, y: 1 }} style={[styles.hero, { borderColor: theme.outline }]}>
         <View style={[styles.heroGlow, { backgroundColor: theme.neon }]} /><View style={styles.heroTop}><View style={styles.heroBadge}><Icon name="flame.fill" android="flame" size={18} color="#FFFFFF" /></View><Text style={[FONTS.text.bold, styles.heroEyebrow]}>{t('home.currentDay')}</Text><Text style={[FONTS.display.semibold, styles.heroTitle]}>{t('home.energy')}</Text><Text style={[FONTS.text.regular, styles.heroHint]}>{t('home.energyHint')}</Text></View>
-        <View style={styles.heroMain}><Float amplitude={4} rotate={1.2} style={[{ borderRadius: 69, backgroundColor: 'rgba(20,4,6,0.55)' }, glow(theme.neon, 0.7)]}><ProgressRing value={pct(consumed, targets.kcal)} size={138} stroke={11} color="#FFFFFF" trackColor="#FFFFFF" fill="rgba(255,255,255,0.06)"><View style={styles.ringCenter}><Text style={[FONTS.display.bold, styles.ringValue]}>{consumed === undefined ? '—' : Math.round(consumed).toLocaleString('fr-FR')}</Text><Text style={[FONTS.text.semibold, styles.ringUnit]}>kcal</Text></View></ProgressRing></Float><View style={styles.heroCopy}><Text style={[FONTS.text.regular, styles.heroLabel]}>{t('home.dailyTarget')}</Text><Text style={[FONTS.display.semibold, styles.heroTarget]}>{targets.kcal.toLocaleString('fr-FR')} kcal</Text><Text style={[FONTS.text.regular, styles.heroRemaining]}>{remaining === undefined ? 'Donnée indisponible' : remaining > 0 ? `${remaining.toLocaleString('fr-FR')} kcal restantes` : 'Objectif atteint'}</Text></View></View>
-        <View style={styles.heroFooter}><Text style={[FONTS.text.regular, styles.heroMeta]}>Dépense estimée {energy.tdee.toLocaleString('fr-FR')} kcal</Text><Text style={[FONTS.text.regular, styles.heroMeta]}>{energy.basisLabel}</Text></View>
+        <View style={styles.heroMain}><Float amplitude={4} rotate={1.2} style={[{ borderRadius: 69, backgroundColor: 'rgba(20,4,6,0.55)' }, glow(theme.neon, 0.7)]}><ProgressRing value={pct(consumed, targets.kcal)} size={138} stroke={11} color="#FFFFFF" trackColor="#FFFFFF" fill="rgba(255,255,255,0.06)"><View style={styles.ringCenter}><Text style={[FONTS.display.bold, styles.ringValue]}>{consumed === undefined ? '—' : Math.round(consumed).toLocaleString('fr-FR')}</Text><Text style={[FONTS.text.semibold, styles.ringUnit]}>kcal</Text></View></ProgressRing></Float><View style={styles.heroCopy}><Text style={[FONTS.text.regular, styles.heroLabel]}>{t('home.dailyTarget')}</Text><Text style={[FONTS.display.semibold, styles.heroTarget]}>{targets.kcal.toLocaleString('fr-FR')} kcal</Text><Text style={[FONTS.text.regular, styles.heroRemaining]}>{remaining === undefined ? 'Donnée indisponible' : remaining > 0 ? `${formatNumber(remaining)} ${t('kcal restantes')}` : t('Objectif atteint')}</Text></View></View>
+        <View style={styles.heroFooter}><Text style={[FONTS.text.regular, styles.heroMeta]}>Dépense estimée {energy.tdee.toLocaleString('fr-FR')} kcal</Text><Text style={[FONTS.text.regular, styles.heroMeta]}>{localizeBasisLabel(energy.basisLabel, language)}</Text></View>
       </LinearGradient></View></FadeInUp>
 
       {props.onOpenFood ? <FadeInUp delay={MOTION.stagger * 1.5}><CoachCard entries={entries} targets={targets} onOpenFood={props.onOpenFood} onOpenDetail={props.onOptimizeDay} /></FadeInUp> : null}

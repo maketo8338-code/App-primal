@@ -6,6 +6,7 @@ import { Pressable3D } from './motion';
 import { Icon } from './Icon';
 import { useTheme, RADIUS } from '../lib/theme';
 import { FONTS } from '../lib/fonts';
+import { useI18n } from '../lib/i18n';
 import { optimizeDay } from '../lib/optimizer';
 import { splitFoodName } from '../lib/foodName';
 import type { Food, JournalEntry, Targets } from '../types';
@@ -16,6 +17,7 @@ import type { Food, JournalEntry, Targets } from '../types';
  */
 export default function CoachCard({ entries, targets, onOpenFood, onOpenDetail }: { entries: JournalEntry[]; targets: Targets; onOpenFood: (food: Food) => void; onOpenDetail: () => void }) {
   const { theme } = useTheme();
+  const { t } = useI18n();
   const plan = useMemo(() => optimizeDay(entries, targets), [entries, targets]);
   const suggestions = plan.suggestions.slice(0, 2);
 
@@ -36,7 +38,7 @@ export default function CoachCard({ entries, targets, onOpenFood, onOpenDetail }
     <View style={{ gap: 10 }}>
       {suggestions.map((s) => {
         const { title } = splitFoodName(s.food.name);
-        const portion = s.food.portionLabel && s.food.portionLabel !== `${s.portionGrams} g` ? `${s.food.portionLabel} · ${s.portionGrams} g` : `${s.portionGrams} g`;
+        const portion = s.food.portionLabel && s.food.portionLabel !== `${s.portionGrams} g` ? `${t(s.food.portionLabel)} · ${s.portionGrams} g` : `${s.portionGrams} g`;
         return <Pressable3D key={s.food.id} accessibilityLabel={`Voir ${title}`} onPress={() => onOpenFood(s.food)} style={[styles.row, { backgroundColor: theme.cardAlt, borderColor: theme.border }]}>
           <IconBadge name="sparkles" android="sparkles" size={36} color={theme.primary} backgroundColor={theme.primarySoft} />
           <View style={{ flex: 1, minWidth: 0 }}>

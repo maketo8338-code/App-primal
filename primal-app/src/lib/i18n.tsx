@@ -1,10 +1,12 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { UI_EN } from './i18nUiEn';
 
 export type LanguageCode = 'fr' | 'en' | 'it' | 'es' | 'de' | 'pt';
 export interface LanguageOption { code: LanguageCode; name: string; flag: string; locale: string; }
 
-export const LANGUAGES: LanguageOption[] = [
+/** Every language that has a dictionary. Only the complete ones are offered (see LANGUAGES). */
+export const ALL_LANGUAGES: LanguageOption[] = [
   { code: 'fr', name: 'Français', flag: '🇫🇷', locale: 'fr-FR' },
   { code: 'en', name: 'English', flag: '🇬🇧', locale: 'en-GB' },
   { code: 'it', name: 'Italiano', flag: '🇮🇹', locale: 'it-IT' },
@@ -12,6 +14,10 @@ export const LANGUAGES: LanguageOption[] = [
   { code: 'de', name: 'Deutsch', flag: '🇩🇪', locale: 'de-DE' },
   { code: 'pt', name: 'Português', flag: '🇵🇹', locale: 'pt-PT' },
 ];
+
+/** Languages offered in the picker. it/es/de/pt are only partly translated, so they stay hidden for now. */
+const COMPLETE_LANGUAGES: LanguageCode[] = ['fr', 'en'];
+export const LANGUAGES: LanguageOption[] = ALL_LANGUAGES.filter((item) => COMPLETE_LANGUAGES.includes(item.code));
 
 const STORAGE_KEY = 'primal.language.v1';
 const FALLBACK: LanguageCode = 'fr';
@@ -465,7 +471,7 @@ const ONBOARDING_TARGETED: Record<LanguageCode, Dictionary> = {
   pt: { 'onb.about.title': 'Sobre ti', 'onb.about.description': 'A PRIMAL nunca deduz dados pessoais. Estas informações servem para personalizar as tuas referências.', 'onb.firstName': 'O teu nome', 'onb.optional': 'opcional', 'onb.age': 'A tua idade', 'onb.sex': 'Sexo biológico', 'onb.female': 'Feminino', 'onb.male': 'Masculino', 'onb.about.helper': 'Usado para a equação energética e algumas referências nutricionais.', 'onb.body.title': 'O teu corpo', 'onb.body.description': 'A gordura corporal é opcional e nunca será estimada a partir de uma fotografia.', 'onb.height': 'Altura (cm)', 'onb.weight': 'Peso (kg)', 'onb.bodyFat': 'Gordura corporal', 'onb.example': 'Ex. 18', 'onb.activity.title': 'A tua atividade diária', 'onb.activity.description': 'Os passos são opcionais e podem ser introduzidos diariamente em Atividade.', 'onb.work': 'Atividade profissional ou escolar', 'onb.sedentary': 'Sentado a maior parte do tempo', 'onb.standing': 'Frequentemente de pé', 'onb.active': 'Trabalho ou estudos ativos', 'onb.steps': 'Passos médios / dia', 'onb.walking': 'Caminhada / dia', 'onb.notProvided': 'Não indicado', 'onb.activity.info': 'As atividades desportivas não são teóricas: serão registadas no dia em que realmente acontecem.', 'onb.goal.title': 'O teu objetivo e a tua alimentação', 'onb.goal.description': 'O défice ou excedente mantém-se moderado e ajusta-se à tendência real do peso.', 'onb.goal': 'Objetivo', 'onb.targetWeight': 'Peso alvo', 'onb.customGap': 'Ajuste face à manutenção (kcal)', 'onb.dietPreference': 'Preferência alimentar', 'onb.goal.maintain': 'Manter', 'onb.goal.maintain.description': 'Manter o peso com uma ingestão próxima do gasto.', 'onb.goal.lose': 'Perder peso', 'onb.goal.lose.description': 'Um défice moderado, ajustado à tendência do peso.', 'onb.goal.gain': 'Ganhar peso', 'onb.goal.gain.description': 'Um excedente gradual segundo a evolução real do peso.', 'onb.goal.personalized': 'Personalizado', 'onb.goal.personalized.description': 'Definir o teu próprio ajuste face à manutenção.', 'onb.review.title': 'Verifica as tuas referências', 'onb.review.description': 'Esta primeira estimativa usa apenas os dados introduzidos. As atividades desportivas serão adicionadas ao longo do tempo.', 'onb.calorieGoal': 'OBJETIVO CALÓRICO', 'onb.confidence': 'Confiança', 'onb.whereFrom': 'De onde vem esta referência?', 'onb.bmr': 'BMR estimado', 'onb.neat': 'NEAT · atividade diária', 'onb.eat': 'EAT · atividade do dia', 'onb.tef': 'TEF · efeito térmico', 'onb.tdee': 'TDEE estimado', 'onb.macros': 'Macros iniciais', 'onb.summary.female': 'Feminino', 'onb.summary.male': 'Masculino', 'onb.summary.sedentary': 'Sentado', 'onb.summary.standing': 'De pé', 'onb.summary.active': 'Ativo', 'onb.summary.stepsMissing': 'passos não indicados', 'onb.summary.goal.maintain': 'Manter', 'onb.summary.goal.lose': 'Perder peso', 'onb.summary.goal.gain': 'Ganhar peso', 'onb.summary.goal.personalized': 'Personalizado', 'onb.validation.sex': 'Escolhe o teu sexo biológico para usar Mifflin-St Jeor sem o adivinhar.', 'onb.validation.work': 'Escolhe a tua atividade profissional ou escolar. Os passos continuam opcionais.', 'onb.validation.customGap': 'Indica o teu ajuste personalizado face à manutenção.', 'onb.next': 'Continuar', 'onb.finish': 'Guardar e começar', 'onb.walkingOptional': 'Caminhada / dia (min)', 'onb.facultative': 'Opcional', 'onb.macro.protein': 'proteínas', 'onb.macro.fat': 'gorduras', 'onb.macro.carbs': 'hidratos', 'onb.macro.fiber': 'fibras' },
 };
 
-const DICTIONARIES: Record<LanguageCode, Dictionary> = { fr: { ...FR, ...TARGETED.fr, ...TARGETED_EXTRA.fr, ...JOURNAL_TARGETED.fr, ...ONBOARDING_TARGETED.fr }, en: { ...EN, ...TARGETED.en, ...TARGETED_EXTRA.en, ...JOURNAL_TARGETED.en, ...ONBOARDING_TARGETED.en }, it: { ...IT, ...TARGETED.it, ...TARGETED_EXTRA.it, ...JOURNAL_TARGETED.it, ...ONBOARDING_TARGETED.it }, es: { ...ES, ...TARGETED.es, ...TARGETED_EXTRA.es, ...JOURNAL_TARGETED.es, ...ONBOARDING_TARGETED.es }, de: { ...DE, ...TARGETED.de, ...TARGETED_EXTRA.de, ...JOURNAL_TARGETED.de, ...ONBOARDING_TARGETED.de }, pt: { ...PT, ...TARGETED.pt, ...TARGETED_EXTRA.pt, ...JOURNAL_TARGETED.pt, ...ONBOARDING_TARGETED.pt } };
+const DICTIONARIES: Record<LanguageCode, Dictionary> = { fr: { ...FR, ...TARGETED.fr, ...TARGETED_EXTRA.fr, ...JOURNAL_TARGETED.fr, ...ONBOARDING_TARGETED.fr }, en: { ...UI_EN, ...EN, ...TARGETED.en, ...TARGETED_EXTRA.en, ...JOURNAL_TARGETED.en, ...ONBOARDING_TARGETED.en }, it: { ...IT, ...TARGETED.it, ...TARGETED_EXTRA.it, ...JOURNAL_TARGETED.it, ...ONBOARDING_TARGETED.it }, es: { ...ES, ...TARGETED.es, ...TARGETED_EXTRA.es, ...JOURNAL_TARGETED.es, ...ONBOARDING_TARGETED.es }, de: { ...DE, ...TARGETED.de, ...TARGETED_EXTRA.de, ...JOURNAL_TARGETED.de, ...ONBOARDING_TARGETED.de }, pt: { ...PT, ...TARGETED.pt, ...TARGETED_EXTRA.pt, ...JOURNAL_TARGETED.pt, ...ONBOARDING_TARGETED.pt } };
 
 const RAW_ALIASES: Dictionary = {
   'PRIMAL': 'app.name', 'Retour': 'common.back', 'Continuer': 'common.continue', 'Enregistrer': 'common.save', 'Annuler': 'common.cancel', 'Appliquer': 'common.apply', 'Fermer': 'common.close', 'Ajouter': 'common.add', 'Rechercher': 'common.search', 'Chargement…': 'common.loading', 'Indisponible': 'common.unavailable', "Aujourd’hui": 'common.today', "Aujourd'hui": 'common.today', 'Objectif quotidien': 'common.dailyGoal', 'Distance': 'common.distance', 'Durée': 'common.duration', 'Intensité': 'common.intensity', 'Accueil': 'nav.home', 'Aliments': 'nav.foods', 'Journal': 'nav.journal', 'Profil': 'profile.title', 'Réglages': 'settings.title', 'Langue': 'settings.language',
@@ -570,7 +576,9 @@ function localizeFoodName(value: string, language: LanguageCode): string {
 function detectLanguage(): LanguageCode {
   try {
     const locale = Intl.DateTimeFormat().resolvedOptions().locale.toLowerCase();
-    return LANGUAGES.find((item) => locale.startsWith(item.code))?.code || FALLBACK;
+    if (locale.startsWith('fr')) return 'fr';
+    // Any other device language gets English, the closest complete translation.
+    return 'en';
   } catch {
     return FALLBACK;
   }
