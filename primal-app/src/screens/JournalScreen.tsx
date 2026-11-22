@@ -13,6 +13,7 @@ import { IconBadge, ProgressRing } from '../components/PrimalVisuals';
 import { completeTotalForEntries, MEALS, pct, shiftDate, todayKey, totalsForEntries } from '../lib/nutrition';
 import { calculateDailyNutritionTargets, targetsWithDynamicMacros } from '../lib/energy';
 import { useI18n } from '../lib/i18n';
+import { useEnergyHistory } from '../weight/useEnergyHistory';
 
 interface Props { onAddFood: (meal: 'breakfast' | 'lunch' | 'snack' | 'dinner', date: string) => void; }
 const keyboard: KeyboardTypeOptions = 'numeric';
@@ -23,7 +24,8 @@ export default function JournalScreen({ onAddFood }: Props) {
   const { entriesForDate, habitsForDate, updateEntry, removeEntry, profile } = useStore();
   const [date, setDate] = useState(todayKey()); const [editingId, setEditingId] = useState<string | null>(null); const [editingGrams, setEditingGrams] = useState('');
   const entries = entriesForDate(date); const totals = useMemo(() => totalsForEntries(entries), [entries]);
-  const dailyTargets = useMemo(() => calculateDailyNutritionTargets(profile, habitsForDate(date), totals), [profile, habitsForDate, date, totals]);
+  const energyHistory = useEnergyHistory();
+  const dailyTargets = useMemo(() => calculateDailyNutritionTargets(profile, habitsForDate(date), totals, date === todayKey() ? energyHistory : undefined), [profile, habitsForDate, date, totals, energyHistory]);
   const target = targetsWithDynamicMacros(profile, dailyTargets.macros); const totalKcal = completeTotalForEntries(entries, 'kcal'); const progress = pct(totalKcal, target.kcal);
   const macroRows = [{ label: 'journal.protein', nutrient: 'protein' as const, value: completeTotalForEntries(entries, 'protein'), target: target.protein, color: theme.primary }, { label: 'journal.carbs', nutrient: 'carbs' as const, value: completeTotalForEntries(entries, 'carbs'), target: target.carbs, color: theme.accent }, { label: 'journal.fat', nutrient: 'fat' as const, value: completeTotalForEntries(entries, 'fat'), target: target.fat, color: theme.success }];
   const startEditing = (entry: { id: string; grams: number }) => { setEditingId(editingId === entry.id ? null : entry.id); setEditingGrams(String(entry.grams)); };

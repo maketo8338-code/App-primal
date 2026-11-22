@@ -14,6 +14,7 @@ import { formatNutrientValue, scoreTotalsForEntries, todayKey } from '../lib/nut
 import { calculateDailyNutritionTargets, targetsWithDynamicMacros } from '../lib/energy';
 import { optimizeDay, OptimizerSuggestion } from '../lib/optimizer';
 import { Food } from '../types';
+import { useEnergyHistory } from '../weight/useEnergyHistory';
 
 interface Props { onBack: () => void; onOpenFood: (food: Food) => void; }
 
@@ -25,7 +26,8 @@ export default function OptimizeDayScreen({ onBack, onOpenFood }: Props) {
   const entries = entriesForDate(date);
   const habits = habitsForDate(date);
   const totals = useMemo(() => scoreTotalsForEntries(entries), [entries]);
-  const dailyTargets = useMemo(() => calculateDailyNutritionTargets(profile, habits, totals), [profile, habits, totals]);
+  const energyHistory = useEnergyHistory();
+  const dailyTargets = useMemo(() => calculateDailyNutritionTargets(profile, habits, totals, energyHistory), [profile, habits, totals, energyHistory]);
   const energy = dailyTargets.energy;
   const targets = useMemo(() => targetsWithDynamicMacros(profile, dailyTargets.macros), [profile, dailyTargets.macros]);
   const plan = useMemo(() => optimizeDay(entries, targets, profile), [entries, targets, profile]);

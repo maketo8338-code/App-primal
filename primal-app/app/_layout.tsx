@@ -14,6 +14,7 @@ import { SessionProvider } from '../src/navigation/session';
 import { NeonProvider } from '../src/neon/NeonProvider';
 import NeonBackground from '../src/neon/NeonBackground';
 import IntroOverlay from '../src/intro/IntroOverlay';
+import WeightPrompt from '../src/weight/WeightPrompt';
 import LanguageSelectionScreen from '../src/screens/LanguageSelectionScreen';
 import OnboardingScreen from '../src/screens/OnboardingScreen';
 
@@ -21,7 +22,7 @@ import OnboardingScreen from '../src/screens/OnboardingScreen';
 export default function RootLayout() {
   const fontsReady = useAppFonts();
   if (!fontsReady) return <View style={styles.black}><StatusBar style="light" /></View>;
-  return <SafeAreaProvider><I18nProvider><ThemeProvider><StoreProvider><SessionProvider><NeonProvider><Root /><IntroOverlay /></NeonProvider></SessionProvider></StoreProvider></ThemeProvider></I18nProvider></SafeAreaProvider>;
+  return <SafeAreaProvider><I18nProvider><ThemeProvider><StoreProvider><SessionProvider><NeonProvider><Root /><WeightPrompt /><IntroOverlay /></NeonProvider></SessionProvider></StoreProvider></ThemeProvider></I18nProvider></SafeAreaProvider>;
 }
 
 function Root() {

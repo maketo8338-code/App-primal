@@ -24,6 +24,7 @@ import { activityDuration, knownActiveCalories } from '../lib/activitySync';
 import { formatSleepDuration } from '../lib/sleepSync';
 import { hydrationTargetForDay, totalHydrationMl, waterFromEntries } from '../lib/healthTargets';
 import { calculateDailyNutritionTargets, targetsWithDynamicMacros } from '../lib/energy';
+import { useEnergyHistory } from '../weight/useEnergyHistory';
 
 interface Props {
   onAddFood: () => void; onOpenJournal: () => void; onOpenMicros: () => void; onOpenScore: () => void;
@@ -45,7 +46,8 @@ export default function HomeScreen(props: Props) {
   const entries = entriesForDate(todayKey());
   const totals = useMemo(() => scoreTotalsForEntries(entries), [entries]);
   const habits = habitsForDate(todayKey());
-  const dailyTargets = useMemo(() => calculateDailyNutritionTargets(profile, habits, totals), [profile, habits, totals]);
+  const energyHistory = useEnergyHistory();
+  const dailyTargets = useMemo(() => calculateDailyNutritionTargets(profile, habits, totals, energyHistory), [profile, habits, totals, energyHistory]);
   const energy = dailyTargets.energy;
   const targets = { ...targetsWithDynamicMacros(profile, dailyTargets.macros), waterMl: hydrationTargetForDay(profile, habits) };
   const consumed = completeTotalForEntries(entries, 'kcal');

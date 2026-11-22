@@ -13,6 +13,7 @@ import NeonTabBar from '../navigation/NeonTabBar';
 import { NeonProvider } from '../neon/NeonProvider';
 import NeonBackground from '../neon/NeonBackground';
 import IntroOverlay from '../intro/IntroOverlay';
+import WeightPrompt from '../weight/WeightPrompt';
 import HomeScreen from '../screens/HomeScreen';
 import FoodSearchScreen from '../screens/FoodSearchScreen';
 import FoodDetailScreen from '../screens/FoodDetailScreen';
@@ -46,7 +47,7 @@ type Overlay = 'none' | 'share' | 'food' | 'scan' | 'settings' | 'micros' | 'sco
 export default function PreviewApp() {
   const fontsReady = useAppFonts();
   if (!fontsReady) return <View style={styles.black} />;
-  return <SafeAreaProvider><I18nProvider><ThemeProvider><StoreProvider><SessionProvider><NeonProvider><Root /><IntroOverlay /></NeonProvider></SessionProvider></StoreProvider></ThemeProvider></I18nProvider></SafeAreaProvider>;
+  return <SafeAreaProvider><I18nProvider><ThemeProvider><StoreProvider><SessionProvider><NeonProvider><Root /><WeightPrompt /><IntroOverlay /></NeonProvider></SessionProvider></StoreProvider></ThemeProvider></I18nProvider></SafeAreaProvider>;
 }
 
 function Root() {

@@ -21,6 +21,7 @@ import { Card, Chip, PrimaryButton } from '../components/ui';
 import { IconBadge, SectionHeading } from '../components/PrimalVisuals';
 import ProfilePhotoCropper, { ProfilePhotoAsset } from '../components/ProfilePhotoCropper';
 import { useI18n } from '../lib/i18n';
+import { useEnergyHistory } from '../weight/useEnergyHistory';
 
 type LabelKey = string;
 type ActivityType = 'Marche' | 'Marche rapide' | 'Course à pied' | 'Vélo' | 'Natation' | 'Randonnée' | 'Musculation' | 'Calisthenics' | 'Football' | 'Basketball' | 'Tennis' | 'Escalade' | 'Rameur' | 'Elliptique' | 'HIIT' | 'Yoga' | 'Danse' | 'Autre activité';
@@ -66,7 +67,8 @@ export default function ProfileScreen({ onOpenSettings }: { onOpenSettings: () =
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({}); const [showStyles, setShowStyles] = useState(false); const [showCalculation, setShowCalculation] = useState(false); const [cropAsset, setCropAsset] = useState<ProfilePhotoAsset | null>(null);
   const style = getDietStyleOption(dietStyle);
   const todayHabits = habits[todayKey()] || { waterMl: 0, waterEntries: [], steps: 0, outdoorMin: 0, sleepH: 0, activities: [] };
-  const history = useMemo<HistoricalEnergyInput[]>(() => Object.keys(habits).sort().map((date) => ({ date, consumedKcal: completeTotalForEntries(entries.filter((entry) => entry.date === date), 'kcal'), weightKg: habits[date].weight })), [entries, habits]);
+  // Same history as the rest of the app: weigh-ins carried forward, today excluded.
+  const history = useEnergyHistory();
   const dailyTargets = useMemo(() => calculateDailyNutritionTargets(profile, todayHabits, scoreTotalsForEntries(entries.filter((entry) => entry.date === todayKey())), history), [profile, todayHabits, entries, history]);
   const energy = dailyTargets.energy; const macros = dailyTargets.macros;
   const progressionTargets = useMemo(() => targetsWithDynamicMacros(profile, macros), [profile, macros]);

@@ -14,6 +14,7 @@ import { scoreTotalsForEntries, todayKey } from '../lib/nutrition';
 import { hydrationTargetForDay } from '../lib/healthTargets';
 import { calculateDailyNutritionTargets, targetsWithDynamicMacros } from '../lib/energy';
 import { computeDayScore } from '../lib/scoring';
+import { useEnergyHistory } from '../weight/useEnergyHistory';
 
 export default function ScoreDetailScreen({ onBack }: { onBack: () => void }) {
   const { theme } = useTheme();
@@ -23,7 +24,8 @@ export default function ScoreDetailScreen({ onBack }: { onBack: () => void }) {
   const entries = entriesForDate(date);
   const habits = habitsForDate(date);
   const totals = useMemo(() => scoreTotalsForEntries(entries), [entries]);
-  const dailyTargets = useMemo(() => calculateDailyNutritionTargets(profile, habits, totals), [profile, habits, totals]);
+  const energyHistory = useEnergyHistory();
+  const dailyTargets = useMemo(() => calculateDailyNutritionTargets(profile, habits, totals, energyHistory), [profile, habits, totals, energyHistory]);
   const energy = dailyTargets.energy;
   const targets = useMemo(() => ({ ...targetsWithDynamicMacros(profile, dailyTargets.macros), waterMl: hydrationTargetForDay(profile, habits) }), [profile, dailyTargets.macros, habits]);
   const score = useMemo(() => computeDayScore(totals, habits, targets), [totals, habits, targets]);

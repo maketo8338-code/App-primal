@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useStore } from '../lib/store';
 import { completeTotalForEntries, micronutrientStatuses, scoreTotalsForEntries, todayKey } from '../lib/nutrition';
 import { computeDayScore } from '../lib/scoring';
+import { useEnergyHistory } from '../weight/useEnergyHistory';
 import { calculateDailyNutritionTargets, targetsWithDynamicMacros } from '../lib/energy';
 import { hydrationTargetForDay, totalHydrationMl, waterFromEntries } from '../lib/healthTargets';
 
@@ -21,12 +22,13 @@ export interface DaySummary {
  */
 export function useDaySummary(): DaySummary {
   const { profile, entriesForDate, habitsForDate } = useStore();
+  const energyHistory = useEnergyHistory();
   const date = todayKey();
   const entries = entriesForDate(date);
   const habits = habitsForDate(date);
   return useMemo(() => {
     const totals = scoreTotalsForEntries(entries);
-    const dailyTargets = calculateDailyNutritionTargets(profile, habits, totals);
+    const dailyTargets = calculateDailyNutritionTargets(profile, habits, totals, energyHistory);
     const targets = { ...targetsWithDynamicMacros(profile, dailyTargets.macros), waterMl: hydrationTargetForDay(profile, habits) };
     const score = computeDayScore(totals, habits, targets);
     const best = micronutrientStatuses(entries, profile)
@@ -40,5 +42,5 @@ export function useDaySummary(): DaySummary {
       waterMl: totalHydrationMl(habits.waterMl, waterFromEntries(entries)), waterTarget: targets.waterMl,
       highlight: best && (best.percent ?? 0) >= 50 ? { label: best.label, percent: best.percent ?? 0 } : undefined,
     };
-  }, [date, entries, habits, profile]);
+  }, [date, entries, habits, profile, energyHistory]);
 }

@@ -61,6 +61,11 @@ function goalAdjustment(profile: Pick<Profile, 'goal' | 'customGoalAdjustmentKca
   if (profile.goal === 'gain') return clamp(Math.round(tdee * 0.08 / 25) * 25, 150, 350);
   return 0;
 }
+/** Share of logged exercise calories added back: activity estimates (METs, watches) tend to overestimate. */
+const EXERCISE_SHARE = 0.75;
+/** Safety floor for the daily target: commonly cited minimums, 1 500 kcal for men, 1 200 kcal otherwise. */
+function minimumKcal(profile: Pick<Profile, 'sex'>): number { return profile.sex === 'male' ? 1500 : 1200; }
+
 function historyTdee(history: HistoricalEnergyInput[] | undefined): { value?: number; confidence: Confidence } {
   const usable = (history || []).filter((item) => valid(item.consumedKcal, 800, 8000) && valid(item.weightKg, 25, 300));
   if (usable.length < 7) return { confidence: 'faible' };
@@ -81,13 +86,15 @@ export function estimateEnergy(profile: Profile, habits: DayHabits, consumed: Nu
   const bmr = estimateBmr(profile); const missing: string[] = [];
   if (bmr === undefined) { if (!valid(profile.age, 13, 120)) missing.push('âge'); if (!valid(profile.heightCm, 100, 230)) missing.push('taille'); if (!valid(profile.weightKg, 25, 300)) missing.push('poids'); if (!hasSex(profile.sex) && !valid(profile.bodyFatPercent, 2, 70)) missing.push('sexe biologique ou masse grasse'); }
   const safeBmr = bmr || 0; const neatParts = safeBmr ? estimateNeat(profile, habits, safeBmr) : { total: 0, steps: 0, daily: 0, adjustment: 0, actual: false }; const eat = bmr ? activityCalories(profile, habits.activities) : 0; const tef = estimateTef(consumed);
-  const restTdee = bmr ? Math.round(bmr + neatParts.total + (tef || 0)) : undefined; const activeTdee = bmr ? Math.round((restTdee || 0) + eat) : undefined; const historyResult = historyTdee(history); const actual = neatParts.actual || habits.activities.length > 0;
-  const tdee = actual ? (activeTdee || restTdee || 0) : (historyResult.value || restTdee || 0); const adjustment = goalAdjustment(profile, tdee); const target = tdee ? clamp(round50(tdee + adjustment), 1200, 6000) : profile.targets.kcal;
-  const confidence = historyResult.value && !actual ? historyResult.confidence : confidenceForEnergy(profile, habits, history); const source = historyResult.value && !actual ? 'moyenne réelle calories/poids sur plusieurs jours' : actual ? 'BMR + activité du jour + exercice enregistré + TEF estimé' : 'BMR + activité habituelle ; renseigne tes pas et tes activités le jour venu pour affiner';
+  const restTdee = bmr ? Math.round(bmr + neatParts.total + (tef || 0)) : undefined; const activeTdee = bmr ? Math.round((restTdee || 0) + eat * EXERCISE_SHARE) : undefined; const historyResult = historyTdee(history); const actual = neatParts.actual || habits.activities.length > 0;
+  // With ≥ 7 days of real calories + weight, the real average expenditure wins (formulas can be 10–15 % off);
+  // that average already includes usual activity, so only half of today's logged exercise is added.
+  const tdee = historyResult.value !== undefined ? Math.round(historyResult.value + eat * 0.5) : actual ? (activeTdee || restTdee || 0) : (restTdee || 0); const adjustment = goalAdjustment(profile, tdee); const target = tdee ? clamp(round50(tdee + adjustment), minimumKcal(profile), 6000) : profile.targets.kcal;
+  const confidence = historyResult.value !== undefined ? historyResult.confidence : confidenceForEnergy(profile, habits, history); const source = historyResult.value !== undefined ? 'moyenne réelle calories/poids sur plusieurs jours' : actual ? 'BMR + activité du jour + exercice enregistré + TEF estimé' : 'BMR + activité habituelle ; renseigne tes pas et tes activités le jour venu pour affiner';
   return { bmr: safeBmr, neat: neatParts.total, neatSteps: neatParts.steps, neatDaily: neatParts.daily, neatAdjustment: neatParts.adjustment, exercise: eat, eat, tef, tdee, restTdee, activeTdee, averageTdee: historyResult.value, targetCalories: target, goalAdjustment: adjustment, activityAdjusted: actual, basisLabel: bmr ? `Confiance ${confidence} · ${source}.` : `Calcul incomplet : renseigne ${missing.join(', ')}.`, confidence, missing, source };
 }
 export function estimateBaselineTdee(profile: Profile): number { const estimate = estimateEnergy(profile, { waterMl: 0, waterEntries: [], steps: 0, outdoorMin: 0, sleepH: 0, activities: [] }, {}); return estimate.tdee || profile.targets.kcal; }
-export function calculateGoalCalories(profile: Profile, tdee: number): number { return clamp(round50(tdee + goalAdjustment(profile, tdee)), 1200, 6000); }
+export function calculateGoalCalories(profile: Profile, tdee: number): number { return clamp(round50(tdee + goalAdjustment(profile, tdee)), minimumKcal(profile), 6000); }
 
 function isResistanceActivity(name: string): boolean { return /musculation|muscle|calisthenics|force|crossfit|haltère|poids|bodybuild|renforcement/i.test(name); }
 function hasResistanceTraining(activities: DayHabits['activities']): boolean { return activities.some((activity) => isResistanceActivity(activity.name)); }
