@@ -66,14 +66,23 @@ const EXERCISE_SHARE = 0.75;
 /** Safety floor for the daily target: commonly cited minimums, 1 500 kcal for men, 1 200 kcal otherwise. */
 function minimumKcal(profile: Pick<Profile, 'sex'>): number { return profile.sex === 'male' ? 1500 : 1200; }
 
-function historyTdee(history: HistoricalEnergyInput[] | undefined): { value?: number; confidence: Confidence } {
+function historyTdee(history: HistoricalEnergyInput[] | undefined): { value?: number; confidence: Confidence; weight: number } {
   const usable = (history || []).filter((item) => valid(item.consumedKcal, 800, 8000) && valid(item.weightKg, 25, 300));
-  if (usable.length < 7) return { confidence: 'faible' };
-  const recent = usable.slice(-28); const weights = recent.map((item) => item.weightKg as number); const calories = recent.map((item) => item.consumedKcal as number);
-  const first = weights.slice(0, Math.min(7, weights.length)); const last = weights.slice(-Math.min(7, weights.length));
-  const average = (values: number[]) => values.reduce((sum, value) => sum + value, 0) / values.length;
-  const deltaKg = average(last) - average(first); const days = Math.max(7, recent.length); const adjustment = deltaKg * 7700 / days;
-  return { value: clamp(Math.round((average(calories) - adjustment) / 25) * 25, 1200, 6000), confidence: usable.length >= 21 ? 'élevée' : 'moyenne' };
+  if (usable.length < 7) return { confidence: 'faible', weight: 0 };
+  const recent = usable.slice(-28);
+  const day = (date: string) => Date.parse(`${date}T12:00:00Z`) / 86400000;
+  const t0 = day(recent[0].date);
+  const xs = recent.map((item) => day(item.date) - t0); const ws = recent.map((item) => item.weightKg as number);
+  const span = xs[xs.length - 1] - xs[0];
+  if (!(span >= 6)) return { confidence: 'faible', weight: 0 };
+  // Weight trend = least-squares slope (kg/day): robust to day-to-day water swings.
+  const mean = (values: number[]) => values.reduce((sum, value) => sum + value, 0) / values.length;
+  const mx = mean(xs); const mw = mean(ws);
+  const sxx = xs.reduce((sum, x) => sum + (x - mx) * (x - mx), 0);
+  const slope = sxx > 0 ? xs.reduce((sum, x, i) => sum + (x - mx) * (ws[i] - mw), 0) / sxx : 0;
+  // Energy balance: what was eaten minus what was stored (≈ 7 700 kcal per kg).
+  const value = mean(recent.map((item) => item.consumedKcal as number)) - slope * 7700;
+  return { value: clamp(Math.round(value / 25) * 25, 1200, 6000), confidence: usable.length >= 21 ? 'élevée' : 'moyenne', weight: Math.min(1, usable.length / 21) };
 }
 export function confidenceForEnergy(profile: Profile, habits: DayHabits, history?: HistoricalEnergyInput[]): Confidence {
   const data = historyTdee(history); if (data.value !== undefined) return data.confidence;
@@ -87,9 +96,12 @@ export function estimateEnergy(profile: Profile, habits: DayHabits, consumed: Nu
   if (bmr === undefined) { if (!valid(profile.age, 13, 120)) missing.push('âge'); if (!valid(profile.heightCm, 100, 230)) missing.push('taille'); if (!valid(profile.weightKg, 25, 300)) missing.push('poids'); if (!hasSex(profile.sex) && !valid(profile.bodyFatPercent, 2, 70)) missing.push('sexe biologique ou masse grasse'); }
   const safeBmr = bmr || 0; const neatParts = safeBmr ? estimateNeat(profile, habits, safeBmr) : { total: 0, steps: 0, daily: 0, adjustment: 0, actual: false }; const eat = bmr ? activityCalories(profile, habits.activities) : 0; const tef = estimateTef(consumed);
   const restTdee = bmr ? Math.round(bmr + neatParts.total + (tef || 0)) : undefined; const activeTdee = bmr ? Math.round((restTdee || 0) + eat * EXERCISE_SHARE) : undefined; const historyResult = historyTdee(history); const actual = neatParts.actual || habits.activities.length > 0;
-  // With ≥ 7 days of real calories + weight, the real average expenditure wins (formulas can be 10–15 % off);
-  // that average already includes usual activity, so only half of today's logged exercise is added.
-  const tdee = historyResult.value !== undefined ? Math.round(historyResult.value + eat * 0.5) : actual ? (activeTdee || restTdee || 0) : (restTdee || 0); const adjustment = goalAdjustment(profile, tdee); const target = tdee ? clamp(round50(tdee + adjustment), minimumKcal(profile), 6000) : profile.targets.kcal;
+  // Real expenditure (calories eaten vs weight trend) blends in progressively: 1/3 at 7 days of data, fully at 21.
+  // It stays within −30 % / +40 % of the formulas, in case meals were badly logged.
+  const formulaRef = (restTdee || 0) + (tef === undefined && bmr ? Math.round(bmr * 0.1) : 0);
+  const realTdee = historyResult.value !== undefined ? (formulaRef ? clamp(historyResult.value, Math.round(formulaRef * 0.7), Math.round(formulaRef * 1.4)) : historyResult.value) : undefined;
+  const tdee = realTdee !== undefined ? Math.round(realTdee * historyResult.weight + (formulaRef || realTdee) * (1 - historyResult.weight) + eat * 0.5) : actual ? (activeTdee || restTdee || 0) : (restTdee || 0);
+  const adjustment = goalAdjustment(profile, tdee); const target = tdee ? clamp(round50(tdee + adjustment), minimumKcal(profile), 6000) : profile.targets.kcal;
   const confidence = historyResult.value !== undefined ? historyResult.confidence : confidenceForEnergy(profile, habits, history); const source = historyResult.value !== undefined ? 'moyenne réelle calories/poids sur plusieurs jours' : actual ? 'BMR + activité du jour + exercice enregistré + TEF estimé' : 'BMR + activité habituelle ; renseigne tes pas et tes activités le jour venu pour affiner';
   return { bmr: safeBmr, neat: neatParts.total, neatSteps: neatParts.steps, neatDaily: neatParts.daily, neatAdjustment: neatParts.adjustment, exercise: eat, eat, tef, tdee, restTdee, activeTdee, averageTdee: historyResult.value, targetCalories: target, goalAdjustment: adjustment, activityAdjusted: actual, basisLabel: bmr ? `Confiance ${confidence} · ${source}.` : `Calcul incomplet : renseigne ${missing.join(', ')}.`, confidence, missing, source };
 }

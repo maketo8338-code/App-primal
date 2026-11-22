@@ -16,7 +16,9 @@ export function buildEnergyHistory(today: string, entriesForDate: (d: string) =>
     const w = habitsForDate(date).weight;
     if (typeof w === 'number' && Number.isFinite(w)) weight = w;
     if (weight === undefined) continue;
-    out.push({ date, consumedKcal: completeTotalForEntries(entriesForDate(date), 'kcal'), weightKg: weight });
+    // A day with fewer than 2 foods logged is probably incomplete: its calories are not trusted (weight still is).
+    const entries = entriesForDate(date);
+    out.push({ date, consumedKcal: entries.length >= 2 ? completeTotalForEntries(entries, 'kcal') : undefined, weightKg: weight });
   }
   return out.slice(-28);
 }
