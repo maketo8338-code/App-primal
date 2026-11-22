@@ -9,9 +9,6 @@
     "userInterfaceStyle": "dark",
     "backgroundColor": "#050505",
     "newArchEnabled": true,
-    "splash": {
-      "backgroundColor": "#050505"
-    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "app.primal.nutrition"
@@ -58,10 +55,25 @@
       ],
       "expo-notifications",
       "expo-audio",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/logo/logo-braise.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "backgroundColor": "#050505"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false
+    },
+    "owner": "reyflow",
+    "extra": {
+      "eas": {
+        "projectId": "b2eedb39-50c0-4115-90ba-b8343eb071f8"
+      }
     }
   }
 }
