@@ -28,7 +28,7 @@ export default function OptimizeDayScreen({ onBack, onOpenFood }: Props) {
   const dailyTargets = useMemo(() => calculateDailyNutritionTargets(profile, habits, totals), [profile, habits, totals]);
   const energy = dailyTargets.energy;
   const targets = useMemo(() => targetsWithDynamicMacros(profile, dailyTargets.macros), [profile, dailyTargets.macros]);
-  const plan = useMemo(() => optimizeDay(entries, targets), [entries, targets]);
+  const plan = useMemo(() => optimizeDay(entries, targets, profile), [entries, targets, profile]);
   const priorities = plan.priorities.slice(0, 3);
 
   return <View style={{ flex: 1, backgroundColor: 'transparent' }}>

@@ -7,6 +7,7 @@ import { Icon } from './Icon';
 import { useTheme, RADIUS } from '../lib/theme';
 import { FONTS } from '../lib/fonts';
 import { useI18n } from '../lib/i18n';
+import { useStore } from '../lib/store';
 import { optimizeDay } from '../lib/optimizer';
 import { splitFoodName } from '../lib/foodName';
 import type { Food, JournalEntry, Targets } from '../types';
@@ -18,7 +19,8 @@ import type { Food, JournalEntry, Targets } from '../types';
 export default function CoachCard({ entries, targets, onOpenFood, onOpenDetail }: { entries: JournalEntry[]; targets: Targets; onOpenFood: (food: Food) => void; onOpenDetail: () => void }) {
   const { theme } = useTheme();
   const { t } = useI18n();
-  const plan = useMemo(() => optimizeDay(entries, targets), [entries, targets]);
+  const { profile } = useStore();
+  const plan = useMemo(() => optimizeDay(entries, targets, profile), [entries, targets, profile]);
   const suggestions = plan.suggestions.slice(0, 2);
 
   if (!entries.length) {
