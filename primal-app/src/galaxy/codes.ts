@@ -2,7 +2,7 @@
 // Only a hash of each code is stored, so the codes are not written in clear in the app.
 // To change a code: `node tools/galaxy-code.mjs MONCODE` and paste the printed hash below.
 // This is light protection for a free cosmetic: a determined person could still find them.
-import type { GalaxyId } from '../lib/theme';
+import type { LockedId } from '../lib/theme';
 
 /** Normalises what the user typed: case, spaces and accents do not matter. */
 export function normalizeCode(input: string): string {
@@ -20,17 +20,19 @@ export function hashCode(input: string): string {
 }
 
 // Each code is a short phrase (punctuation, accents and case are ignored). Only hashes are stored.
-export const GALAXY_CODE_HASHES: Record<GalaxyId, string> = {
+export const GALAXY_CODE_HASHES: Record<LockedId, string> = {
   nebuleuse: '1uw8d7loj70',
   aurore: '1802byd5xre',
   supernova: 'd51evrw5a4',
   trounoir: '1obz96mi4kf',
+  or: '1d02jx3uhqv',
+  chrome: 'fdwtym3kap',
 };
 
 /** Returns the variant a code unlocks, or null. */
-export function variantForCode(input: string): GalaxyId | null {
+export function variantForCode(input: string): LockedId | null {
   if (!normalizeCode(input)) return null;
   const hash = hashCode(input);
-  const match = (Object.keys(GALAXY_CODE_HASHES) as GalaxyId[]).find((id) => GALAXY_CODE_HASHES[id] === hash);
+  const match = (Object.keys(GALAXY_CODE_HASHES) as LockedId[]).find((id) => GALAXY_CODE_HASHES[id] === hash);
   return match ?? null;
 }

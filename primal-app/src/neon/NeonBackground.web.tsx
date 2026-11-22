@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { adaptVisible, IMPULSE_SHAKE, PARTICLE_COUNT as N, STRIDE, useNeon } from './NeonProvider';
-import { isGalaxy, useTheme } from '../lib/theme';
+import { hasSky, useTheme } from '../lib/theme';
 import GalaxyBackground from '../galaxy/GalaxyBackground.web';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -23,7 +23,7 @@ function makeSprite(stops: Array<[number, string]>): HTMLCanvasElement {
 /** Galaxy variants get their own starry sky; the classic colours keep the embers. */
 export default function NeonBackground() {
   const { ambience } = useTheme();
-  return isGalaxy(ambience.accent) ? <GalaxyBackground key={ambience.accent} variant={ambience.accent} /> : <EmberBackground />;
+  return hasSky(ambience.accent) ? <GalaxyBackground key={ambience.accent} variant={ambience.accent} /> : <EmberBackground />;
 }
 
 function EmberBackground() {

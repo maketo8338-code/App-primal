@@ -3,13 +3,13 @@ import { StyleSheet, useWindowDimensions } from 'react-native';
 import { BlendMode, Canvas, createPicture, Picture, Rect, Skia, TileMode, vec, PaintStyle, StrokeCap } from '@shopify/react-native-skia';
 import { useDerivedValue, useFrameCallback, useSharedValue } from 'react-native-reanimated';
 import { adaptVisible, PARTICLE_COUNT, useNeon } from '../neon/NeonProvider';
-import { PALETTES, type GalaxyId } from '../lib/theme';
+import { PALETTES, type LockedId } from '../lib/theme';
 import { KIND, NS, OP, STATE_LEN, stepSky, T_GLOW, T_HOLE, T_RING, T_STAR, T_STREAK } from './sky';
 
 // Phone renderer of the Galaxy sky: simulation (sky.ts) and drawing both run
 // on the UI thread with Skia, like the ember field.
 
-export default function GalaxyField({ variant }: { variant: GalaxyId }) {
+export default function GalaxyField({ variant }: { variant: LockedId }) {
   const { width, height } = useWindowDimensions();
   const { impulses, flow, tilt, intensity } = useNeon();
   const galaxy = PALETTES[variant].galaxy!;

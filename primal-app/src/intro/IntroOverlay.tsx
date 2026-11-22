@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, Image, Platform, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
-import { glow, isGalaxy, PALETTES, useTheme } from '../lib/theme';
+import { glow, PALETTES, useTheme } from '../lib/theme';
 import { FONTS } from '../lib/fonts';
 import { I18nText as Text } from '../components/I18nText';
 import { useAppIcon } from '../lib/appAssets';
@@ -61,7 +61,7 @@ function Intro({ onDone }: { onDone: () => void }) {
 
   // Particle trajectories, computed once: left half flies left, right half right,
   // everything drifts upward and fades — like vapour leaving the logo.
-  const gx = isGalaxy(ambience.accent) ? PALETTES[ambience.accent].galaxy : undefined;
+  const gx = PALETTES[ambience.accent]?.galaxy;
   const galaxy = useMemo(() => (gx ? [gx.a, gx.b, gx.c] : null), [gx]);
   const particles = useMemo(() => LOGO_POINTS.map(([px, py, kind, s], i) => {
     const r1 = rand(i + 1); const r2 = rand(i + 101); const r3 = rand(i + 211);

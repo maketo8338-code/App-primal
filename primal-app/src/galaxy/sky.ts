@@ -11,7 +11,9 @@
 // move near stars more than far ones, so the sky has real parallax.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const KIND = { nebuleuse: 0, aurore: 1, supernova: 2, trounoir: 3 } as const;
+export const KIND = { nebuleuse: 0, aurore: 1, supernova: 2, trounoir: 3, or: 4, chrome: 5 } as const;
+/** Kinds 4+ are « Métal »: liquid metal instead of a starry sky. */
+export const METAL_KIND = 4;
 
 /** Draw ops: [type, x, y, rx, ry, alpha, color, angle]. */
 export const OP = 8;
@@ -85,6 +87,83 @@ function init(s: number[], W: number, H: number, kind: number) {
 }
 
 /**
+ * « Métal » (Or, Chrome): liquid metal instead of stars. Wavy diagonal bands of
+ * molten metal flow slowly; their bright glints slide when the phone tilts
+ * (like light on real metal); droplets rise; a touch sends a ripple.
+ * Colours: a = metal body, b = deep shadow tint, c = highlight, 3 = white.
+ */
+function stepMetal(s: number[], dt: number, t: number, W: number, H: number, impulses: number[], camX: number, camY: number, k: number, visible: number, fy: number) {
+  'worklet';
+  // Touch: a ripple (at most one every 1.2 s) and droplets pushed away.
+  for (let q = 0; q + 3 < impulses.length; q += 4) {
+    const ix = impulses[q]; const iy = impulses[q + 1];
+    if (impulses[q + 3] === 1 || !Number.isFinite(ix) || !Number.isFinite(iy)) { s[6] = Math.min(2.5, s[6] + 0.6); continue; }
+    s[6] = Math.min(2.5, s[6] + 0.5);
+    if (t - s[12] < 1.2) continue;
+    s[12] = t; s[8] = ix; s[9] = iy; s[10] = 0;
+    for (let i = 0; i < NS; i++) {
+      const o = STARS + i * SS; const dx = s[o] - ix; const dy = s[o + 1] - iy; const d = Math.sqrt(dx * dx + dy * dy) + 0.01;
+      if (d > 220) continue;
+      const f = 1 - d / 220; s[o + 2] += (dx / d) * 260 * f; s[o + 3] += (dy / d) * 260 * f;
+    }
+  }
+  const e = s[6];
+  // ── Molten bands ──
+  const bands = 6; const n = 30; const diag = 0.55;
+  for (let r = 0; r < bands; r++) {
+    const y0 = ((r + 0.5) / bands) * (H + W * diag) - W * diag * 0.5;
+    const par = 0.08 + (r % 3) * 0.07;
+    const thick = H * (0.05 + 0.018 * Math.sin(r * 2.1 + t * 0.15));
+    let px = 0; let py = 0;
+    for (let i = 0; i <= n; i++) {
+      const u = i / n;
+      const x = -0.15 * W + u * 1.3 * W + camX * par;
+      const y = y0 + (x - W / 2) * diag + H * 0.05 * Math.sin(u * 3.1 + t * 0.22 + r * 1.9) + H * 0.018 * (1 + e * 0.4) * Math.sin(u * 7.3 - t * 0.31 + r * 0.7) + camY * par;
+      if (i > 0) {
+        const mx = (x + px) / 2; const my = (y + py) / 2; const ang = Math.atan2(y - py, x - px);
+        const seg = Math.sqrt((x - px) * (x - px) + (y - py) * (y - py));
+        const swell = 0.75 + 0.25 * Math.sin(u * 5 + t * 0.4 + r);
+        op(s, T_GLOW, mx, my, seg * 2.6, thick * 2.8 * swell, 0.12 * (0.7 + 0.3 * k), 1, ang);
+        op(s, T_GLOW, mx, my, seg * 2.4, thick * 1.4 * swell, 0.22 * (0.7 + 0.3 * k), 0, ang);
+        // Specular glint: travels along the band and slides with the tilt.
+        const g = Math.sin(u * 5.5 + t * 0.55 + r * 2.3 + camX * 0.02 + camY * 0.015);
+        const glint = g > 0 ? Math.pow(g, 6) : 0;
+        if (glint > 0.02) {
+          const nx = -Math.sin(ang) * thick * 0.35; const ny = Math.cos(ang) * thick * 0.35;
+          op(s, T_STREAK, px - nx, py - ny, seg * 1.25, 1.6 + glint * 3, glint * 0.8, r % 2 === 0 ? 3 : 2, ang);
+          op(s, T_GLOW, mx - nx, my - ny, seg * 1.8, thick * 0.45, glint * 0.3, 2, ang);
+        }
+      }
+      px = x; py = y;
+    }
+  }
+  // ── Ripple ──
+  if (s[10] < 1) {
+    s[10] += dt; const a = s[10];
+    op(s, T_RING, s[8], s[9], 20 + a * 260, 1.5 + (1 - a) * 2.5, (1 - a) * 0.75, 2, 0);
+    op(s, T_RING, s[8], s[9], 10 + a * 170, 1 + (1 - a) * 1.5, (1 - a) * 0.5, 0, 0);
+  }
+  // ── Droplets rising + fine metal dust ──
+  const count = Math.min(NS, Math.round(visible * 0.55));
+  for (let i = 0; i < count; i++) {
+    const o = STARS + i * SS; const dep = s[o + 4];
+    s[o + 2] = (s[o + 2] + Math.sin(t * 0.8 + s[o + 6]) * 6 * dt) * Math.exp(-1.2 * dt);
+    s[o + 3] = (s[o + 3] + (-10 - dep * 18 + fy * 0.4 * dep) * dt) * Math.exp(-1.2 * dt);
+    s[o] += s[o + 2] * dt; s[o + 1] += s[o + 3] * dt;
+    if (!Number.isFinite(s[o]) || s[o + 1] < -30 || s[o + 1] > H + 30 || s[o] < -30 || s[o] > W + 30) { s[o] = Math.random() * W; s[o + 1] = H + 20; s[o + 2] = 0; s[o + 3] = 0; }
+    const x = s[o] + camX * dep * 0.6; const y = s[o + 1] + camY * dep * 0.6;
+    if (i % 3 === 0) {
+      const rr = s[o + 5] * 2.6 + 1.5;
+      op(s, T_RING, x, y, rr, 0.9, 0.3 + dep * 0.35, 2, 0);
+      op(s, T_STAR, x - rr * 0.35, y - rr * 0.35, s[o + 5] * 0.45, 0, 0.55 + dep * 0.3, 3, 0);
+    } else {
+      const tw = 0.5 + 0.5 * Math.sin(t * (1 + s[o + 6]) + s[o + 6] * 5);
+      op(s, T_STAR, x, y, s[o + 5] * 0.55, 0, (0.25 + dep * 0.45) * tw, i % 2 ? 0 : 2, 0);
+    }
+  }
+}
+
+/**
  * Advances the sky by dt seconds and rebuilds the draw list.
  * impulses: flat [x, y, strength, kind, …] (kind 0 = tap, 1 = shake).
  * tilt: high-pass accelerometer [x, y]. flow: scroll/drag speed [vx, vy] px/s.
@@ -103,6 +182,7 @@ export function stepSky(s: number[], dt: number, t: number, W: number, H: number
   s[2] = Math.max(-140, Math.min(140, s[2])); s[3] = Math.max(-140, Math.min(140, s[3]));
   const camX = s[2]; const camY = s[3];
   s[6] = Math.min(2.5, s[6] * Math.exp(-1.4 * dt) + Math.min(1, speed / 2500) * dt * 6);
+  if (kind >= METAL_KIND) { stepMetal(s, dt, t, W, H, impulses, camX, camY, k, visible, fy); return; }
 
   // ── Touch ──
   for (let q = 0; q + 3 < impulses.length; q += 4) {

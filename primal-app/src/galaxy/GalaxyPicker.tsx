@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withSequence, withTiming, type SharedValue } from 'react-native-reanimated';
-import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, LinearGradient, RadialGradient, Stop } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { I18nText as Text } from '../components/I18nText';
 import { Pressable3D } from '../components/motion';
 import { Icon } from '../components/Icon';
 import { PrimaryButton } from '../components/ui';
-import { GALAXY_IDS, glow, PALETTES, useTheme, type GalaxyId } from '../lib/theme';
+import { glow, isGalaxy, PALETTES, useTheme, type LockedId } from '../lib/theme';
 import { FONTS } from '../lib/fonts';
 import { useI18n } from '../lib/i18n';
 import { variantForCode } from './codes';
@@ -16,7 +16,7 @@ const SIZE = 44;
 const rgb = (c: [number, number, number]) => `rgb(${c[0]},${c[1]},${c[2]})`;
 
 /** Round « mini galaxy » swatch: two-colour glow + a few stars. Dimmed with a padlock while locked. */
-function GalaxySwatch({ id, locked, selected }: { id: GalaxyId; locked: boolean; selected: boolean }) {
+function GalaxySwatch({ id, locked, selected }: { id: LockedId; locked: boolean; selected: boolean }) {
   const { theme } = useTheme();
   const g = PALETTES[id].galaxy!;
   return <View style={[styles.swatch, { borderColor: selected ? theme.text : locked ? theme.border : 'transparent' }, selected ? glow(PALETTES[id].neon, 0.9) : null]}>
@@ -28,9 +28,19 @@ function GalaxySwatch({ id, locked, selected }: { id: GalaxyId; locked: boolean;
           <Stop offset="0.75" stopColor={rgb(g.b)} stopOpacity="0.6" />
           <Stop offset="1" stopColor="#050505" stopOpacity="1" />
         </RadialGradient>
+        <LinearGradient id={`mx-${id}`} x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor={rgb(g.b)} />
+          <Stop offset="0.3" stopColor={rgb(g.c)} />
+          <Stop offset="0.5" stopColor={rgb(g.a)} />
+          <Stop offset="0.72" stopColor={rgb(g.b)} />
+          <Stop offset="0.88" stopColor={rgb(g.c)} />
+          <Stop offset="1" stopColor={rgb(g.a)} />
+        </LinearGradient>
       </Defs>
-      <Circle cx={SIZE / 2} cy={SIZE / 2} r={SIZE / 2} fill={`url(#gx-${id})`} />
-      {[[12, 14, 1.2], [31, 11, 0.9], [34, 30, 1.3], [15, 32, 0.8], [24, 22, 1.6]].map(([x, y, r], i) => <Circle key={i} cx={x} cy={y} r={r} fill="#FFFFFF" opacity={0.9} />)}
+      {isGalaxy(id) ? <>
+        <Circle cx={SIZE / 2} cy={SIZE / 2} r={SIZE / 2} fill={`url(#gx-${id})`} />
+        {[[12, 14, 1.2], [31, 11, 0.9], [34, 30, 1.3], [15, 32, 0.8], [24, 22, 1.6]].map(([x, y, r], i) => <Circle key={i} cx={x} cy={y} r={r} fill="#FFFFFF" opacity={0.9} />)}
+      </> : <Circle cx={SIZE / 2} cy={SIZE / 2} r={SIZE / 2} fill={`url(#mx-${id})`} />}
     </Svg>
     {locked ? <View style={styles.lock}><Icon name="lock.fill" android="lock-closed" size={16} color="#FFFFFF" /></View>
       : selected ? <View style={styles.lock}><Icon name="checkmark" android="checkmark" size={18} color="#FFFFFF" /></View> : null}
@@ -56,18 +66,19 @@ function BurstStar({ index, progress, color }: { index: number; progress: Shared
 }
 
 /** « Galaxie » row in Settings › Ambiance: four variants, each unlocked with its own code. */
-export default function GalaxyPicker() {
+/** A row of locked variants in Settings › Ambiance (Galaxie, Métal…): each one unlocked with its own code. */
+export default function GalaxyPicker({ ids, title, hint }: { ids: LockedId[]; title: string; hint: string }) {
   const { theme, ambience, setAmbience } = useTheme();
   const { t } = useI18n();
-  const [asking, setAsking] = useState<GalaxyId | null>(null);
+  const [asking, setAsking] = useState<LockedId | null>(null);
   const [code, setCode] = useState('');
   const [error, setError] = useState(false);
-  const [burst, setBurst] = useState<GalaxyId | null>(null);
+  const [burst, setBurst] = useState<LockedId | null>(null);
   const shake = useSharedValue(0);
   const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shake.value }] }));
   const inputRef = useRef<TextInput>(null);
 
-  const open = (id: GalaxyId) => {
+  const open = (id: LockedId) => {
     if (ambience.unlocked.includes(id)) { setAmbience({ accent: id }); return; }
     setCode(''); setError(false); setAsking(id);
   };
@@ -87,9 +98,9 @@ export default function GalaxyPicker() {
   };
 
   return <View>
-    <Text style={[FONTS.text.semibold, styles.label, { color: theme.sub }]}>Galaxie</Text>
+    <Text style={[FONTS.text.semibold, styles.label, { color: theme.sub }]}>{title}</Text>
     <View style={styles.row}>
-      {GALAXY_IDS.map((id) => {
+      {ids.map((id) => {
         const locked = !ambience.unlocked.includes(id); const selected = ambience.accent === id;
         return <Pressable3D key={id} accessibilityLabel={`${t(PALETTES[id].label)}${locked ? ` · ${t('verrouillé')}` : ''}`} accessibilityState={{ selected }} onPress={() => open(id)} tilt={0} sink={0.9} style={styles.item}>
           <View>
@@ -100,7 +111,7 @@ export default function GalaxyPicker() {
         </Pressable3D>;
       })}
     </View>
-    <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, lineHeight: 17, marginTop: 10 }]}>Variantes collector : chacune se débloque avec un code secret.</Text>
+    <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, lineHeight: 17, marginTop: 10 }]}>{hint}</Text>
 
     <Modal visible={asking !== null} transparent animationType="fade" onRequestClose={() => setAsking(null)} onShow={() => setTimeout(() => inputRef.current?.focus(), 80)}>
       <Pressable style={styles.backdrop} onPress={() => setAsking(null)}>

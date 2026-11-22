@@ -5,7 +5,7 @@ import { Card, Chip } from './ui';
 import { IconBadge, SectionHeading } from './PrimalVisuals';
 import { Pressable3D } from './motion';
 import { Icon } from './Icon';
-import { AmbienceIntensity, CLASSIC_IDS, glow, PALETTES, useTheme } from '../lib/theme';
+import { AmbienceIntensity, CLASSIC_IDS, GALAXY_IDS, glow, METAL_IDS, PALETTES, useTheme } from '../lib/theme';
 import GalaxyPicker from '../galaxy/GalaxyPicker';
 import { FONTS } from '../lib/fonts';
 
@@ -62,7 +62,8 @@ export default function AmbienceSettings() {
         })}</View>
         <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, lineHeight: 17, marginTop: 12 }]}>La couleur s'applique aux particules et à toute l'app.</Text>
       </View>
-      <View style={[styles.block, { borderTopColor: theme.border }]}><GalaxyPicker /></View>
+      <View style={[styles.block, { borderTopColor: theme.border }]}><GalaxyPicker ids={GALAXY_IDS} title="Galaxie" hint="Variantes collector : chacune se débloque avec un code secret." /></View>
+      <View style={[styles.block, { borderTopColor: theme.border }]}><GalaxyPicker ids={METAL_IDS} title="Métal" hint="Thèmes premium : chacun se débloque avec un code." /></View>
     </Card>
   </>;
 }

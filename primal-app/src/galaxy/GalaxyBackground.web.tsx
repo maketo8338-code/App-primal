@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { adaptVisible, PARTICLE_COUNT, useNeon } from '../neon/NeonProvider';
-import { PALETTES, useTheme, type GalaxyId } from '../lib/theme';
+import { PALETTES, useTheme, type LockedId } from '../lib/theme';
 import { KIND, NS, OP, STATE_LEN, stepSky, T_GLOW, T_HOLE, T_RING, T_STAR, T_STREAK } from './sky';
 
 // Web renderer of the Galaxy sky (2D canvas). Same simulation as the phone (sky.ts).
@@ -14,7 +14,7 @@ function sprite(stops: Array<[number, string]>): HTMLCanvasElement {
   g.fillStyle = gr; g.fillRect(0, 0, n, n); return c;
 }
 
-export default function GalaxyBackground({ variant }: { variant: GalaxyId }) {
+export default function GalaxyBackground({ variant }: { variant: LockedId }) {
   const host = useRef<HTMLDivElement | null>(null);
   const { impulses, flow, tilt, intensity } = useNeon();
   const { galaxy } = PALETTES[variant];

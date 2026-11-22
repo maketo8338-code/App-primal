@@ -13,6 +13,8 @@ export const APP_ICONS: Record<AccentId, ImageSourcePropType> = {
   aurore: require('../../assets/logo/logo-aurore.png'),
   supernova: require('../../assets/logo/logo-supernova.png'),
   trounoir: require('../../assets/logo/logo-trounoir.png'),
+  or: require('../../assets/logo/logo-or.png'),
+  chrome: require('../../assets/logo/logo-chrome.png'),
 };
 
 /** Default logo (Braise), kept for code that is not theme-aware. */

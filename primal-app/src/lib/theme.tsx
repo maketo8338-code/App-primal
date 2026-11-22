@@ -32,10 +32,19 @@ export interface NeonLight { halo: [number, number, number]; edge: [number, numb
 export type ClassicId = 'braise' | 'ambre' | 'foret' | 'glacier' | 'lune';
 /** « Galaxie » variants: each one is unlocked with its own promo code. */
 export type GalaxyId = 'nebuleuse' | 'aurore' | 'supernova' | 'trounoir';
-export type AccentId = ClassicId | GalaxyId;
+/** « Métal » variants (future premium themes), also unlocked with a code. */
+export type MetalId = 'or' | 'chrome';
+/** Every variant that sits behind a padlock. */
+export type LockedId = GalaxyId | MetalId;
+export type AccentId = ClassicId | LockedId;
 export const CLASSIC_IDS: ClassicId[] = ['braise', 'ambre', 'foret', 'glacier', 'lune'];
 export const GALAXY_IDS: GalaxyId[] = ['nebuleuse', 'aurore', 'supernova', 'trounoir'];
 export function isGalaxy(id: AccentId): id is GalaxyId { return (GALAXY_IDS as string[]).includes(id); }
+export const METAL_IDS: MetalId[] = ['or', 'chrome'];
+export const LOCKED_IDS: LockedId[] = [...GALAXY_IDS, ...METAL_IDS];
+export function isLocked(id: AccentId): id is LockedId { return (LOCKED_IDS as string[]).includes(id); }
+/** Variants with their own animated background (Galaxie + Métal). */
+export function hasSky(id: AccentId): id is LockedId { return isLocked(id); }
 interface Palette {
   label: string;
   primary: string; primarySoft: string; primaryGradient: [string, string]; deep: string; deepSoft: string; onPrimary: string; neon: string;
@@ -79,6 +88,16 @@ export const PALETTES: Record<AccentId, Palette> = {
     heroGradient: ['#020203', '#0C1018', '#1C2636'], card: '#08090CE0', cardAlt: '#101218', cardSolid: '#08090C', border: '#1E2330', atmosphere: ['#020203', '#010102', '#030305'],
     light: { halo: [190, 215, 255], edge: [140, 170, 255], core: [255, 255, 255], haze: [30, 40, 60] },
     galaxy: { a: [200, 225, 255], b: [255, 190, 120], c: [120, 150, 255] } },
+  // ── Métal (locked behind promo codes, premium later) ──
+  // galaxy colours here = liquid-metal shades: a = body, b = deep shadow, c = highlight.
+  or: { label: 'Or', primary: '#E9BE62', primarySoft: '#33260C', primaryGradient: ['#FFE29A', '#C9922E'], deep: '#F5D58C', deepSoft: '#241A08', onPrimary: '#1A1103', neon: '#E0A940',
+    heroGradient: ['#0E0A04', '#2E2008', '#5C3F0E'], card: '#0F0C07E0', cardAlt: '#19140C', cardSolid: '#0F0C07', border: '#30261A', atmosphere: ['#080603', '#050404', '#0A0704'],
+    light: { halo: [233, 180, 80], edge: [190, 130, 40], core: [255, 240, 200], haze: [90, 60, 15] },
+    galaxy: { a: [214, 160, 62], b: [120, 76, 18], c: [255, 236, 176] } },
+  chrome: { label: 'Chrome', primary: '#D9DEE6', primarySoft: '#23262B', primaryGradient: ['#FFFFFF', '#9DA4AF'], deep: '#EEF1F5', deepSoft: '#17191C', onPrimary: '#0A0B0D', neon: '#C9CFD8',
+    heroGradient: ['#08090A', '#1C1F23', '#3A3F46'], card: '#0B0C0EE0', cardAlt: '#141619', cardSolid: '#0B0C0E', border: '#272A30', atmosphere: ['#060607', '#040405', '#07080A'],
+    light: { halo: [200, 206, 216], edge: [140, 146, 158], core: [255, 255, 255], haze: [50, 54, 62] },
+    galaxy: { a: [168, 174, 186], b: [58, 62, 70], c: [244, 247, 252] } },
 };
 
 /** Builds the full theme for an accent: shared black base + the chosen palette. */
@@ -133,7 +152,7 @@ export function glow(color: string, intensity = 1): ViewStyle {
 
 // ── Ambience: particles on/off, intensity, accent colour (saved on the phone) ──
 export type AmbienceIntensity = 'soft' | 'normal' | 'intense';
-export interface Ambience { enabled: boolean; intensity: AmbienceIntensity; accent: AccentId; /** Galaxy variants unlocked with a code. */ unlocked: GalaxyId[]; /** Short sound during the launch animation. */ introSound: boolean; /** Light haptics during the launch animation. */ introHaptics: boolean }
+export interface Ambience { enabled: boolean; intensity: AmbienceIntensity; accent: AccentId; /** Galaxy variants unlocked with a code. */ unlocked: LockedId[]; /** Short sound during the launch animation. */ introSound: boolean; /** Light haptics during the launch animation. */ introHaptics: boolean }
 export const DEFAULT_AMBIENCE: Ambience = { enabled: true, intensity: 'normal', accent: 'braise', unlocked: [], introSound: true, introHaptics: true };
 export const INTENSITY_FACTOR: Record<AmbienceIntensity, number> = { soft: 0.45, normal: 1, intense: 1.6 };
 const AMBIENCE_KEY = 'primal.ambience.v1';
@@ -146,13 +165,13 @@ function readAmbience(raw: string | null): Ambience {
 /** Keeps only valid ambience values (used for saved settings and imported backups). */
 export function sanitizeAmbience(input: unknown): Ambience {
   const v = (input && typeof input === 'object' ? input : {}) as Partial<Ambience>;
-  const unlocked = Array.isArray(v.unlocked) ? GALAXY_IDS.filter((id) => (v.unlocked as unknown[]).includes(id)) : [];
+  const unlocked = Array.isArray(v.unlocked) ? LOCKED_IDS.filter((id) => (v.unlocked as unknown[]).includes(id)) : [];
   {
     return {
       enabled: typeof v.enabled === 'boolean' ? v.enabled : DEFAULT_AMBIENCE.enabled,
       intensity: v.intensity === 'soft' || v.intensity === 'normal' || v.intensity === 'intense' ? v.intensity : DEFAULT_AMBIENCE.intensity,
       // A Galaxy variant can only be the active one if it was unlocked.
-      accent: typeof v.accent === 'string' && Object.prototype.hasOwnProperty.call(PALETTES, v.accent) && (!isGalaxy(v.accent as AccentId) || unlocked.includes(v.accent as GalaxyId)) ? v.accent : DEFAULT_AMBIENCE.accent,
+      accent: typeof v.accent === 'string' && Object.prototype.hasOwnProperty.call(PALETTES, v.accent) && (!isLocked(v.accent as AccentId) || unlocked.includes(v.accent as LockedId)) ? v.accent : DEFAULT_AMBIENCE.accent,
       unlocked,
       introSound: typeof v.introSound === 'boolean' ? v.introSound : DEFAULT_AMBIENCE.introSound,
       introHaptics: typeof v.introHaptics === 'boolean' ? v.introHaptics : DEFAULT_AMBIENCE.introHaptics,
