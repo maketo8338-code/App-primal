@@ -33,10 +33,10 @@ test('gaining weight on « maintain » lowers the target', () => {
   const gaining = estimateEnergy(profile, empty(), {}, history(2600, 80, 81)).targetCalories;
   assert.ok(gaining <= stable - 200, `${gaining} should be well below ${stable}`);
 });
-test('a day with a single food logged is not trusted', () => {
+test('only days with no food logged are left out', () => {
   const days = Array.from({ length: 10 }, (_, i) => shiftDate(TODAY, i - 10));
-  const h = buildEnergyHistory(TODAY, (d) => (days.includes(d) ? [food(d, 'a', 900)] : []), (d) => empty(d === days[0] ? 80 : undefined));
-  assert.ok(h.every((d) => d.consumedKcal === undefined));
+  const h = buildEnergyHistory(TODAY, (d) => (days.includes(d) && d !== days[3] ? [food(d, 'a', 900)] : []), (d) => empty(d === days[0] ? 80 : undefined));
+  assert.equal(h.filter((d) => d.consumedKcal === undefined).length, 1);
 });
 test('no weigh-in → formulas, and a man never gets below 1 500 kcal', () => {
   const e = estimateEnergy({ ...profile, goal: 'lose', weightKg: 45, heightCm: 150, age: 70 } as Profile, empty(), {}, []);

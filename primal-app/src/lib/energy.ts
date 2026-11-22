@@ -67,7 +67,7 @@ const EXERCISE_SHARE = 0.75;
 function minimumKcal(profile: Pick<Profile, 'sex'>): number { return profile.sex === 'male' ? 1500 : 1200; }
 
 function historyTdee(history: HistoricalEnergyInput[] | undefined): { value?: number; confidence: Confidence; weight: number } {
-  const usable = (history || []).filter((item) => valid(item.consumedKcal, 800, 8000) && valid(item.weightKg, 25, 300));
+  const usable = (history || []).filter((item) => valid(item.consumedKcal, 1, 8000) && valid(item.weightKg, 25, 300));
   if (usable.length < 7) return { confidence: 'faible', weight: 0 };
   const recent = usable.slice(-28);
   const day = (date: string) => Date.parse(`${date}T12:00:00Z`) / 86400000;
