@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, View, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import MetalShine, { MetalEdge } from '../metal/MetalShine';
 import { I18nText as Text } from './I18nText';
 import { RADIUS, shadow, useTheme } from '../lib/theme';
 import { FONTS } from '../lib/fonts';
@@ -10,8 +11,9 @@ import { Pressable3D } from './motion';
 export function Card({ children, style, onPress }: { children: React.ReactNode; style?: ViewStyle | ViewStyle[]; onPress?: () => void }) {
   const { theme } = useTheme();
   const base: ViewStyle = { backgroundColor: theme.card, borderRadius: RADIUS.lg, padding: 18, borderWidth: StyleSheet.hairlineWidth, borderColor: theme.border, ...shadow(theme, 1) };
-  if (onPress) return <Pressable3D onPress={onPress} style={[base, style]}>{children}</Pressable3D>;
-  return <View style={[base, style]}>{children}</View>;
+  const edge = theme.metal ? <MetalEdge color={theme.metal[2]} /> : null;
+  if (onPress) return <Pressable3D onPress={onPress} style={[base, style]}>{edge}{children}</Pressable3D>;
+  return <View style={[base, style]}>{edge}{children}</View>;
 }
 
 export function ProgressBar({ value, color, height = 8 }: { value: number; color?: string; height?: number }) {
@@ -37,7 +39,8 @@ export function PrimaryButton({ label, onPress, disabled, color }: { label: stri
   const { theme } = useTheme();
   const textColor = disabled ? theme.sub : color ? '#FFFFFF' : theme.onPrimary;
   return <Pressable3D onPress={onPress} disabled={disabled} tilt={10} sink={0.97} style={[styles.button, disabled ? { backgroundColor: theme.cardAlt } : { backgroundColor: color || theme.primary, ...shadow(theme, 2, color || theme.primary) }]}>
-    {!disabled ? <LinearGradient colors={color ? [color, color] : theme.primaryGradient} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: RADIUS.pill }]} /> : null}
+    {!disabled ? <LinearGradient colors={(color ? [color, color] : theme.metal ?? theme.primaryGradient) as [string, string, ...string[]]} start={{ x: 0, y: 0 }} end={theme.metal && !color ? { x: 1, y: 1 } : { x: 0, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: RADIUS.pill }]} /> : null}
+    {!disabled && theme.metal && !color ? <View pointerEvents="none" style={[StyleSheet.absoluteFill, { borderRadius: RADIUS.pill, overflow: 'hidden' }]}><MetalShine /></View> : null}
     {!disabled ? <LinearGradient colors={['rgba(255,255,255,0.16)', 'rgba(255,255,255,0)']} start={{ x: 0, y: 0 }} end={{ x: 0, y: 0.6 }} style={[StyleSheet.absoluteFill, { borderRadius: RADIUS.pill }]} /> : null}
     <Text style={[styles.buttonLabel, FONTS.text.semibold, { color: textColor }]}>{label}</Text>
   </Pressable3D>;

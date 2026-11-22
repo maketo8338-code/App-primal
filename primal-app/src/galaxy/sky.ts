@@ -107,59 +107,31 @@ function stepMetal(s: number[], dt: number, t: number, W: number, H: number, imp
       const f = 1 - d / 220; s[o + 2] += (dx / d) * 260 * f; s[o + 3] += (dy / d) * 260 * f;
     }
   }
-  const e = s[6];
-  // ── Molten bands ──
-  const bands = 6; const n = 30; const diag = 0.55;
-  for (let r = 0; r < bands; r++) {
-    const y0 = ((r + 0.5) / bands) * (H + W * diag) - W * diag * 0.5;
-    const par = 0.08 + (r % 3) * 0.07;
-    const thick = H * (0.05 + 0.018 * Math.sin(r * 2.1 + t * 0.15));
-    let px = 0; let py = 0;
-    for (let i = 0; i <= n; i++) {
-      const u = i / n;
-      const x = -0.15 * W + u * 1.3 * W + camX * par;
-      const y = y0 + (x - W / 2) * diag + H * 0.05 * Math.sin(u * 3.1 + t * 0.22 + r * 1.9) + H * 0.018 * (1 + e * 0.4) * Math.sin(u * 7.3 - t * 0.31 + r * 0.7) + camY * par;
-      if (i > 0) {
-        const mx = (x + px) / 2; const my = (y + py) / 2; const ang = Math.atan2(y - py, x - px);
-        const seg = Math.sqrt((x - px) * (x - px) + (y - py) * (y - py));
-        const swell = 0.75 + 0.25 * Math.sin(u * 5 + t * 0.4 + r);
-        op(s, T_GLOW, mx, my, seg * 2.6, thick * 2.8 * swell, 0.12 * (0.7 + 0.3 * k), 1, ang);
-        op(s, T_GLOW, mx, my, seg * 2.4, thick * 1.4 * swell, 0.22 * (0.7 + 0.3 * k), 0, ang);
-        // Specular glint: travels along the band and slides with the tilt.
-        const g = Math.sin(u * 5.5 + t * 0.55 + r * 2.3 + camX * 0.02 + camY * 0.015);
-        const glint = g > 0 ? Math.pow(g, 6) : 0;
-        if (glint > 0.02) {
-          const nx = -Math.sin(ang) * thick * 0.35; const ny = Math.cos(ang) * thick * 0.35;
-          op(s, T_STREAK, px - nx, py - ny, seg * 1.25, 1.6 + glint * 3, glint * 0.8, r % 2 === 0 ? 3 : 2, ang);
-          op(s, T_GLOW, mx - nx, my - ny, seg * 1.8, thick * 0.45, glint * 0.3, 2, ang);
-        }
-      }
-      px = x; py = y;
-    }
-  }
+  // The metal texture itself is drawn by the renderer (it reads camX/camY in s[2], s[3]).
+  // ── Light sweeping across the polished surface, and a glint that follows the tilt ──
+  const sweep = (t / 13) % 1;
+  op(s, T_GLOW, W * (-0.35 + 1.7 * sweep) + camX * 2.2, H * 0.42 + camY * 1.5, W * 0.2, H * 0.95, 0.075 * (0.7 + 0.3 * k), 3, 0.42);
+  op(s, T_GLOW, W * 0.5 + camX * 3, H * 0.22 + camY * 3, W * 0.42, H * 0.16, 0.05, 2, -0.3);
   // ── Ripple ──
   if (s[10] < 1) {
     s[10] += dt; const a = s[10];
     op(s, T_RING, s[8], s[9], 20 + a * 260, 1.5 + (1 - a) * 2.5, (1 - a) * 0.75, 2, 0);
     op(s, T_RING, s[8], s[9], 10 + a * 170, 1 + (1 - a) * 1.5, (1 - a) * 0.5, 0, 0);
   }
-  // ── Droplets rising + fine metal dust ──
-  const count = Math.min(NS, Math.round(visible * 0.55));
+  // ── Gold leaf / platinum flakes: they drift and flash when they face the light ──
+  const count = Math.min(NS, Math.round(visible * 0.4));
   for (let i = 0; i < count; i++) {
     const o = STARS + i * SS; const dep = s[o + 4];
-    s[o + 2] = (s[o + 2] + Math.sin(t * 0.8 + s[o + 6]) * 6 * dt) * Math.exp(-1.2 * dt);
-    s[o + 3] = (s[o + 3] + (-10 - dep * 18 + fy * 0.4 * dep) * dt) * Math.exp(-1.2 * dt);
+    s[o + 2] = (s[o + 2] + Math.sin(t * 0.5 + s[o + 6]) * 5 * dt) * Math.exp(-1.2 * dt);
+    s[o + 3] = (s[o + 3] + (4 + dep * 7 + fy * 0.3 * dep) * dt) * Math.exp(-1.2 * dt);
     s[o] += s[o + 2] * dt; s[o + 1] += s[o + 3] * dt;
-    if (!Number.isFinite(s[o]) || s[o + 1] < -30 || s[o + 1] > H + 30 || s[o] < -30 || s[o] > W + 30) { s[o] = Math.random() * W; s[o + 1] = H + 20; s[o + 2] = 0; s[o + 3] = 0; }
+    if (!Number.isFinite(s[o]) || s[o + 1] < -30 || s[o + 1] > H + 30 || s[o] < -30 || s[o] > W + 30) { s[o] = Math.random() * W; s[o + 1] = -20; s[o + 2] = 0; s[o + 3] = 0; }
     const x = s[o] + camX * dep * 0.6; const y = s[o + 1] + camY * dep * 0.6;
-    if (i % 3 === 0) {
-      const rr = s[o + 5] * 2.6 + 1.5;
-      op(s, T_RING, x, y, rr, 0.9, 0.3 + dep * 0.35, 2, 0);
-      op(s, T_STAR, x - rr * 0.35, y - rr * 0.35, s[o + 5] * 0.45, 0, 0.55 + dep * 0.3, 3, 0);
-    } else {
-      const tw = 0.5 + 0.5 * Math.sin(t * (1 + s[o + 6]) + s[o + 6] * 5);
-      op(s, T_STAR, x, y, s[o + 5] * 0.55, 0, (0.25 + dep * 0.45) * tw, i % 2 ? 0 : 2, 0);
-    }
+    const rot = t * (0.5 + dep * 0.9) + s[o + 6] * 3;
+    const face = Math.abs(Math.cos(rot)); const flash = Math.pow(face, 12);
+    const size = s[o + 5] * (1.4 + dep * 1.6);
+    op(s, T_GLOW, x, y, size, size * Math.max(0.18, Math.abs(Math.sin(rot + 0.7))), (0.18 + 0.6 * flash) * (0.4 + dep * 0.6), i % 4 === 0 ? 3 : 2, s[o + 6]);
+    if (flash > 0.55) op(s, T_STAR, x, y, size * 0.35, 0, flash * dep, 3, 0);
   }
 }
 

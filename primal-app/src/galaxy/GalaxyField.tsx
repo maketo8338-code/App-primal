@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo } from 'react';
 import { StyleSheet, useWindowDimensions } from 'react-native';
-import { BlendMode, Canvas, createPicture, Picture, Rect, Skia, TileMode, vec, PaintStyle, StrokeCap } from '@shopify/react-native-skia';
+import { BlendMode, Canvas, createPicture, Picture, Rect, Skia, TileMode, vec, PaintStyle, StrokeCap, useImage } from '@shopify/react-native-skia';
 import { useDerivedValue, useFrameCallback, useSharedValue } from 'react-native-reanimated';
 import { adaptVisible, PARTICLE_COUNT, useNeon } from '../neon/NeonProvider';
 import { PALETTES, type LockedId } from '../lib/theme';
-import { KIND, NS, OP, STATE_LEN, stepSky, T_GLOW, T_HOLE, T_RING, T_STAR, T_STREAK } from './sky';
+import { KIND, METAL_KIND, NS, OP, STATE_LEN, stepSky, T_GLOW, T_HOLE, T_RING, T_STAR, T_STREAK } from './sky';
+import { METAL_TEXTURES } from '../metal/textures';
 
 // Phone renderer of the Galaxy sky: simulation (sky.ts) and drawing both run
 // on the UI thread with Skia, like the ember field.
@@ -14,6 +15,8 @@ export default function GalaxyField({ variant }: { variant: LockedId }) {
   const { impulses, flow, tilt, intensity } = useNeon();
   const galaxy = PALETTES[variant].galaxy!;
   const kind = KIND[variant];
+  // « Métal »: a real liquid-metal texture under the light effects (dimmed: luxe sobre).
+  const texture = useImage(kind >= METAL_KIND ? METAL_TEXTURES[variant as 'or' | 'chrome'] : null);
   const dims = useSharedValue([width, height]);
   useEffect(() => { dims.value = [width, height]; }, [dims, width, height]);
   const sky = useSharedValue<number[]>([]);
@@ -29,7 +32,10 @@ export default function GalaxyField({ variant }: { variant: LockedId }) {
     const lines = colors.map((c) => { const p = Skia.Paint(); p.setAntiAlias(true); p.setBlendMode(BlendMode.Plus); p.setStyle(PaintStyle.Stroke); p.setStrokeCap(StrokeCap.Round); p.setColor(col(c, 1)); return p; });
     const hole = Skia.Paint(); hole.setAntiAlias(true);
     hole.setShader(Skia.Shader.MakeRadialGradient(vec(0, 0), 1.3, [Skia.Color('rgba(0,0,0,1)'), Skia.Color('rgba(0,0,0,1)'), Skia.Color('rgba(0,0,0,0)')], [0, 0.75, 1], TileMode.Clamp));
-    return { glows, stars, lines, hole };
+    const texPaint = Skia.Paint(); texPaint.setAntiAlias(true); texPaint.setAlphaf(0.55);
+    const shade = Skia.Paint();
+    shade.setShader(Skia.Shader.MakeLinearGradient(vec(0, 0), vec(0, 1), [Skia.Color('rgba(0,0,0,0.34)'), Skia.Color('rgba(0,0,0,0.4)'), Skia.Color('rgba(0,0,0,0.62)')], [0, 0.45, 1], TileMode.Clamp));
+    return { glows, stars, lines, hole, texPaint, shade };
   }, [galaxy]);
 
   useFrameCallback((frame) => {
@@ -46,7 +52,14 @@ export default function GalaxyField({ variant }: { variant: LockedId }) {
 
   const picture = useDerivedValue(() => createPicture((canvas) => {
     'worklet';
-    const s = sky.value; const { glows, stars, lines, hole } = paints;
+    const s = sky.value; const { glows, stars, lines, hole, texPaint, shade } = paints;
+    if (texture && s.length >= STATE_LEN) {
+      const W = dims.value[0]; const H = dims.value[1]; const iw = texture.width(); const ih = texture.height(); const t = clock.value;
+      const sc = Math.max(W / iw, H / ih) * 1.14; const dw = iw * sc; const dh = ih * sc;
+      const ox = (W - dw) / 2 + Math.sin(t * 0.05) * W * 0.025 + s[2] * 0.3; const oy = (H - dh) / 2 + Math.cos(t * 0.04) * H * 0.02 + s[3] * 0.3;
+      canvas.drawImageRect(texture, Skia.XYWHRect(0, 0, iw, ih), Skia.XYWHRect(ox, oy, dw, dh), texPaint);
+      canvas.save(); canvas.scale(W, H); canvas.drawRect(Skia.XYWHRect(0, 0, 1, 1), shade); canvas.restore();
+    }
     for (let i = STATE_LEN; i + OP <= s.length; i += OP) {
       const type = s[i]; const x = s[i + 1]; const y = s[i + 2]; const rx = s[i + 3]; const ry = s[i + 4]; const a = s[i + 5]; const c = s[i + 6]; const ang = s[i + 7];
       if (type === T_GLOW) {

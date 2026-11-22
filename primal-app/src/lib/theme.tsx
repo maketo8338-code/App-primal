@@ -24,6 +24,8 @@ export interface Theme {
   neon: string;
   /** Particle light colours. */
   light: NeonLight;
+  /** « Métal » themes: brushed-metal gradient stops (buttons, rings, edges). Undefined elsewhere. */
+  metal?: string[];
 }
 
 /** Particle light colours, as [r, g, b]. */
@@ -52,6 +54,7 @@ interface Palette {
   light: NeonLight;
   /** Galaxy variants: two signature colours for the swatch and the sky. */
   galaxy?: { a: [number, number, number]; b: [number, number, number]; c: [number, number, number] };
+  metal?: string[];
 }
 
 /** The ambiences the user can pick in Settings › Ambiance (5 classic + 4 Galaxie). */
@@ -93,11 +96,13 @@ export const PALETTES: Record<AccentId, Palette> = {
   or: { label: 'Or', primary: '#E9BE62', primarySoft: '#33260C', primaryGradient: ['#FFE29A', '#C9922E'], deep: '#F5D58C', deepSoft: '#241A08', onPrimary: '#1A1103', neon: '#E0A940',
     heroGradient: ['#0E0A04', '#2E2008', '#5C3F0E'], card: '#0F0C07E0', cardAlt: '#19140C', cardSolid: '#0F0C07', border: '#30261A', atmosphere: ['#080603', '#050404', '#0A0704'],
     light: { halo: [233, 180, 80], edge: [190, 130, 40], core: [255, 240, 200], haze: [90, 60, 15] },
-    galaxy: { a: [214, 160, 62], b: [120, 76, 18], c: [255, 236, 176] } },
+    galaxy: { a: [214, 160, 62], b: [120, 76, 18], c: [255, 236, 176] },
+    metal: ['#7A5414', '#E9C46F', '#FFF1C4', '#C9922E', '#8A6018', '#E8BD5E'] },
   chrome: { label: 'Chrome', primary: '#D9DEE6', primarySoft: '#23262B', primaryGradient: ['#FFFFFF', '#9DA4AF'], deep: '#EEF1F5', deepSoft: '#17191C', onPrimary: '#0A0B0D', neon: '#C9CFD8',
     heroGradient: ['#08090A', '#1C1F23', '#3A3F46'], card: '#0B0C0EE0', cardAlt: '#141619', cardSolid: '#0B0C0E', border: '#272A30', atmosphere: ['#060607', '#040405', '#07080A'],
     light: { halo: [200, 206, 216], edge: [140, 146, 158], core: [255, 255, 255], haze: [50, 54, 62] },
-    galaxy: { a: [168, 174, 186], b: [58, 62, 70], c: [244, 247, 252] } },
+    galaxy: { a: [168, 174, 186], b: [58, 62, 70], c: [244, 247, 252] },
+    metal: ['#555B65', '#C9CED6', '#FFFFFF', '#9AA1AC', '#5E6470', '#DDE1E8'] },
 };
 
 /** Builds the full theme for an accent: shared black base + the chosen palette. */
@@ -119,6 +124,7 @@ export function makeTheme(accent: AccentId): Theme {
     chart: { micros: '#FF7AB6', water: '#5CC8E0', steps: '#FF8A5B', sleep: '#B99BFF' },
     neon: p.neon,
     light: p.light,
+    metal: p.metal,
   };
 }
 

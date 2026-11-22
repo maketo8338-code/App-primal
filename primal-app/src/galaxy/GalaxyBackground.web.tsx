@@ -2,7 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { adaptVisible, PARTICLE_COUNT, useNeon } from '../neon/NeonProvider';
 import { PALETTES, useTheme, type LockedId } from '../lib/theme';
-import { KIND, NS, OP, STATE_LEN, stepSky, T_GLOW, T_HOLE, T_RING, T_STAR, T_STREAK } from './sky';
+import { KIND, METAL_KIND, NS, OP, STATE_LEN, stepSky, T_GLOW, T_HOLE, T_RING, T_STAR, T_STREAK } from './sky';
+import { METAL_TEXTURES, textureUri } from '../metal/textures';
 
 // Web renderer of the Galaxy sky (2D canvas). Same simulation as the phone (sky.ts).
 
@@ -30,6 +31,8 @@ export default function GalaxyBackground({ variant }: { variant: LockedId }) {
     const glows = colors.map((c) => sprite([[0, rgba(c, 1)], [0.3, rgba(c, 0.38)], [0.65, rgba(c, 0.08)], [1, rgba(c, 0)]]));
     const stars = colors.map((c) => sprite([[0, 'rgba(255,255,255,1)'], [0.12, 'rgba(255,255,255,0.95)'], [0.25, rgba(c, 0.45)], [1, rgba(c, 0)]]));
     const kind = KIND[variant];
+    let tex: HTMLImageElement | null = null;
+    if (kind >= METAL_KIND) { const img = new window.Image(); img.onload = () => { tex = img; }; img.src = textureUri(METAL_TEXTURES[variant as 'or' | 'chrome']); }
     let W = 0; let H = 0;
     const resize = () => { const dpr = Math.min(2, window.devicePixelRatio || 1); W = root.clientWidth; H = root.clientHeight; canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
     resize(); window.addEventListener('resize', resize);
@@ -47,6 +50,13 @@ export default function GalaxyBackground({ variant }: { variant: LockedId }) {
       if (fx !== 0 || fy !== 0) { const d = Math.exp(-5 * dt); flow.value = Math.abs(fx) + Math.abs(fy) < 2 ? [0, 0] : [fx * d, fy * d]; }
 
       ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; ctx.fillStyle = '#030306'; ctx.fillRect(0, 0, W, H);
+      if (tex) {
+        const sc = Math.max(W / tex.width, H / tex.height) * 1.14; const dw = tex.width * sc; const dh = tex.height * sc;
+        const ox = (W - dw) / 2 + Math.sin(clock * 0.05) * W * 0.025 + s[2] * 0.3; const oy = (H - dh) / 2 + Math.cos(clock * 0.04) * H * 0.02 + s[3] * 0.3;
+        ctx.globalAlpha = 0.55; ctx.drawImage(tex, ox, oy, dw, dh); ctx.globalAlpha = 1;
+        const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, 'rgba(0,0,0,0.34)'); g.addColorStop(0.45, 'rgba(0,0,0,0.4)'); g.addColorStop(1, 'rgba(0,0,0,0.62)');
+        ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      }
       ctx.globalCompositeOperation = 'lighter';
       for (let i = STATE_LEN; i + OP <= s.length; i += OP) {
         const type = s[i]; const x = s[i + 1]; const y = s[i + 2]; const rx = s[i + 3]; const ry = s[i + 4]; const a = s[i + 5]; const c = s[i + 6]; const ang = s[i + 7];

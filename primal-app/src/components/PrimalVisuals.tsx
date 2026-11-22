@@ -30,8 +30,7 @@ export function ProgressRing({ value, size = 116, stroke = 10, color, trackColor
     <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={StyleSheet.absoluteFill}>
       <Defs>
         <SvgLinearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={arc} stopOpacity="0.72" />
-          <Stop offset="1" stopColor={arc} stopOpacity="1" />
+          {(theme.metal && !color ? theme.metal : [arc, arc]).map((c, i, all) => <Stop key={i} offset={String(i / (all.length - 1))} stopColor={c} stopOpacity={theme.metal && !color ? '1' : i === 0 ? '0.72' : '1'} />)}
         </SvgLinearGradient>
       </Defs>
       <Circle cx={size / 2} cy={size / 2} r={radius} stroke={trackColor || theme.cardAlt} strokeOpacity={trackColor ? 0.22 : 1} strokeWidth={stroke} fill={fill ?? theme.cardAlt} />

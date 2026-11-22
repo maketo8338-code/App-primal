@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
+import MetalShine from '../metal/MetalShine';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { I18nText as Text } from '../components/I18nText';
 import { Icon } from '../components/Icon';
@@ -63,7 +64,8 @@ export default function NeonTabBar({ state, navigation }: BottomTabBarProps) {
         ? <Pressable3D key="add" accessibilityLabel={t('foods.addTitle')} onPress={add} tilt={16} sink={0.9} style={styles.addButton}>
             <Animated.View style={[styles.addHalo, { backgroundColor: theme.neon, opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.18, 0.42] }), transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.9, 1.15] }) }] }]} />
             <View style={[styles.addOrb, { borderColor: theme.cardSolid, backgroundColor: theme.neon }, glow(theme.neon, 1)]}>
-              <LinearGradient colors={theme.primaryGradient} start={{ x: 0.2, y: 0 }} end={{ x: 0.8, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: 27 }]} />
+              <LinearGradient colors={(theme.metal ?? theme.primaryGradient) as [string, string, ...string[]]} start={{ x: 0.2, y: 0 }} end={{ x: 0.8, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: 27 }]} />
+              {theme.metal ? <View pointerEvents="none" style={[StyleSheet.absoluteFill, { borderRadius: 27, overflow: 'hidden' }]}><MetalShine every={5200} delay={1800} strength={0.7} /></View> : null}
               <View style={styles.addGloss} />
               <Icon android="add" size={28} color={theme.onPrimary} />
             </View>
