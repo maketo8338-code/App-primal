@@ -82,30 +82,53 @@
   });
 
   /* ================= 1. RÉCIT + TÉLÉPHONE 3D ================= */
+  // Hauteur de scène en pixels : dans un cadre qui s'agrandit avec son contenu, les unités svh s'emballent.
+  let lastW = 0, lastH = 0;
+  function sizeStage(force) {
+    const sh = screen.height || innerHeight;
+    const h = (innerHeight > sh * 1.15 || innerHeight < 320) ? Math.min(sh, 1000) : innerHeight;
+    if (!force && innerWidth === lastW && Math.abs(h - lastH) < 120) return;
+    lastW = innerWidth; lastH = h;
+    root.style.setProperty('--vh', h + 'px');
+  }
+  sizeStage(true);
   const story = $('.story'), stage = $('.stage');
   const steps = $$('.step', stage), dots = $$('.progress li', stage);
   const N = steps.length;
   const screens = [1, 2, 3, 4, 5].map((i) => `img/ecran-${i}.jpg`);
   let target = 0, current = 0, active = 0;
 
-  function readScroll() {
-    const r = story.getBoundingClientRect();
-    const total = story.offsetHeight - innerHeight;
-    target = clamp(-r.top / total, 0, 1) * (N - 1);
-    const a = clamp(Math.round(target), 0, N - 1);
-    if (a !== active) {
-      steps[active].classList.remove('is-active'); dots[active].classList.remove('is-active');
-      active = a;
-      steps[active].classList.add('is-active'); dots[active].classList.add('is-active');
-      Sound.bell(scale[active % scale.length]);
-      if (fallback) fallback.src = screens[Math.max(active, 1) - 1];
-    }
-    stage.classList.toggle('is-scrolled', target > .15);
-    $('.topbar').classList.toggle('is-solid', scrollY > 30);
-  }
   const fallback = $('.stage__fallback');
+  let auto = false, autoTimer = 0;
+  function setActive(a) {
+    if (a === active) return;
+    steps[active].classList.remove('is-active'); dots[active].classList.remove('is-active');
+    active = a;
+    steps[active].classList.add('is-active'); dots[active].classList.add('is-active');
+    Sound.bell(scale[active % scale.length]);
+    if (fallback) fallback.src = screens[Math.max(active, 1) - 1];
+  }
+  function readScroll() {
+    $('.topbar').classList.toggle('is-solid', scrollY > 30);
+    if (auto) return;
+    const r = story.getBoundingClientRect();
+    const total = Math.max(1, story.offsetHeight - stage.offsetHeight);
+    target = clamp(-r.top / total, 0, 1) * (N - 1);
+    setActive(clamp(Math.round(target), 0, N - 1));
+    stage.classList.toggle('is-scrolled', target > .15);
+  }
+  // Si la page ne peut pas défiler elle-même (aperçu intégré qui s'agrandit), le rituel défile tout seul.
+  function checkAuto() {
+    const sh = screen.height || innerHeight;
+    const se = document.scrollingElement || root;
+    if (auto || !(innerHeight > sh * 1.15 || se.scrollHeight <= innerHeight + 40)) return;
+    auto = true; root.classList.add('is-auto'); sizeStage(true);
+    let i = active;
+    autoTimer = setInterval(() => { i = i >= N - 1 ? 1 : i + 1; target = i; setActive(i); }, 4200);
+  }
   addEventListener('scroll', readScroll, { passive: true });
-  addEventListener('resize', readScroll);
+  addEventListener('resize', () => { sizeStage(false); readScroll(); checkAuto(); });
+  addEventListener('load', () => setTimeout(checkAuto, 400));
 
   // rotation du téléphone : dos (relique) à l'accueil, puis un tour complet par étape
   function phonePose(p) {
@@ -138,6 +161,8 @@
     g.fillStyle = sky; g.fillRect(0, 0, 512, 256);
     const blob = (x, y, r, c) => { const rg = g.createRadialGradient(x, y, 0, x, y, r); rg.addColorStop(0, c); rg.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = rg; g.fillRect(0, 0, 512, 256); };
     blob(120, 55, 90, 'rgba(255,236,200,1)'); blob(300, 40, 50, 'rgba(255,255,255,.9)'); blob(410, 150, 80, 'rgba(255,138,31,.9)'); blob(30, 170, 60, 'rgba(255,59,78,.6)');
+    g.fillStyle = 'rgba(255,246,230,.95)'; g.fillRect(70, 28, 80, 44); g.fillRect(330, 18, 110, 22); g.fillRect(250, 0, 10, 256);
+    g.fillStyle = 'rgba(255,170,90,.8)'; g.fillRect(450, 90, 40, 120);
     const envT = new T.CanvasTexture(envC); envT.mapping = T.EquirectangularReflectionMapping; envT.encoding = T.sRGBEncoding;
     const pmrem = new T.PMREMGenerator(renderer);
     scene.environment = pmrem.fromEquirectangular(envT).texture;
@@ -145,56 +170,74 @@
     const loader = new T.TextureLoader();
     const tex = (url, cb) => { const t = loader.load(url, cb); t.encoding = T.sRGBEncoding; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); return t; };
 
-    // ----- téléphone -----
-    const W = 2.3, H = W / .507, R = .36, D = .22;
+    // ----- téléphone (cadre or poli, verre avant, dos en verre dépoli, bloc photo, boutons) -----
+    const sw = 2.12, sh = sw / .507, BZ = .075;          // écran au format des captures, bordure fine
+    const W = sw + BZ * 2, H = sh + BZ * 2, R = .44, D = .2;
     const rr = (w, h, r) => {
       const s = new T.Shape(), x = -w / 2, y = -h / 2;
-      s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r);
-      s.lineTo(x + w, y + h - r); s.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-      s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r);
-      s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y); return s;
+      s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.bezierCurveTo(x + w - r * .2, y, x + w, y + r * .2, x + w, y + r);
+      s.lineTo(x + w, y + h - r); s.bezierCurveTo(x + w, y + h - r * .2, x + w - r * .2, y + h, x + w - r, y + h);
+      s.lineTo(x + r, y + h); s.bezierCurveTo(x + r * .2, y + h, x, y + h - r * .2, x, y + h - r);
+      s.lineTo(x, y + r); s.bezierCurveTo(x, y + r * .2, x + r * .2, y, x + r, y); return s;
     };
-    const flatUV = (geo, w, h, square) => { // UV normalisés (square : image carrée centrée)
+    const flatUV = (geo, w, h, k = 1, oy = 0) => { // UV normalisés ; k < 1 : image carrée réduite et centrée
       const p = geo.attributes.position, uv = geo.attributes.uv;
       for (let i = 0; i < p.count; i++) {
         const x = p.getX(i), y = p.getY(i);
-        uv.setXY(i, x / w + .5, square ? y / w + .5 : y / h + .5);
+        uv.setXY(i, k === 1 ? x / w + .5 : x / (w * k) + .5, k === 1 ? y / h + .5 : (y - oy) / (w * k) + .5);
       }
       uv.needsUpdate = true; return geo;
     };
+    const seg = lite ? 10 : 24;
     const phone = new T.Group();
-    const bodyGeo = new T.ExtrudeGeometry(rr(W, H, R), { depth: D, bevelEnabled: true, bevelThickness: .05, bevelSize: .05, bevelSegments: lite ? 2 : 5, curveSegments: lite ? 8 : 18 });
+    const goldMat = new T.MeshPhysicalMaterial({ color: 0xd8a54e, metalness: 1, roughness: .16, clearcoat: .5, clearcoatRoughness: .1 });
+    const bodyGeo = new T.ExtrudeGeometry(rr(W, H, R), { depth: D, bevelEnabled: true, bevelThickness: .045, bevelSize: .045, bevelSegments: lite ? 3 : 6, curveSegments: seg });
     bodyGeo.translate(0, 0, -D / 2);
-    const goldMat = new T.MeshStandardMaterial({ color: 0xd9a441, metalness: 1, roughness: .26 });
     phone.add(new T.Mesh(bodyGeo, goldMat));
-    const zf = D / 2 + .05;
-    const glass = new T.Mesh(new T.ShapeGeometry(rr(W - .04, H - .04, R - .02), 16), new T.MeshStandardMaterial({ color: 0x030303, metalness: .3, roughness: .08 }));
-    glass.position.z = zf + .002; phone.add(glass);
-    const sw = W - .17, sh = H - .17;
+    const zf = D / 2 + .045;
+    // façade : verre noir, écran, île, reflets
+    const front = new T.Mesh(new T.ShapeGeometry(rr(W - .03, H - .03, R - .015), seg), new T.MeshPhysicalMaterial({ color: 0x020202, metalness: 0, roughness: .05, clearcoat: 1 }));
+    front.position.z = zf + .001; phone.add(front);
     const screenMat = new T.MeshBasicMaterial({ map: tex(screens[0]), toneMapped: false });
-    const screen = new T.Mesh(flatUV(new T.ShapeGeometry(rr(sw, sh, R - .09), 16), sw, sh), screenMat);
-    screen.position.z = zf + .004; phone.add(screen);
-    // reflet sur la vitre
+    const screen = new T.Mesh(flatUV(new T.ShapeGeometry(rr(sw, sh, R - BZ), seg), sw, sh), screenMat);
+    screen.position.z = zf + .003; phone.add(screen);
+    const island = new T.Mesh(new T.ShapeGeometry(rr(.64, .19, .095), 12), new T.MeshBasicMaterial({ color: 0x000000 }));
+    island.position.set(0, sh / 2 - .17, zf + .005); phone.add(island);
+    const lensDot = new T.Mesh(new T.CircleGeometry(.045, 16), new T.MeshPhysicalMaterial({ color: 0x0b1424, roughness: 0, clearcoat: 1 }));
+    lensDot.position.set(.19, sh / 2 - .17, zf + .006); phone.add(lensDot);
+    const coat = new T.Mesh(new T.ShapeGeometry(rr(W - .03, H - .03, R - .015), seg), new T.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: .02, transparent: true, opacity: .07, envMapIntensity: 3, depthWrite: false }));
+    coat.position.z = zf + .007; phone.add(coat);
     const shC = document.createElement('canvas'); shC.width = 256; shC.height = 512;
     const sg = shC.getContext('2d'); const lg2 = sg.createLinearGradient(0, 0, 256, 512);
-    lg2.addColorStop(0, 'rgba(255,255,255,0)'); lg2.addColorStop(.42, 'rgba(255,255,255,0)'); lg2.addColorStop(.5, 'rgba(255,240,214,.16)'); lg2.addColorStop(.6, 'rgba(255,255,255,0)');
+    lg2.addColorStop(0, 'rgba(255,255,255,0)'); lg2.addColorStop(.44, 'rgba(255,255,255,0)'); lg2.addColorStop(.5, 'rgba(255,240,214,.13)'); lg2.addColorStop(.58, 'rgba(255,255,255,0)');
     sg.fillStyle = lg2; sg.fillRect(0, 0, 256, 512);
-    const sheen = new T.Mesh(flatUV(new T.ShapeGeometry(rr(sw, sh, R - .09), 16), sw, sh), new T.MeshBasicMaterial({ map: new T.CanvasTexture(shC), transparent: true, blending: T.AdditiveBlending, depthWrite: false }));
-    sheen.position.z = zf + .006; phone.add(sheen);
-    // dos : le logo or qui rayonne
+    const sheen = new T.Mesh(flatUV(new T.ShapeGeometry(rr(sw, sh, R - BZ), seg), sw, sh), new T.MeshBasicMaterial({ map: new T.CanvasTexture(shC), transparent: true, blending: T.AdditiveBlending, depthWrite: false }));
+    sheen.position.z = zf + .008; phone.add(sheen);
+    // dos : verre dépoli bronze, logo or lumineux au centre
     const logo = tex('img/logo-or.jpg');
     logo.wrapS = logo.wrapT = T.ClampToEdgeWrapping;
-    const back = new T.Mesh(flatUV(new T.ShapeGeometry(rr(W - .06, H - .06, R - .03), 16), W - .06, H - .06, true),
-      new T.MeshStandardMaterial({ color: 0x140b05, metalness: .7, roughness: .35, emissive: 0xffffff, emissiveMap: logo, emissiveIntensity: 1.25 }));
-    back.position.z = -zf - .002; back.rotation.y = Math.PI; phone.add(back);
-    const lensMat = new T.MeshStandardMaterial({ color: 0x050505, metalness: .5, roughness: .05 });
-    [[.55, 1.85], [.55, 1.35]].forEach(([dx, dy]) => {
-      const lens = new T.Mesh(new T.CylinderGeometry(.17, .17, .07, 28), lensMat);
-      lens.rotation.x = Math.PI / 2; lens.position.set(W / 2 - dx, dy, -zf - .03); phone.add(lens);
-      const ring = new T.Mesh(new T.TorusGeometry(.18, .022, 8, 32), goldMat);
-      ring.position.set(W / 2 - dx, dy, -zf - .06); phone.add(ring);
+    const back = new T.Mesh(flatUV(new T.ShapeGeometry(rr(W - .03, H - .03, R - .015), seg), W, H, .62, -.25),
+      new T.MeshPhysicalMaterial({ color: 0x3a2410, metalness: .25, roughness: .55, clearcoat: 1, clearcoatRoughness: .3, emissive: 0xffffff, emissiveMap: logo, emissiveIntensity: 1.15 }));
+    back.position.z = -zf - .001; back.rotation.y = Math.PI; phone.add(back);
+    // bloc photo (vu de dos : en haut à gauche)
+    const camX = W / 2 - .2 - .5, camY = H / 2 - .2 - .52;
+    const plateGeo = new T.ExtrudeGeometry(rr(1, 1.04, .26), { depth: .04, bevelEnabled: true, bevelThickness: .015, bevelSize: .015, bevelSegments: 3, curveSegments: 12 });
+    const plate = new T.Mesh(plateGeo, new T.MeshPhysicalMaterial({ color: 0x24160a, metalness: .4, roughness: .12, clearcoat: 1 }));
+    plate.rotation.y = Math.PI; plate.position.set(camX, camY, -zf - .005); phone.add(plate);
+    const ringMat = goldMat, glassMat = new T.MeshPhysicalMaterial({ color: 0x050608, metalness: .2, roughness: .02, clearcoat: 1 });
+    const iris = new T.MeshPhysicalMaterial({ color: 0x1a2a4a, metalness: .6, roughness: .05, clearcoat: 1 });
+    [[.2, .24], [.2, -.24], [-.22, 0]].forEach(([dx, dy]) => {
+      const x = camX + dx, y = camY + dy, z = -zf - .07;
+      const barrel = new T.Mesh(new T.CylinderGeometry(.17, .17, .05, 32), ringMat); barrel.rotation.x = Math.PI / 2; barrel.position.set(x, y, z); phone.add(barrel);
+      const lens = new T.Mesh(new T.CircleGeometry(.135, 32), glassMat); lens.rotation.y = Math.PI; lens.position.set(x, y, z - .026); phone.add(lens);
+      const eye = new T.Mesh(new T.CircleGeometry(.06, 24), iris); eye.rotation.y = Math.PI; eye.position.set(x, y, z - .027); phone.add(eye);
     });
-
+    const flash = new T.Mesh(new T.CircleGeometry(.05, 16), new T.MeshBasicMaterial({ color: 0xfff1cc })); flash.rotation.y = Math.PI; flash.position.set(camX - .22, camY + .34, -zf - .05); phone.add(flash);
+    // boutons latéraux
+    const btnGeo = (h) => { const g2 = new T.CylinderGeometry(.035, .035, h, 12); return g2; };
+    [[-W / 2 - .045, 1.15, .42], [-W / 2 - .045, .6, .42], [W / 2 + .045, .95, .7]].forEach(([x, y, h]) => {
+      const bt = new T.Mesh(btnGeo(h), goldMat); bt.position.set(x, y, 0); phone.add(bt);
+    });
     // ----- auréole, inscription, rayons -----
     const relic = new T.Group(); relic.add(phone);
     const haloMat = new T.MeshBasicMaterial({ color: 0xe9be62, toneMapped: false });
@@ -246,6 +289,7 @@
     const key = new T.DirectionalLight(0xffe0b0, 1.3); key.position.set(-4, 5, 6); scene.add(key);
     const neon = new T.PointLight(0xff8a1f, 2.2, 14); neon.position.set(3, -2, 3); scene.add(neon);
     const red = new T.PointLight(0xff3b4e, 1.4, 12); red.position.set(-3, 2, -2); scene.add(red);
+    const rim = new T.DirectionalLight(0xffd9a0, 1.1); rim.position.set(2, 3, -6); scene.add(rim);
 
     // précharge les autres écrans
     const screenTex = [screenMat.map];
@@ -269,14 +313,15 @@
     function frame(now) {
       if (!running) return;
       const t = (now - t0) / 1000;
-      current += (target - current) * (reduced ? 1 : .085);
+      const stepped = lite || auto; // sur mobile : le téléphone tourne d'une étape à l'autre, sans suivre chaque pixel
+      current += ((stepped ? active : target) - current) * (reduced ? 1 : stepped ? .05 : .085);
       mx += (tmx - mx) * .05; my += (tmy - my) * .05;
       const pose = phonePose(current);
       if (pose.screen !== shown) { shown = pose.screen; screenMat.map = screenTex[shown]; screenMat.needsUpdate = true; }
       const float = reduced ? 0 : Math.sin(t * .8) * .09;
       relic.position.set(baseX, baseY + float, 0); relic.scale.setScalar(baseS);
       phone.rotation.set(my * .22, pose.rot + mx * .35, reduced ? 0 : Math.sin(t * .5) * .03);
-      sheen.material.opacity = .6 + .4 * Math.sin(pose.rot * 2);
+      sheen.material.opacity = .55 + .45 * Math.sin(pose.rot * 2 + 1);
       if (!reduced) {
         halo1.rotation.set(Math.sin(t * .3) * .25 + .15, Math.cos(t * .25) * .2, 0);
         halo2.rotation.set(-.2 + Math.sin(t * .2) * .15, Math.sin(t * .35) * .25, 0);
