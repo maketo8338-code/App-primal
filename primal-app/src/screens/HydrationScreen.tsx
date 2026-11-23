@@ -38,7 +38,6 @@ export default function HydrationScreen({ onBack }: { onBack: () => void }) {
     return { key, total, label: new Date(key + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short' }).slice(0, 1).toUpperCase() };
   });
 
-  const changeTarget = (delta: number) => updateTargets({ waterMl: Math.min(5000, Math.max(1200, target + delta)) });
   const addManualWater = () => {
     const amount = Number(waterInput.replace(',', '.'));
     if (!Number.isFinite(amount) || amount <= 0) return;
@@ -97,18 +96,12 @@ export default function HydrationScreen({ onBack }: { onBack: () => void }) {
             return <Chip key={level} label={`${t(level === 'low' ? 'Bas' : level === 'medium' ? 'Moyen' : 'Haut')} · ${(value / 1000).toLocaleString(locale, { maximumFractionDigits: 1 })} L`} selected={value > 0 && Math.abs(target - value) < 1} onPress={() => value && updateTargets({ waterMl: value })} />;
           })}
         </View>
-        <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, lineHeight: 17, marginBottom: 10 }]}>Eau des boissons et des aliments. Le score atteint 100 % dès 80 % de l'objectif. Si tu te sens bien hydraté avec moins, choisis « Bas ».</Text>
+        <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, lineHeight: 17, marginBottom: 10 }]}>Eau des boissons et des aliments. Le score atteint 100 % dès 80 % de l'objectif. L'objectif reste entre 30 et 36 ml par kg de poids : « Bas » = 30, « Moyen » = 33, « Haut » = 36.</Text>
         <Card style={styles.targetCard}>
-          <Pressable3D onPress={() => changeTarget(-250)} style={[styles.targetControl, { backgroundColor: theme.primarySoft }]}>
-            <Icon name="minus" android="remove" size={18} color={theme.primary} />
-          </Pressable3D>
           <View style={{ flex: 1, alignItems: 'center' }}>
             <Text style={[FONTS.display.bold, { color: theme.text, fontSize: 24 }]}>{(target / 1000).toFixed(1)} L</Text>
             <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, marginTop: 2 }]}>par jour</Text>
           </View>
-          <Pressable3D onPress={() => changeTarget(250)} style={[styles.targetControl, { backgroundColor: theme.primarySoft }]}>
-            <Icon name="plus" android="add" size={18} color={theme.primary} />
-          </Pressable3D>
         </Card>
 
         <Text style={[styles.sectionTitle, FONTS.display.semibold, { color: theme.text, marginTop: 22 }]}>Consommations enregistrées</Text>
