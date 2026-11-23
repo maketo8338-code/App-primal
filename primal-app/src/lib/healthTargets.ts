@@ -5,17 +5,19 @@ function valid(value: number | undefined, min: number, max: number): value is nu
 }
 
 /**
- * Sleep duration guidelines by age (National Sleep Foundation, 2015):
- * « recommended » range and the wider « may be appropriate » range.
+ * Sleep by age. recMin–recMax = default ideal range (score 100): set at the upper,
+ * « optimal » part of the National Sleep Foundation recommendations (2015), which
+ * describe what is enough for most people rather than what is best.
+ * okMin–okMax = how far the user can move their own range.
  * No official guideline separates men and women, so sex is not used.
  */
 export interface SleepGuideline { recMin: number; recMax: number; okMin: number; okMax: number }
 export function sleepGuidelineForAge(age: number | undefined): SleepGuideline {
-  if (valid(age, 6, 13)) return { recMin: 9, recMax: 11, okMin: 7, okMax: 12 };
-  if (valid(age, 14, 17)) return { recMin: 8, recMax: 10, okMin: 7, okMax: 11 };
-  if (valid(age, 18, 25)) return { recMin: 7, recMax: 9, okMin: 6, okMax: 11 };
-  if (valid(age, 65, 120)) return { recMin: 7, recMax: 8, okMin: 5, okMax: 9 };
-  return { recMin: 7, recMax: 9, okMin: 6, okMax: 10 }; // 26–64 and unknown age
+  if (valid(age, 6, 13)) return { recMin: 9.5, recMax: 11, okMin: 9, okMax: 12 };
+  if (valid(age, 14, 17)) return { recMin: 8.5, recMax: 10, okMin: 8, okMax: 11 };
+  if (valid(age, 18, 25)) return { recMin: 8, recMax: 9, okMin: 7, okMax: 11 };
+  if (valid(age, 65, 120)) return { recMin: 7.5, recMax: 8.5, okMin: 7, okMax: 9.5 };
+  return { recMin: 8, recMax: 9, okMin: 7, okMax: 10.5 }; // 26–64 and unknown age
 }
 
 /** Default start of the ideal sleep range (the recommended minimum for the age). */

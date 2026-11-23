@@ -33,17 +33,15 @@ function proximityScore(value: number | undefined, target: number): number | und
 }
 
 /**
- * Sleep score from the personal ideal range [min, max] (by default the recommended range for the age):
- * - inside the range: 100;
- * - short sleep: −20 points per hour for the first hour, then −35 per hour (lack of sleep is what hurts most);
- * - long sleep: −8 per hour for the first hour, then −15 per hour, never below 50 (long sleep is mostly a
- *   sign to watch, not a deficit).
+ * Sleep score from the personal ideal range [min, max] (by default the ideal range for the age):
+ * 100 inside the range, then a steady slope: −30 points per hour short (30 min → 85, 1 h → 70,
+ * 2 h → 40), −10 points per hour over (never below 50: long sleep is a sign to watch, not a deficit).
  */
 function sleepRangeScore(hours: number | undefined, min: number, max: number): number | undefined {
   if (!known(hours) || hours <= 0) return undefined;
-  if (hours < min) { const d = min - hours; return Math.max(10, Math.round(d <= 1 ? 100 - 20 * d : 80 - 35 * (d - 1))); }
+  if (hours < min) return Math.max(5, Math.round(100 - 30 * (min - hours)));
   if (hours <= max) return 100;
-  const d = hours - max; return Math.max(50, Math.round(d <= 1 ? 100 - 8 * d : 92 - 15 * (d - 1)));
+  return Math.max(50, Math.round(100 - 10 * (hours - max)));
 }
 
 function sleepDurationScore(hours: number | undefined): number | undefined {
@@ -83,7 +81,7 @@ export function computeDayScore(totals: Nutrients, habits: DayHabits, targets: T
   const hydrationScore = ratioScore(hydrationMl > 0 ? hydrationMl : undefined, targets.waterMl * 0.8);
   const activityScore = ratioScore(habits.steps > 0 ? habits.steps : undefined, targets.steps);
   const sleepMin = known(targets.sleepH) && targets.sleepH > 0 ? targets.sleepH : undefined;
-  const sleepScore = habits.sleepH > 0 ? (sleepMin !== undefined ? sleepRangeScore(habits.sleepH, sleepMin, Math.max(sleepMin, targets.sleepMaxH ?? sleepMin + 2)) : sleepDurationScore(habits.sleepH)) : undefined;
+  const sleepScore = habits.sleepH > 0 ? (sleepMin !== undefined ? sleepRangeScore(habits.sleepH, sleepMin, Math.max(sleepMin, targets.sleepMaxH ?? sleepMin + 1)) : sleepDurationScore(habits.sleepH)) : undefined;
   const outdoorScore = ratioScore(habits.outdoorMin > 0 ? habits.outdoorMin : undefined, targets.outdoorMin);
 
   const pillars = [
