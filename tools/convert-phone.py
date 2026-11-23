@@ -1,4 +1,4 @@
-"""Convertit le modèle OBJ du téléphone en un binaire compact pour le site (site/models/phone.bin + phone.json).
+"""Convertit le modèle OBJ du téléphone en un binaire compact pour le site (site/models/phone.json, binaire en base64).
 
 Usage : python3 -I tools/convert-phone.py "chemin/modele.obj" site/models
 
@@ -7,7 +7,7 @@ Usage : python3 -I tools/convert-phone.py "chemin/modele.obj" site/models
 - Recentre, met à l'échelle (hauteur = 4.6 unités), oriente l'écran vers +z.
 - Positions en Float32, normales en Int8, UV planaires pour l'écran, indices en Uint16/Uint32.
 """
-import json, struct, sys
+import base64, json, struct, sys
 from array import array
 
 src, out = sys.argv[1], sys.argv[2]
@@ -133,6 +133,6 @@ for role, tris in split.items():
     print(role, 'triangles', len(idx) // 3, 'sommets', len(verts))
 
 meta['size'] = [(mx[0] - mn[0]) * s, (mx[1] - mn[1]) * s, (mx[2] - mn[2]) * s]
-open(f'{out}/phone.bin', 'wb').write(blob)
+meta['data'] = base64.b64encode(bytes(blob)).decode()   # un seul fichier .json, servi partout
 json.dump(meta, open(f'{out}/phone.json', 'w'))
 print('taille', len(blob) // 1024, 'Ko', meta['size'])

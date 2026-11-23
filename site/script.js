@@ -307,7 +307,9 @@
       const t = new T.CanvasTexture(c); t.encoding = T.sRGBEncoding; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); return t;
     };
     let modelReady = false;
-    Promise.all([fetch('models/phone.json').then((r) => r.json()), fetch('models/phone.bin').then((r) => r.arrayBuffer())]).then(([meta, buf]) => {
+    fetch('models/phone.json').then((r) => r.json()).then((meta) => {
+      const bin = atob(meta.data), buf = new ArrayBuffer(bin.length), u8 = new Uint8Array(buf);
+      for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
       const mats = {
         frame: goldMat,
         glassFront: new T.MeshPhysicalMaterial({ color: 0x030303, metalness: .1, roughness: .04, clearcoat: 1, clearcoatRoughness: .02 }),
