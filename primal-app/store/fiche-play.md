@@ -13,7 +13,7 @@ NUTRITION
 • Plus de 3 000 aliments issus de la table officielle Ciqual (ANSES)
 • Scan de code-barres (Open Food Facts)
 • Calories, protéines, glucides, lipides, fibres
-• Vitamines et minéraux suivis chaque jour
+• Vitamines, minéraux, fibres et oméga-3 suivis gratuitement, sans abonnement
 • Un coach qui te propose les aliments qui complètent ta journée
 
 TON OBJECTIF CALORIQUE S'ADAPTE
