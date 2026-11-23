@@ -1,12 +1,11 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { loadPersisted, savePersisted, type WriteCache } from './persist';
 import { DayHabits, DietStyleId, Food, JournalEntry, ManualActivity, NotificationKind, NotificationPreferences, Profile, Targets } from '../types';
 import { calculateDietTargets } from './dietStyles';
 import { estimateActivityCalories } from './activitySync';
 import { calculateProgression } from './progression';
 import { normalizeDayHabits, normalizeFood, normalizeJournalEntry, normalizeManualActivity, normalizePersistedState, normalizeProfile, normalizeTargetOverrides, normalizeTargets, STORAGE_LIMITS } from './safeStorage';
 
-const KEY = 'primal.state.v1';
 
 export const DEFAULT_TARGETS: Targets = {
   kcal: 2600,
@@ -98,29 +97,26 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<State>({ profile: DEFAULT_PROFILE, entries: [], habits: {}, favoriteFoods: [], notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES });
   const [ready, setReady] = useState(false);
 
+  // Saving is allowed only once the saved data was read successfully: if reading
+  // failed, saving the empty start state would erase the user's journal.
+  const canSave = useRef(false);
+  const writeCache = useRef<WriteCache>(new Map());
+  const saving = useRef<Promise<void>>(Promise.resolve());
+
   useEffect(() => {
-    AsyncStorage.getItem(KEY)
-      .then((raw) => {
-        if (!raw) return;
-        let parsed: unknown;
-        try {
-          parsed = JSON.parse(raw);
-        } catch {
-          return;
-        }
-        setState(stateFromPersisted(parsed));
+    loadPersisted()
+      .then(({ data, ok }) => {
+        canSave.current = ok;
+        if (data) setState(stateFromPersisted(data));
       })
       .catch(() => {})
       .finally(() => setReady(true));
   }, []);
 
   useEffect(() => {
-    if (!ready) return;
-    try {
-      AsyncStorage.setItem(KEY, JSON.stringify(state)).catch(() => {});
-    } catch {
-      // Un serializable state is ignored rather than crashing the app.
-    }
+    if (!ready || !canSave.current) return;
+    // One save at a time, in order; only the months that changed are rewritten.
+    saving.current = saving.current.then(() => savePersisted(state, writeCache.current)).catch(() => {});
   }, [state, ready]);
 
   const entriesForDate = useCallback(

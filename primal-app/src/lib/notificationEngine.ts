@@ -37,7 +37,21 @@ async function readStored(): Promise<StoredNotifications> {
 }
 async function cancelStored(ids?: string[]): Promise<void> { for (const id of ids || []) { try { await cancelReminder(id); } catch {} } }
 
-export async function syncSmartNotifications(state: NotificationState): Promise<void> {
+// Syncs run one after the other (two at once could schedule the same reminders twice);
+// when several changes arrive while one runs, only the latest state is synced next.
+let running: Promise<void> | null = null;
+let pending: NotificationState | null = null;
+export function syncSmartNotifications(state: NotificationState): Promise<void> {
+  pending = state;
+  if (!running) {
+    running = (async () => {
+      while (pending) { const next = pending; pending = null; try { await syncOnce(next); } catch { /* next change retries */ } }
+    })().finally(() => { running = null; });
+  }
+  return running;
+}
+
+async function syncOnce(state: NotificationState): Promise<void> {
   const previous = await readStored();
   const enabled = [state.preferences.hydration, state.preferences.meal, state.preferences.activity, state.preferences.sleep, state.preferences.insight].some(Boolean);
   if (!enabled) { await cancelStored(previous.ids); await AsyncStorage.removeItem(STORAGE_KEY); return; }

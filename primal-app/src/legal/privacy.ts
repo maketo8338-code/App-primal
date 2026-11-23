@@ -9,18 +9,19 @@
 export interface PolicySection { title: string; body: string[] }
 export interface Policy { title: string; updated: string; intro: string; sections: PolicySection[] }
 
-export const PRIVACY_UPDATED = '2026-11-21';
+export const PRIVACY_UPDATED = '2026-11-23';
 
 export const PRIVACY_FR: Policy = {
   title: 'Politique de confidentialité',
-  updated: 'Dernière mise à jour : 21 novembre 2026',
+  updated: 'Dernière mise à jour : 23 novembre 2026',
   intro: 'PRIMAL est conçu pour fonctionner sans compte et sans serveur. Cette page explique, simplement, quelles données l’app utilise, où elles sont conservées et ce qui sort de ton téléphone.',
   sections: [
     { title: '1. Responsable', body: ['Éditeur de l’app : Suella.', 'Contact pour toute question sur tes données : primal.health.app@gmail.com.'] },
     { title: '2. Données que tu saisis', body: [
       'Profil : prénom, âge, sexe biologique, taille, poids, masse grasse (facultative), objectif, style alimentaire, activité habituelle, photo de profil (facultative).',
-      'Journal : aliments et quantités, eau, pas, activités, sommeil, temps passé dehors.',
-      'Réglages : langue, ambiance (couleur, particules, son, vibrations), préférences de rappels.',
+      'Journal : aliments et quantités, eau, pas, activités, sommeil, temps passé dehors, pesées (si tu notes ton poids du jour).',
+      'Réglages : langue, ambiance (couleur, particules, son, vibrations), thèmes débloqués, préférences de rappels.',
+      'Codes promotionnels : ils sont vérifiés directement sur le téléphone. Le code saisi n’est envoyé nulle part.',
       'Ces données servent uniquement à calculer tes repères (énergie, nutriments, score) et à afficher ton suivi.',
     ] },
     { title: '3. Où elles sont conservées', body: [
@@ -66,14 +67,15 @@ export const PRIVACY_FR: Policy = {
 
 export const PRIVACY_EN: Policy = {
   title: 'Privacy policy',
-  updated: 'Last updated: 21 November 2026',
+  updated: 'Last updated: 23 November 2026',
   intro: 'PRIMAL is designed to work without an account and without a server. This page explains, simply, which data the app uses, where it is kept and what leaves your phone.',
   sections: [
     { title: '1. Controller', body: ['App publisher: Suella.', 'Contact for any question about your data: primal.health.app@gmail.com.'] },
     { title: '2. Data you enter', body: [
       'Profile: first name, age, biological sex, height, weight, body fat (optional), goal, eating style, usual activity, profile photo (optional).',
-      'Journal: foods and amounts, water, steps, activities, sleep, time outdoors.',
-      'Settings: language, ambience (colour, particles, sound, vibrations), reminder preferences.',
+      'Journal: foods and amounts, water, steps, activities, sleep, time outdoors, weigh-ins (if you log your weight of the day).',
+      'Settings: language, ambience (colour, particles, sound, vibrations), unlocked themes, reminder preferences.',
+      'Promo codes: they are checked on the phone itself. The code you type is never sent anywhere.',
       'This data is only used to compute your guidelines (energy, nutrients, score) and show your progress.',
     ] },
     { title: '3. Where it is kept', body: [

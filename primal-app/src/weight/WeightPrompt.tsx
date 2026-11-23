@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { BackHandler, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { I18nText as Text } from '../components/I18nText';
@@ -11,6 +11,7 @@ import { FONTS } from '../lib/fonts';
 import { useStore } from '../lib/store';
 import { todayKey } from '../lib/nutrition';
 import { useI18n } from '../lib/i18n';
+import { useDayKey } from '../lib/useDayKey';
 
 const KEY = 'primal.weighPrompt.v1';
 const MIN = 25; const MAX = 300;
@@ -28,6 +29,7 @@ export default function WeightPrompt() {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('');
   const current = profile.weightKg;
+  const day = useDayKey();
 
   useEffect(() => {
     if (!ready || !profile.onboarded || !current) return;
@@ -36,9 +38,15 @@ export default function WeightPrompt() {
       if (!last) { void AsyncStorage.setItem(KEY, today); return; } // first day: weight was just entered in the onboarding
       if (last !== today) { setValue(String(current).replace('.', ',')); setOpen(true); }
     }).catch(() => undefined);
-  }, [ready, profile.onboarded, current]);
+  }, [ready, profile.onboarded, current, day]);
 
   const close = () => { setOpen(false); void AsyncStorage.setItem(KEY, todayKey()).catch(() => undefined); };
+  // Android back button closes the prompt (same as « Plus tard »).
+  useEffect(() => {
+    if (!open) return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => { close(); return true; });
+    return () => sub.remove();
+  }, [open]);
   const parsed = Number(value.replace(',', '.'));
   const valid = Number.isFinite(parsed) && parsed >= MIN && parsed <= MAX;
   const step = (delta: number) => {

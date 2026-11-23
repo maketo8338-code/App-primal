@@ -1,6 +1,19 @@
 {
-  "cli": { "appVersionSource": "local" },
+  "cli": {
+    "appVersionSource": "remote"
+  },
   "build": {
-    "preview": { "android": { "buildType": "apk" }, "distribution": "internal" }
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      },
+      "distribution": "internal"
+    },
+    "production": {
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "autoIncrement": true
+    }
   }
 }

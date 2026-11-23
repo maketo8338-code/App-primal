@@ -14,6 +14,7 @@ import { NeonProvider } from '../neon/NeonProvider';
 import NeonBackground from '../neon/NeonBackground';
 import IntroOverlay from '../intro/IntroOverlay';
 import WeightPrompt from '../weight/WeightPrompt';
+import { useDayKey } from '../lib/useDayKey';
 import HomeScreen from '../screens/HomeScreen';
 import FoodSearchScreen from '../screens/FoodSearchScreen';
 import FoodDetailScreen from '../screens/FoodDetailScreen';
@@ -51,6 +52,7 @@ export default function PreviewApp() {
 }
 
 function Root() {
+  const day = useDayKey();
   const { ready: i18nReady, languageChosen } = useI18n();
   const { ready, entries, habits, profile, notificationPreferences, addEntry } = useStore();
   const session = useSession();
@@ -105,7 +107,7 @@ function Root() {
   return <View style={styles.black}>
     <StatusBar style="light" />
     {ambience.enabled ? <NeonBackground /> : null}
-    <View style={{ flex: 1 }}>{content}</View>
+    <View key={day} style={{ flex: 1 }}>{content}</View>
   </View>;
 }
 

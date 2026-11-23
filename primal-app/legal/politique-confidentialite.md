@@ -1,6 +1,6 @@
 # Politique de confidentialité
 
-_Dernière mise à jour : 21 novembre 2026_
+_Dernière mise à jour : 23 novembre 2026_
 
 PRIMAL est conçu pour fonctionner sans compte et sans serveur. Cette page explique, simplement, quelles données l’app utilise, où elles sont conservées et ce qui sort de ton téléphone.
 
@@ -14,9 +14,11 @@ Contact pour toute question sur tes données : primal.health.app@gmail.com.
 
 Profil : prénom, âge, sexe biologique, taille, poids, masse grasse (facultative), objectif, style alimentaire, activité habituelle, photo de profil (facultative).
 
-Journal : aliments et quantités, eau, pas, activités, sommeil, temps passé dehors.
+Journal : aliments et quantités, eau, pas, activités, sommeil, temps passé dehors, pesées (si tu notes ton poids du jour).
 
-Réglages : langue, ambiance (couleur, particules, son, vibrations), préférences de rappels.
+Réglages : langue, ambiance (couleur, particules, son, vibrations), thèmes débloqués, préférences de rappels.
+
+Codes promotionnels : ils sont vérifiés directement sur le téléphone. Le code saisi n’est envoyé nulle part.
 
 Ces données servent uniquement à calculer tes repères (énergie, nutriments, score) et à afficher ton suivi.
 

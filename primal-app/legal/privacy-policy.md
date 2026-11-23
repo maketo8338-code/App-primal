@@ -1,6 +1,6 @@
 # Privacy policy
 
-_Last updated: 21 November 2026_
+_Last updated: 23 November 2026_
 
 PRIMAL is designed to work without an account and without a server. This page explains, simply, which data the app uses, where it is kept and what leaves your phone.
 
@@ -14,9 +14,11 @@ Contact for any question about your data: primal.health.app@gmail.com.
 
 Profile: first name, age, biological sex, height, weight, body fat (optional), goal, eating style, usual activity, profile photo (optional).
 
-Journal: foods and amounts, water, steps, activities, sleep, time outdoors.
+Journal: foods and amounts, water, steps, activities, sleep, time outdoors, weigh-ins (if you log your weight of the day).
 
-Settings: language, ambience (colour, particles, sound, vibrations), reminder preferences.
+Settings: language, ambience (colour, particles, sound, vibrations), unlocked themes, reminder preferences.
+
+Promo codes: they are checked on the phone itself. The code you type is never sent anywhere.
 
 This data is only used to compute your guidelines (energy, nutrients, score) and show your progress.
 

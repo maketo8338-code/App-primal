@@ -15,6 +15,7 @@ import { NeonProvider } from '../src/neon/NeonProvider';
 import NeonBackground from '../src/neon/NeonBackground';
 import IntroOverlay from '../src/intro/IntroOverlay';
 import WeightPrompt from '../src/weight/WeightPrompt';
+import { useDayKey } from '../src/lib/useDayKey';
 import LanguageSelectionScreen from '../src/screens/LanguageSelectionScreen';
 import OnboardingScreen from '../src/screens/OnboardingScreen';
 
@@ -36,6 +37,8 @@ function Root() {
     void syncSmartNotifications({ entries, habits, targets: profile.targets, preferences: notificationPreferences }).catch(() => undefined);
   }, [ready, entries, habits, profile.targets, notificationPreferences]);
 
+  // A new day (midnight, or reopening the next morning) reloads the screens on today.
+  const day = useDayKey();
   // Same gating as before: language → onboarding → app.
   const gate = !i18nReady || !ready ? 'loading' : !profile.onboarded && !languageChosen ? 'language' : !profile.onboarded ? 'onboarding' : 'app';
 
@@ -45,7 +48,7 @@ function Root() {
   return <NavigationTheme value={navigationTheme}><View style={styles.black}>
     <StatusBar style="light" />
     {gate === 'app' && ambience.enabled ? <NeonBackground /> : null}
-    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' }, animation: 'fade_from_bottom' }}>
+    <Stack key={day} screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' }, animation: 'fade_from_bottom' }}>
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="scan" options={{ animation: 'slide_from_bottom', contentStyle: { backgroundColor: '#050505' } }} />
     </Stack>
