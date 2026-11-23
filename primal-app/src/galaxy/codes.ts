@@ -19,12 +19,12 @@ export function hashCode(input: string): string {
   return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
 }
 
-// Each code is a short phrase (punctuation, accents and case are ignored). Only hashes are stored.
+// Each Galaxie code is a short code written #XXXXXX (the « # », punctuation, spaces and case are ignored). Only hashes are stored.
 export const GALAXY_CODE_HASHES: Record<LockedId, string> = {
-  nebuleuse: '1uw8d7loj70',
-  aurore: '1802byd5xre',
-  supernova: 'd51evrw5a4',
-  trounoir: '1obz96mi4kf',
+  nebuleuse: '2dzj1lv3x8g',
+  aurore: '1n74xbd60ui',
+  supernova: '11w3rm2raf',
+  trounoir: '1rbnzb3g6dz',
   or: '1d02jx3uhqv',
   chrome: 'fdwtym3kap',
 };

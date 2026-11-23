@@ -9,6 +9,7 @@ const code = process.argv[2];
 if (!code) { console.error('Usage: node tools/galaxy-code.mjs MONCODE'); process.exit(1); }
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const out = join(mkdtempSync(join(tmpdir(), 'galaxy-')), 'codes.mjs');
-execFileSync('npx', ['esbuild', join(root, 'src/galaxy/codes.ts'), '--format=esm', `--outfile=${out}`, '--log-level=error'], { stdio: 'inherit' });
+const stub = join(root, 'tests/stub-native.js');
+execFileSync('npx', ['esbuild', join(root, 'src/galaxy/codes.ts'), '--bundle', '--format=esm', '--platform=node', `--alias:@react-native-async-storage/async-storage=${stub}`, `--alias:react-native=${stub}`, `--outfile=${out}`, '--log-level=error'], { stdio: 'inherit' });
 const { hashCode, normalizeCode } = await import(out);
 console.log(`${normalizeCode(code)} → '${hashCode(code)}'`);
