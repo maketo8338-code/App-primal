@@ -13,8 +13,8 @@ function valid(value: number | undefined, min: number, max: number): value is nu
  */
 export interface SleepGuideline { recMin: number; recMax: number; okMin: number; okMax: number }
 export function sleepGuidelineForAge(age: number | undefined): SleepGuideline {
-  if (valid(age, 6, 13)) return { recMin: 9.5, recMax: 11, okMin: 9, okMax: 12 };
-  if (valid(age, 14, 17)) return { recMin: 8.5, recMax: 10, okMin: 8, okMax: 11 };
+  if (valid(age, 6, 12)) return { recMin: 9.5, recMax: 11, okMin: 9, okMax: 12 };
+  if (valid(age, 13, 17)) return { recMin: 8.5, recMax: 10, okMin: 8, okMax: 11 };
   if (valid(age, 18, 25)) return { recMin: 8, recMax: 9, okMin: 7, okMax: 11 };
   if (valid(age, 65, 120)) return { recMin: 7.5, recMax: 8.5, okMin: 7, okMax: 9.5 };
   return { recMin: 8, recMax: 9, okMin: 7, okMax: 10.5 }; // 26–64 and unknown age

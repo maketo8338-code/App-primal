@@ -19,15 +19,13 @@ export default function SleepScreen({ onBack }: { onBack: () => void }) {
   const { theme } = useTheme();
   const { t, formatDate } = useI18n();
   const insets = useSafeAreaInsets();
-  const { setHabit, habitsForDate, profile, updateTargets } = useStore();
+  const { setHabit, habitsForDate, profile } = useStore();
   const [date, setDate] = useState(todayKey());
   const [sleepInput, setSleepInput] = useState('');
   const habits = habitsForDate(date);
-  // The ideal range can be set anywhere inside the « may be appropriate » range for the age.
+  // Ideal range from the age bracket (not user-adjustable).
   const guide = sleepGuidelineForAge(profile.age);
-  const SLEEP_MIN = guide.okMin; const SLEEP_MAX = guide.okMax;
-  const target = Math.min(SLEEP_MAX, Math.max(SLEEP_MIN, profile.targetOverrides?.sleepH ?? guide.recMin));
-  const targetMax = Math.min(SLEEP_MAX, Math.max(target, profile.targetOverrides?.sleepMaxH ?? guide.recMax));
+  const target = guide.recMin; const targetMax = guide.recMax;
   const isToday = date === todayKey();
   const week = useMemo(() => Array.from({ length: 7 }, (_, index) => {
     const day = shiftDate(todayKey(), index - 6);
@@ -59,9 +57,8 @@ export default function SleepScreen({ onBack }: { onBack: () => void }) {
       <Card><View style={styles.inputRow}><Icon name="moon.fill" android="moon" size={18} color={theme.sub} /><Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 14, flex: 1 }]}>Coucher</Text><TextInput value={habits.sleepBedtime || ''} onChangeText={(sleepBedtime) => setHabit(date, { sleepBedtime, sleepSource: 'manual' })} placeholder="22:45" placeholderTextColor={theme.sub} style={[FONTS.mono.semibold, styles.timeInput, { borderColor: theme.border, color: theme.text }]} /></View><View style={[styles.inputRow, { borderTopWidth: 1, borderTopColor: theme.border }]}><Icon name="sun.max.fill" android="sunny" size={18} color={theme.sub} /><Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 14, flex: 1 }]}>Réveil</Text><TextInput value={habits.sleepWakeTime || ''} onChangeText={(sleepWakeTime) => setHabit(date, { sleepWakeTime, sleepSource: 'manual' })} placeholder="06:45" placeholderTextColor={theme.sub} style={[FONTS.mono.semibold, styles.timeInput, { borderColor: theme.border, color: theme.text }]} /></View></Card>
 
       <Text style={[styles.section, FONTS.display.semibold, { color: theme.text }]}>Objectif quotidien</Text>
-      <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, lineHeight: 17, marginBottom: 10 }]}>Ta plage idéale : le score vaut 100 % entre ces deux durées. Par défaut, c'est la plage recommandée pour ton âge.</Text>
-      <Card style={styles.durationCard}><Text style={[FONTS.text.semibold, { color: theme.sub, fontSize: 13, width: 28 }]}>De</Text><Pressable3D onPress={() => updateTargets({ sleepH: Math.max(SLEEP_MIN, Math.round((target - 0.25) * 100) / 100) })}><Icon name="minus.circle.fill" android="remove-circle" size={27} color={theme.sub} /></Pressable3D><Text style={[FONTS.mono.semibold, { color: theme.text, fontSize: 18, flex: 1, textAlign: 'center' }]}>{formatSleepDuration(target)}</Text><Pressable3D onPress={() => { const next = Math.min(SLEEP_MAX, Math.round((target + 0.25) * 100) / 100); updateTargets({ sleepH: next, ...(next > targetMax ? { sleepMaxH: next } : {}) }); }}><Icon name="plus.circle.fill" android="add-circle" size={27} color={theme.primary} /></Pressable3D></Card>
-      <Card style={[styles.durationCard, { marginTop: 8 }]}><Text style={[FONTS.text.semibold, { color: theme.sub, fontSize: 13, width: 28 }]}>À</Text><Pressable3D onPress={() => { const next = Math.max(SLEEP_MIN, Math.round((targetMax - 0.25) * 100) / 100); updateTargets({ sleepMaxH: next, ...(next < target ? { sleepH: next } : {}) }); }}><Icon name="minus.circle.fill" android="remove-circle" size={27} color={theme.sub} /></Pressable3D><Text style={[FONTS.mono.semibold, { color: theme.text, fontSize: 18, flex: 1, textAlign: 'center' }]}>{formatSleepDuration(targetMax)}</Text><Pressable3D onPress={() => updateTargets({ sleepMaxH: Math.min(SLEEP_MAX, Math.round((targetMax + 0.25) * 100) / 100) })}><Icon name="plus.circle.fill" android="add-circle" size={27} color={theme.primary} /></Pressable3D></Card>
+      <Card style={styles.durationCard}><Icon name="moon.fill" android="moon" size={20} color={theme.primary} /><Text style={[FONTS.mono.semibold, { color: theme.text, fontSize: 18, flex: 1, textAlign: 'center' }]}>{`${formatSleepDuration(target)} – ${formatSleepDuration(targetMax)}`}</Text></Card>
+      <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, lineHeight: 17, marginTop: 8 }]}>Ta plage idéale, selon ton âge : le score vaut 100 % entre ces deux durées. Il baisse de 30 points par heure manquante et de 10 points par heure en trop.</Text>
 
       <Text style={[styles.section, FONTS.display.semibold, { color: theme.text }]}>Régularité et évolution</Text>
       <Card><View style={styles.regularity}><View style={{ flex: 1 }}><Text style={[FONTS.display.bold, { color: regularity === undefined ? theme.sub : regularity >= 80 ? theme.success : theme.warn, fontSize: 32 }]}>{regularity === undefined ? '—' : `${regularity}%`}</Text><Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 13, marginTop: 2 }]}>Régularité sur 7 jours</Text></View><Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, maxWidth: 126 }]}>Basée sur la variation de tes nuits renseignées.</Text></View><View style={styles.week}>{week.map((item) => <View key={item.day} style={styles.weekCol}><View style={[styles.barTrack, { backgroundColor: theme.cardAlt }]}><View style={[styles.bar, { height: `${Math.max(4, Math.min(100, pct(item.sleep, target)))}%`, backgroundColor: item.sleep >= target ? theme.success : theme.primary }]} /></View><Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 11 }]}>{item.label}</Text></View>)}</View></Card>
