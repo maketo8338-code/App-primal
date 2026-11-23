@@ -129,9 +129,23 @@ a { color: inherit; }
 .story { position: relative; height: calc(var(--steps) * var(--vh, 100svh)); }
 .stage { position: sticky; top: 0; height: var(--vh, 100svh); overflow: hidden; isolation: isolate; }
 /* mode automatique : la page ne peut pas défiler elle-même (cadre intégré) → le rituel défile seul */
-.is-auto .story { height: auto; }
-.is-auto .stage { position: relative; }
-.is-auto .stage__hint { display: none; }
+.is-swipe .story { height: auto; }
+.is-swipe .stage { position: relative; touch-action: pan-y; }
+.is-swipe .stage__hint { display: none; }
+.stage__nav { display: none; }
+.is-swipe .stage__nav {
+  display: flex; align-items: center; gap: 1rem; z-index: 3;
+  position: absolute; left: 50%; bottom: calc(2.5svh + 6px); translate: -50% 0;
+  font: 500 .62rem/1 var(--caps); letter-spacing: .24em; text-transform: uppercase; color: var(--muted); white-space: nowrap;
+}
+.stage__nav button {
+  width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--gold);
+  background: rgba(11, 6, 4, .6); color: var(--cream); font: 400 1.5rem/1 var(--caps); cursor: pointer;
+  transition: border-color .3s, box-shadow .3s;
+}
+.stage__nav button:hover, .stage__nav button:active { border-color: var(--neon); box-shadow: var(--glow); }
+.is-swipe .step--hero.is-active ~ .stage__nav span { animation: nudge 1.8s ease-in-out infinite; }
+@keyframes nudge { 0%, 100% { translate: 0 0; } 50% { translate: -8px 0; } }
 .stage__sky {
   position: absolute; inset: -6%; z-index: -2;
   background: url(img/nuages-hero.jpg) center / cover no-repeat;
@@ -257,22 +271,26 @@ a { color: inherit; }
 .coverflow { position: relative; margin: 0 calc(-1 * var(--gutter)); }
 .coverflow__track {
   --w: clamp(210px, 21vw, 300px);
-  display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
-  padding: 3rem calc(50% - var(--w) / 2) 6rem;
+  position: relative; height: calc(var(--w) * 1.78 + 6rem);
   perspective: 1400px; transform-style: preserve-3d;
+  touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab;
 }
-.coverflow__track::-webkit-scrollbar { display: none; }
+.coverflow__track:active { cursor: grabbing; }
+.coverflow__track::after { /* lueur au sol sous la relique centrale */
+  content: ""; position: absolute; left: 50%; bottom: 1.5rem; width: calc(var(--w) * 1.6); height: 3rem; translate: -50% 0;
+  background: radial-gradient(ellipse, rgba(255, 138, 31, .35), transparent 70%); pointer-events: none;
+}
 .coverflow figure {
-  flex: 0 0 var(--w); margin: 0 calc(var(--w) * -.12);
-  scroll-snap-align: center; transform-style: preserve-3d; will-change: transform;
+  position: absolute; left: 50%; top: 2.5rem; width: var(--w); margin: 0 0 0 calc(var(--w) / -2);
+  transform-style: preserve-3d; will-change: transform, opacity; backface-visibility: hidden;
 }
 .coverflow img {
   width: 100%; height: auto;
   border-radius: 46% 46% 18px 18px / 18% 18% 18px 18px;
   border: 1px solid var(--line);
   box-shadow: 0 30px 70px rgba(0, 0, 0, .65);
-  -webkit-box-reflect: below 10px linear-gradient(transparent 70%, rgba(0, 0, 0, .25));
   transition: box-shadow .4s, border-color .4s;
+  pointer-events: none;
 }
 .coverflow figure.is-center img { border-color: var(--gold); box-shadow: 0 30px 70px rgba(0, 0, 0, .65), 0 0 50px rgba(255, 138, 31, .35); }
 .coverflow__nav {
@@ -356,6 +374,7 @@ a { color: inherit; }
   .stage__frame { left: 12px; top: 70px; width: calc(100% - 24px); height: calc(100% - 70px - 2svh); }
   .stage__sky::after { background: linear-gradient(rgba(5, 2, 1, .5), transparent 30%, rgba(8, 4, 2, .7) 62%, rgba(11, 6, 4, .98)); }
   .step { left: 16px; right: 16px; width: auto; top: auto; bottom: 7svh; translate: 0 30px; text-align: center; }
+  .is-swipe .step { bottom: calc(2.5svh + 64px); }
   .step.is-active { translate: none; }
   .step--hero .hero__sub { margin: 1.4rem auto; font-size: .7rem; }
   .hero__cta { justify-content: center; }
@@ -381,7 +400,7 @@ a { color: inherit; }
   .stylobate { display: none; }
   .extras, .vault__list { grid-template-columns: 1fr; }
   .coverflow__nav { display: none; }
-  .coverflow__track { --w: 62vw; }
+  .coverflow__track { --w: 58vw; }
   .vault { border-radius: 28px; padding: 3.5rem 1.2rem; }
   .faq-wrap { grid-template-columns: 1fr; gap: 1rem; }
   .faq-wrap__head { position: static; text-align: center; }

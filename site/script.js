@@ -94,12 +94,16 @@
   sizeStage(true);
   const story = $('.story'), stage = $('.stage');
   const steps = $$('.step', stage), dots = $$('.progress li', stage);
-  const N = steps.length;
+  const N = steps.length, SCREENS = N - 1;              // accueil + 5 écrans
   const screens = [1, 2, 3, 4, 5].map((i) => `img/ecran-${i}.jpg`);
-  let target = 0, current = 0, active = 0;
-
   const fallback = $('.stage__fallback');
-  let auto = false, autoTimer = 0;
+  // Deux façons de faire tourner le téléphone :
+  //  - PC : le défilement de la page pilote la rotation (scène collante) ;
+  //  - tactile / aperçu intégré : on glisse à gauche (suivant) ou à droite (précédent), le défilement vertical reste libre.
+  let swipe = lite;
+  let target = 0, current = 0, active = 0, vIdx = 0, drag = 0, swiping = false, autoTimer = 0;
+  const stepOf = (v) => (v <= 0 ? 0 : 1 + ((v - 1) % SCREENS));
+
   function setActive(a) {
     if (a === active) return;
     steps[active].classList.remove('is-active'); dots[active].classList.remove('is-active');
@@ -108,33 +112,69 @@
     Sound.bell(scale[active % scale.length]);
     if (fallback) fallback.src = screens[Math.max(active, 1) - 1];
   }
+  function go(v) { vIdx = Math.max(0, v); setActive(stepOf(vIdx)); stage.classList.toggle('is-scrolled', vIdx > 0); }
+  function stopAuto() { clearInterval(autoTimer); autoTimer = 0; }
+  function applyMode() { root.classList.toggle('is-swipe', swipe); sizeStage(true); }
+  applyMode();
+
   function readScroll() {
     $('.topbar').classList.toggle('is-solid', scrollY > 30);
-    if (auto) return;
+    if (swipe) return;
     const r = story.getBoundingClientRect();
     const total = Math.max(1, story.offsetHeight - stage.offsetHeight);
     target = clamp(-r.top / total, 0, 1) * (N - 1);
     setActive(clamp(Math.round(target), 0, N - 1));
     stage.classList.toggle('is-scrolled', target > .15);
   }
-  // Si la page ne peut pas défiler elle-même (aperçu intégré qui s'agrandit), le rituel défile tout seul.
+  // Si la page ne peut pas défiler elle-même (aperçu intégré qui s'agrandit) : mode glisser + défilement automatique.
   function checkAuto() {
     const sh = screen.height || innerHeight;
     const se = document.scrollingElement || root;
-    if (auto || !(innerHeight > sh * 1.15 || se.scrollHeight <= innerHeight + 40)) return;
-    auto = true; root.classList.add('is-auto'); sizeStage(true);
-    let i = active;
-    autoTimer = setInterval(() => { i = i >= N - 1 ? 1 : i + 1; target = i; setActive(i); }, 4200);
+    if (root.classList.contains('is-auto') || !(innerHeight > sh * 1.15 || se.scrollHeight <= innerHeight + 40)) return;
+    root.classList.add('is-auto'); swipe = true; applyMode();
+    autoTimer = setInterval(() => go(vIdx + 1), 4500);
   }
   addEventListener('scroll', readScroll, { passive: true });
   addEventListener('resize', () => { sizeStage(false); readScroll(); checkAuto(); });
   addEventListener('load', () => setTimeout(checkAuto, 400));
 
-  // rotation du téléphone : dos (relique) à l'accueil, puis un tour complet par étape
+  // glisser gauche / droite (doigt ou souris) ; touch-action: pan-y laisse le défilement vertical au navigateur
+  let sx = 0, sy = 0, decided = false, pid = null;
+  stage.addEventListener('pointerdown', (e) => {
+    if (!swipe || e.target.closest('a, button')) return;
+    sx = e.clientX; sy = e.clientY; swiping = true; decided = false; pid = e.pointerId;
+  });
+  stage.addEventListener('pointermove', (e) => {
+    if (!swiping || e.pointerId !== pid) return;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (!decided) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      decided = true;
+      if (Math.abs(dy) > Math.abs(dx)) { swiping = false; return; }
+      try { stage.setPointerCapture(pid); } catch (err) { /* rien */ }
+    }
+    drag = clamp(-dx / (stage.clientWidth * .6), vIdx === 0 ? 0 : -1, 1);
+  });
+  const endSwipe = () => {
+    if (!swiping) return;
+    swiping = false; const d = drag; drag = 0;
+    if (d > .12) { go(vIdx + 1); stopAuto(); } else if (d < -.12) { go(vIdx - 1); stopAuto(); }
+  };
+  stage.addEventListener('pointerup', endSwipe);
+  stage.addEventListener('pointercancel', () => { swiping = false; drag = 0; });
+  $('.stage__prev')?.addEventListener('click', () => { go(vIdx - 1); stopAuto(); });
+  $('.stage__next')?.addEventListener('click', () => { go(vIdx + 1); stopAuto(); });
+  addEventListener('keydown', (e) => {
+    if (!swipe || e.target.closest('input, textarea, .coverflow')) return;
+    const r = stage.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return;
+    if (e.key === 'ArrowRight') { go(vIdx + 1); stopAuto(); } else if (e.key === 'ArrowLeft') { go(vIdx - 1); stopAuto(); }
+  });
+
+  // rotation : dos (relique) à l'accueil, puis un tour complet par écran
   function phonePose(p) {
-    if (p <= 1) return { rot: Math.PI + Math.PI * smooth(.15, .85, p), screen: 0 };
+    if (p <= 1) return { rot: Math.PI + Math.PI * smooth(.15, .85, Math.max(0, p)), screen: 0 };
     const k = Math.floor(p), f = p - k, e = smooth(.2, .8, f);
-    return { rot: Math.PI * 2 * k + Math.PI * 2 * e, screen: clamp(e < .5 ? k - 1 : k, 0, 4) };
+    return { rot: Math.PI * 2 * k + Math.PI * 2 * e, screen: (e < .5 ? k - 1 : k) % SCREENS };
   }
 
   function initScene() {
@@ -163,9 +203,24 @@
     blob(120, 55, 90, 'rgba(255,236,200,1)'); blob(300, 40, 50, 'rgba(255,255,255,.9)'); blob(410, 150, 80, 'rgba(255,138,31,.9)'); blob(30, 170, 60, 'rgba(255,59,78,.6)');
     g.fillStyle = 'rgba(255,246,230,.95)'; g.fillRect(70, 28, 80, 44); g.fillRect(330, 18, 110, 22); g.fillRect(250, 0, 10, 256);
     g.fillStyle = 'rgba(255,170,90,.8)'; g.fillRect(450, 90, 40, 120);
-    const envT = new T.CanvasTexture(envC); envT.mapping = T.EquirectangularReflectionMapping; envT.encoding = T.sRGBEncoding;
     const pmrem = new T.PMREMGenerator(renderer);
-    scene.environment = pmrem.fromEquirectangular(envT).texture;
+    const setEnv = () => {
+      const envT = new T.CanvasTexture(envC); envT.mapping = T.EquirectangularReflectionMapping; envT.encoding = T.sRGBEncoding;
+      const old = scene.environment; scene.environment = pmrem.fromEquirectangular(envT).texture; envT.dispose(); if (old) old.dispose();
+    };
+    setEnv();
+    // les nuages peints se reflètent dans l'or et le verre, avec des boîtes à lumière de studio par-dessus
+    const envImg = new Image();
+    envImg.onload = () => {
+      g.globalAlpha = .9; g.drawImage(envImg, 0, 0, 512, 256); g.globalAlpha = 1;
+      g.fillStyle = 'rgba(255,246,230,.95)'; g.fillRect(70, 28, 80, 44); g.fillRect(330, 18, 110, 22); g.fillRect(250, 0, 8, 256); g.fillRect(0, 120, 512, 3);
+      g.fillStyle = 'rgba(255,170,90,.85)'; g.fillRect(450, 90, 40, 120);
+      blob(410, 150, 70, 'rgba(255,138,31,.7)');
+      setEnv();
+    };
+    envImg.src = 'img/nuages-hero.jpg';
+    renderer.shadowMap.enabled = !lite;
+    renderer.shadowMap.type = T.PCFSoftShadowMap;
 
     const loader = new T.TextureLoader();
     const tex = (url, cb) => { const t = loader.load(url, cb); t.encoding = T.sRGBEncoding; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); return t; };
@@ -211,7 +266,7 @@
     const sg = shC.getContext('2d'); const lg2 = sg.createLinearGradient(0, 0, 256, 512);
     lg2.addColorStop(0, 'rgba(255,255,255,0)'); lg2.addColorStop(.44, 'rgba(255,255,255,0)'); lg2.addColorStop(.5, 'rgba(255,240,214,.13)'); lg2.addColorStop(.58, 'rgba(255,255,255,0)');
     sg.fillStyle = lg2; sg.fillRect(0, 0, 256, 512);
-    const sheen = new T.Mesh(flatUV(new T.ShapeGeometry(rr(sw, sh, R - BZ), seg), sw, sh), new T.MeshBasicMaterial({ map: new T.CanvasTexture(shC), transparent: true, blending: T.AdditiveBlending, depthWrite: false }));
+    let sheen = new T.Mesh(flatUV(new T.ShapeGeometry(rr(sw, sh, R - BZ), seg), sw, sh), new T.MeshBasicMaterial({ map: new T.CanvasTexture(shC), transparent: true, blending: T.AdditiveBlending, depthWrite: false }));
     sheen.position.z = zf + .008; phone.add(sheen);
     // dos : verre dépoli bronze, logo or lumineux au centre
     const logo = tex('img/logo-or.jpg');
@@ -238,6 +293,53 @@
     [[-W / 2 - .045, 1.15, .42], [-W / 2 - .045, .6, .42], [W / 2 + .045, .95, .7]].forEach(([x, y, h]) => {
       const bt = new T.Mesh(btnGeo(h), goldMat); bt.position.set(x, y, 0); phone.add(bt);
     });
+    // ----- modèle 3D détaillé (remplace le téléphone dessiné dès qu'il est chargé) -----
+    const composeScreen = (img, aspect) => { // capture + barre d'état sous l'encoche, au format exact de l'écran
+      const cw = 640, ch = Math.round(cw / aspect), c = document.createElement('canvas'); c.width = cw; c.height = ch;
+      const x = c.getContext('2d'), iw = cw * 1.07, ih = iw * img.height / img.width, top = ch - ih;
+      x.drawImage(img, 0, 0, img.width, 2, 0, 0, cw, top + 2);            // prolonge le haut de l'écran
+      x.drawImage(img, (cw - iw) / 2, top, iw, ih);
+      x.fillStyle = '#fff'; x.font = '600 30px -apple-system, "Segoe UI", Roboto, sans-serif'; x.textBaseline = 'middle';
+      const y = Math.max(28, top * .55); x.fillText('9:41', 62, y);
+      [0, 1, 2, 3].forEach((i) => x.fillRect(470 + i * 9, y + 8 - (i + 1) * 4.5, 6, (i + 1) * 4.5));
+      x.strokeStyle = '#fff'; x.lineWidth = 2.5; x.beginPath(); x.roundRect ? x.roundRect(518, y - 10, 46, 21, 6) : x.rect(518, y - 10, 46, 21); x.stroke();
+      x.fillRect(521.5, y - 6.5, 34, 14); x.fillRect(566, y - 4, 3, 8);
+      const t = new T.CanvasTexture(c); t.encoding = T.sRGBEncoding; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); return t;
+    };
+    let modelReady = false;
+    Promise.all([fetch('models/phone.json').then((r) => r.json()), fetch('models/phone.bin').then((r) => r.arrayBuffer())]).then(([meta, buf]) => {
+      const mats = {
+        frame: goldMat,
+        glassFront: new T.MeshPhysicalMaterial({ color: 0x030303, metalness: .1, roughness: .04, clearcoat: 1, clearcoatRoughness: .02 }),
+        glassBack: new T.MeshPhysicalMaterial({ color: 0x160c05, metalness: .55, roughness: .32, clearcoat: 1, clearcoatRoughness: .06, envMapIntensity: 1.1 }),
+        screen: screenMat,
+        lens: new T.MeshPhysicalMaterial({ color: 0x05070d, metalness: .6, roughness: .02, clearcoat: 1, envMapIntensity: 2 }),
+        flash: new T.MeshPhysicalMaterial({ color: 0xfff1d0, roughness: .3, emissive: 0x332a18 }),
+      };
+      const model = new T.Group();
+      let screenGeo = null;
+      for (const m of meta.meshes) {
+        const geo = new T.BufferGeometry();
+        geo.setAttribute('position', new T.BufferAttribute(new Float32Array(buf, m.position[0], m.position[1] / 4), 3));
+        geo.setAttribute('normal', new T.BufferAttribute(new Int8Array(buf, m.normal[0], m.normal[1]), 3, true));
+        if (m.uv) geo.setAttribute('uv', new T.BufferAttribute(new Float32Array(buf, m.uv[0], m.uv[1] / 4), 2));
+        geo.setIndex(new T.BufferAttribute(m.index32 ? new Uint32Array(buf, m.index[0], m.index[1] / 4) : new Uint16Array(buf, m.index[0], m.index[1] / 2), 1));
+        const mesh = new T.Mesh(geo, mats[m.role] || goldMat);
+        mesh.castShadow = mesh.receiveShadow = !lite && m.role !== 'screen';
+        if (m.role === 'screen') { screenGeo = geo; mesh.position.z = .001; }
+        model.add(mesh);
+      }
+      // reflet mobile sur la vitre + logo or incrusté au dos
+      const newSheen = new T.Mesh(screenGeo, sheen.material); newSheen.position.z = .004; model.add(newSheen);
+      const decal = new T.Mesh(new T.PlaneGeometry(1.25, 1.25), new T.MeshBasicMaterial({ map: tex('img/logo-or.png'), transparent: true, depthWrite: false, toneMapped: false }));
+      decal.rotation.y = Math.PI; decal.position.set(0, -.3, meta.backZ - .003); model.add(decal);
+      // écrans recomposés au format de l'écran du modèle
+      const aspect = meta.screenSize[0] / meta.screenSize[1];
+      screens.forEach((u, i) => { const im = new Image(); im.onload = () => { screenTex[i] = composeScreen(im, aspect); if (i === shown) { screenMat.map = screenTex[i]; screenMat.needsUpdate = true; } }; im.src = u; });
+      while (phone.children.length) phone.remove(phone.children[0]);
+      phone.add(model); sheen = newSheen; modelReady = true;
+    }).catch((err) => console.warn('Modèle 3D non chargé, téléphone simplifié conservé :', err));
+
     // ----- auréole, inscription, rayons -----
     const relic = new T.Group(); relic.add(phone);
     const haloMat = new T.MeshBasicMaterial({ color: 0xe9be62, toneMapped: false });
@@ -286,8 +388,12 @@
     }
 
     // ----- lumières -----
-    const key = new T.DirectionalLight(0xffe0b0, 1.3); key.position.set(-4, 5, 6); scene.add(key);
-    const neon = new T.PointLight(0xff8a1f, 2.2, 14); neon.position.set(3, -2, 3); scene.add(neon);
+    const key = new T.DirectionalLight(0xffe0b0, 1.4); key.position.set(-4, 5, 6); scene.add(key);
+    if (!lite) {
+      key.castShadow = true; key.shadow.mapSize.set(1024, 1024); key.shadow.bias = -.0004; key.shadow.normalBias = .02;
+      Object.assign(key.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4, near: 1, far: 20 }); key.target = phone;
+    }
+    const neon = new T.PointLight(0xff8a1f, 1.5, 14); neon.position.set(3.5, -3, 4); scene.add(neon);
     const red = new T.PointLight(0xff3b4e, 1.4, 12); red.position.set(-3, 2, -2); scene.add(red);
     const rim = new T.DirectionalLight(0xffd9a0, 1.1); rim.position.set(2, 3, -6); scene.add(rim);
 
@@ -313,8 +419,8 @@
     function frame(now) {
       if (!running) return;
       const t = (now - t0) / 1000;
-      const stepped = lite || auto; // sur mobile : le téléphone tourne d'une étape à l'autre, sans suivre chaque pixel
-      current += ((stepped ? active : target) - current) * (reduced ? 1 : stepped ? .05 : .085);
+      const goal = swipe ? vIdx + drag : target;   // glisser : le téléphone suit le doigt puis se pose sur l'écran suivant
+      current += (goal - current) * (reduced ? 1 : swipe ? (swiping ? .3 : .065) : .085);
       mx += (tmx - mx) * .05; my += (tmy - my) * .05;
       const pose = phonePose(current);
       if (pose.screen !== shown) { shown = pose.screen; screenMat.map = screenTex[shown]; screenMat.needsUpdate = true; }
@@ -353,37 +459,78 @@
   }, { passive: true });
 
   /* ================= 2. GALERIE EN ARC 3D ================= */
+  // Sans défilement natif : une position animée par ressort, seules les transformations bougent (fluide, même au doigt).
   const track = $('.coverflow__track');
   if (track) {
-    const figs = $$('figure', track);
-    let centerIdx = -1;
-    const layout = () => {
-      const mid = track.scrollLeft + track.clientWidth / 2;
+    const figs = $$('figure', track), n = figs.length;
+    let pos = 3, goal = 3, vel = 0, center = -1, raf = 0, dragging = null;
+    const spacing = () => figs[0].offsetWidth * (innerWidth < 760 ? .7 : .62);
+    function layout() {
+      const sp = spacing();
       figs.forEach((f, i) => {
-        const d = (f.offsetLeft + f.offsetWidth / 2 - mid) / (f.offsetWidth * .78);
-        const a = Math.abs(d), c = clamp(d, -2.5, 2.5);
-        f.style.transform = `translateZ(${-Math.min(a, 3) * 150}px) rotateY(${-c * 34}deg) scale(${1 - Math.min(a, 2) * .06})`;
+        const d = i - pos, a = Math.abs(d), c = clamp(d, -2.2, 2.2);
+        f.style.transform = `translate3d(${d * sp}px, 0, ${-Math.min(a, 3) * 160}px) rotateY(${-c * 36}deg) scale(${1 - Math.min(a, 2) * .05})`;
         f.style.zIndex = String(100 - Math.round(a * 10));
-        f.style.opacity = String(clamp(1.35 - a * .3, .25, 1));
-        if (a < .5 && centerIdx !== i) { centerIdx = i; figs.forEach((x) => x.classList.toggle('is-center', x === f)); Sound.bell(scale[i % scale.length] / 2, .04); }
+        f.style.opacity = String(clamp(1.4 - a * .32, 0, 1));
       });
+      const ci = clamp(Math.round(pos), 0, n - 1);
+      if (ci !== center) {
+        center = ci;
+        figs.forEach((x, i) => { x.classList.toggle('is-center', i === ci); x.setAttribute('aria-hidden', String(i !== ci)); });
+        Sound.bell(scale[ci % scale.length] / 2, .035);
+      }
+    }
+    function tick() {
+      if (!dragging) {
+        if (reduced) { pos = goal; vel = 0; }
+        else { vel = vel * .72 + (goal - pos) * .09; pos += vel; }  // ressort amorti
+      }
+      layout();
+      if (dragging || Math.abs(goal - pos) > .0005 || Math.abs(vel) > .0005) raf = requestAnimationFrame(tick);
+      else { pos = goal; layout(); raf = 0; }
+    }
+    const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
+    const goTo = (i) => { goal = clamp(i, 0, n - 1); kick(); };
+    $('.coverflow__nav--prev').addEventListener('click', () => goTo(Math.round(goal) - 1));
+    $('.coverflow__nav--next').addEventListener('click', () => goTo(Math.round(goal) + 1));
+    track.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(Math.round(goal) - 1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); goTo(Math.round(goal) + 1); }
+    });
+    // glisser au doigt ou à la souris (le défilement vertical reste libre grâce à touch-action: pan-y)
+    track.addEventListener('pointerdown', (e) => {
+      dragging = { x: e.clientX, y: e.clientY, p: pos, lx: e.clientX, lt: performance.now(), v: 0, decided: false, moved: false, id: e.pointerId };
+    });
+    track.addEventListener('pointermove', (e) => {
+      const d = dragging; if (!d || e.pointerId !== d.id) return;
+      const dx = e.clientX - d.x, dy = e.clientY - d.y;
+      if (!d.decided) {
+        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+        d.decided = true;
+        if (Math.abs(dy) > Math.abs(dx)) { dragging = null; return; }
+        try { track.setPointerCapture(d.id); } catch (err) { /* rien */ }
+        kick();
+      }
+      d.moved = true;
+      const now = performance.now(), sp = spacing();
+      d.v = (e.clientX - d.lx) / Math.max(1, now - d.lt) / sp * 16;   // vitesse en positions par image
+      d.lx = e.clientX; d.lt = now;
+      pos = clamp(d.p - dx / sp, -.4, n - .6);
+    });
+    const release = () => {
+      const d = dragging; if (!d) return; dragging = null;
+      if (!d.moved) { kick(); return; }
+      goTo(Math.round(pos - d.v * 6)); vel = -d.v * .5;
     };
-    const go = (i) => { const f = figs[clamp(i, 0, figs.length - 1)]; track.scrollTo({ left: f.offsetLeft + f.offsetWidth / 2 - track.clientWidth / 2, behavior: reduced ? 'auto' : 'smooth' }); };
-    track.addEventListener('scroll', () => requestAnimationFrame(layout), { passive: true });
-    addEventListener('resize', layout);
-    $('.coverflow__nav--prev').addEventListener('click', () => go(centerIdx - 1));
-    $('.coverflow__nav--next').addEventListener('click', () => go(centerIdx + 1));
-    track.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') { e.preventDefault(); go(centerIdx - 1); } if (e.key === 'ArrowRight') { e.preventDefault(); go(centerIdx + 1); } });
-    figs.forEach((f, i) => f.addEventListener('click', () => { if (i !== centerIdx) go(i); }));
-    // glisser à la souris
-    let drag = null;
-    track.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') return; drag = { x: e.clientX, s: track.scrollLeft, moved: false }; track.style.scrollSnapType = 'none'; });
-    addEventListener('pointermove', (e) => { if (!drag) return; const dx = e.clientX - drag.x; if (Math.abs(dx) > 4) drag.moved = true; track.scrollLeft = drag.s - dx; });
-    addEventListener('pointerup', () => { if (!drag) return; track.style.scrollSnapType = ''; const m = drag.moved; drag = null; if (m) go(centerIdx); });
+    track.addEventListener('pointerup', release);
+    track.addEventListener('pointercancel', release);
+    track.addEventListener('click', (e) => {
+      const f = e.target.closest('figure'); if (!f) return;
+      const i = figs.indexOf(f); if (i !== Math.round(goal)) goTo(i);
+    });
     track.addEventListener('dragstart', (e) => e.preventDefault());
-    const start = () => { const f = figs[3]; track.scrollLeft = f.offsetLeft + f.offsetWidth / 2 - track.clientWidth / 2; layout(); };
-    if (document.readyState === 'complete') start(); else addEventListener('load', start);
-    start();
+    addEventListener('resize', layout);
+    layout();
   }
 
   /* ================= 3. INCLINAISON 3D AU SURVOL ================= */
