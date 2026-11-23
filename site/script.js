@@ -338,6 +338,25 @@
       // écrans recomposés au format de l'écran du modèle
       const aspect = meta.screenSize[0] / meta.screenSize[1];
       screens.forEach((u, i) => { const im = new Image(); im.onload = () => { screenTex[i] = composeScreen(im, aspect); if (i === shown) { screenMat.map = screenTex[i]; screenMat.needsUpdate = true; } }; im.src = u; });
+      // vidéos de l'app sur l'écran : seule celle de l'écran visible est lue ; l'image reste en secours
+      const vids = screens.map((_, i) => {
+        const v = document.createElement('video');
+        v.muted = true; v.defaultMuted = true; v.loop = true; v.playsInline = true;
+        v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.preload = i === 0 ? 'auto' : 'metadata';
+        v.src = `video/ecran-${i + 1}.mp4`;
+        const t = new T.VideoTexture(v); t.encoding = T.sRGBEncoding;
+        const item = { v, t, ok: false };
+        v.addEventListener('playing', () => { item.ok = true; if (i === shown) setScreen(i); });
+        return item;
+      });
+      setScreen = (i) => {
+        vids.forEach((it, k) => { if (k !== i && !it.v.paused) it.v.pause(); });
+        const it = vids[i];
+        if (running) it.v.play().catch(() => { /* lecture bloquée (économie d'énergie) : image fixe */ });
+        screenMat.map = it.ok ? it.t : screenTex[i]; screenMat.needsUpdate = true;
+      };
+      pauseVideos = () => vids.forEach((it) => it.v.pause());
+      setScreen(shown);
       while (phone.children.length) phone.remove(phone.children[0]);
       phone.add(model); sheen = newSheen; modelReady = true;
     }).catch((err) => console.warn('Modèle 3D non chargé, téléphone simplifié conservé :', err));
@@ -402,7 +421,9 @@
     // précharge les autres écrans
     const screenTex = [screenMat.map];
     screens.slice(1).forEach((u, i) => { screenTex[i + 1] = tex(u); });
-    let shown = 0;
+    let shown = 0, running = false;
+    let setScreen = (i) => { screenMat.map = screenTex[i]; screenMat.needsUpdate = true; };
+    let pauseVideos = () => {};
 
     let mx = 0, my = 0, tmx = 0, tmy = 0, baseX = 0, baseY = 0, baseS = 1;
     if (finePointer) addEventListener('pointermove', (e) => { tmx = e.clientX / innerWidth - .5; tmy = e.clientY / innerHeight - .5; }, { passive: true });
@@ -417,7 +438,7 @@
     }
     resize(); addEventListener('resize', resize);
 
-    let running = false, t0 = performance.now();
+    let t0 = performance.now();
     function frame(now) {
       if (!running) return;
       const t = (now - t0) / 1000;
@@ -425,7 +446,7 @@
       current += (goal - current) * (reduced ? 1 : swipe ? (swiping ? .3 : .065) : .085);
       mx += (tmx - mx) * .05; my += (tmy - my) * .05;
       const pose = phonePose(current);
-      if (pose.screen !== shown) { shown = pose.screen; screenMat.map = screenTex[shown]; screenMat.needsUpdate = true; }
+      if (pose.screen !== shown) { shown = pose.screen; setScreen(shown); }
       const float = reduced ? 0 : Math.sin(t * .8) * .09;
       relic.position.set(baseX, baseY + float, 0); relic.scale.setScalar(baseS);
       phone.rotation.set(my * .22, pose.rot + mx * .35, reduced ? 0 : Math.sin(t * .5) * .03);
@@ -442,7 +463,10 @@
       renderer.render(scene, camera);
       requestAnimationFrame(frame);
     }
-    const setRunning = (v) => { if (v && !running) { running = true; requestAnimationFrame(frame); } else if (!v) running = false; };
+    const setRunning = (v) => {
+      if (v && !running) { running = true; setScreen(shown); requestAnimationFrame(frame); }
+      else if (!v && running) { running = false; pauseVideos(); }
+    };
     let inView = true;
     new IntersectionObserver(([e]) => { inView = e.isIntersecting; setRunning(inView && !document.hidden); }).observe(story);
     document.addEventListener('visibilitychange', () => setRunning(inView && !document.hidden));
