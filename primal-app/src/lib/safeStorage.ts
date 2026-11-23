@@ -174,6 +174,7 @@ export function normalizeTargets(value: unknown, fallback: Targets): Targets {
     steps: finite(source.steps, 0, STORAGE_LIMITS.steps) ?? fallback.steps,
     sleepH: finite(source.sleepH, 0, STORAGE_LIMITS.sleepHours) ?? fallback.sleepH,
     outdoorMin: finite(source.outdoorMin, 0, STORAGE_LIMITS.outdoorMin) ?? fallback.outdoorMin,
+    ...((finite(source.sleepMaxH, 0, STORAGE_LIMITS.sleepHours) ?? fallback.sleepMaxH) !== undefined ? { sleepMaxH: finite(source.sleepMaxH, 0, STORAGE_LIMITS.sleepHours) ?? fallback.sleepMaxH } : {}),
   };
 }
 
@@ -184,6 +185,8 @@ export function normalizeTargetOverrides(value: unknown): Partial<Targets> {
   const steps = finite(source.steps, 0, STORAGE_LIMITS.steps);
   const sleepH = finite(source.sleepH, 0, STORAGE_LIMITS.sleepHours);
   const outdoorMin = finite(source.outdoorMin, 0, STORAGE_LIMITS.outdoorMin);
+  const sleepMaxH = finite(source.sleepMaxH, 0, STORAGE_LIMITS.sleepHours);
+  if (sleepMaxH !== undefined) result.sleepMaxH = sleepMaxH;
   if (waterMl !== undefined) result.waterMl = waterMl;
   if (steps !== undefined) result.steps = steps;
   if (sleepH !== undefined) result.sleepH = sleepH;

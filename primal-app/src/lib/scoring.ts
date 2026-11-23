@@ -32,6 +32,15 @@ function proximityScore(value: number | undefined, target: number): number | und
   return clamp(Math.round(100 - (Math.abs(value - target) / target) * 100));
 }
 
+/** Sleep: 100 inside the personal range [min, max]; −12 points per hour short, −10 per hour over. */
+function sleepRangeScore(hours: number | undefined, min: number, max: number): number | undefined {
+  if (!known(hours) || hours <= 0) return undefined;
+  if (hours < 4) return 20;
+  if (hours < min) return clamp(Math.round(100 - (min - hours) * 12));
+  if (hours <= max) return 100;
+  return Math.max(50, Math.round(100 - (hours - max) * 10));
+}
+
 function sleepDurationScore(hours: number | undefined): number | undefined {
   if (!known(hours) || hours <= 0) return undefined;
   if (hours < 4) return 20;
@@ -65,9 +74,11 @@ export function computeDayScore(totals: Nutrients, habits: DayHabits, targets: T
 
   const foodWater = known(totals.water) ? totals.water : 0;
   const hydrationMl = habits.waterMl + foodWater;
-  const hydrationScore = ratioScore(hydrationMl > 0 ? hydrationMl : undefined, targets.waterMl);
+  // 100 from 80 % of the target: the target is a guideline, not an exact need.
+  const hydrationScore = ratioScore(hydrationMl > 0 ? hydrationMl : undefined, targets.waterMl * 0.8);
   const activityScore = ratioScore(habits.steps > 0 ? habits.steps : undefined, targets.steps);
-  const sleepScore = habits.sleepH > 0 ? sleepDurationScore(habits.sleepH) : undefined;
+  const sleepMin = known(targets.sleepH) && targets.sleepH > 0 ? targets.sleepH : undefined;
+  const sleepScore = habits.sleepH > 0 ? (sleepMin !== undefined ? sleepRangeScore(habits.sleepH, sleepMin, Math.max(sleepMin, targets.sleepMaxH ?? sleepMin + 0.5)) : sleepDurationScore(habits.sleepH)) : undefined;
   const outdoorScore = ratioScore(habits.outdoorMin > 0 ? habits.outdoorMin : undefined, targets.outdoorMin);
 
   const pillars = [

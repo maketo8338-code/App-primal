@@ -10,15 +10,15 @@ import { useI18n } from '../lib/i18n';
 import { FONTS } from '../lib/fonts';
 import { Icon } from '../components/Icon';
 import { useStore } from '../lib/store';
-import { Card, ProgressBar } from '../components/ui';
+import { Card, Chip, ProgressBar } from '../components/ui';
 import { dateLabel, pct, shiftDate, todayKey } from '../lib/nutrition';
-import { hydrationTargetForDay, totalHydrationMl, waterFromEntries } from '../lib/healthTargets';
+import { hydrationTargetForDay, hydrationTargetForLevel, totalHydrationMl, waterFromEntries, type HydrationLevel } from '../lib/healthTargets';
 
 const QUICK_AMOUNTS = [250, 500, 750];
 
 export default function HydrationScreen({ onBack }: { onBack: () => void }) {
   const { theme } = useTheme();
-  const { t, formatNumber } = useI18n();
+  const { t, formatNumber, locale } = useI18n();
   const insets = useSafeAreaInsets();
   const { addWaterEntry, entriesForDate, habitsForDate, removeWaterEntry, updateTargets, updateWaterEntry, profile } = useStore();
   const [date, setDate] = useState(todayKey());
@@ -90,6 +90,14 @@ export default function HydrationScreen({ onBack }: { onBack: () => void }) {
         </View>
 
         <Text style={[styles.sectionTitle, FONTS.display.semibold, { color: theme.text, marginTop: 22 }]}>Objectif quotidien</Text>
+        <Text style={[FONTS.text.semibold, { color: theme.sub, fontSize: 12, marginBottom: 8 }]}>Mon niveau</Text>
+        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 6 }}>
+          {(['low', 'medium', 'high'] as HydrationLevel[]).map((level) => {
+            const value = hydrationTargetForLevel(profile, level);
+            return <Chip key={level} label={`${t(level === 'low' ? 'Bas' : level === 'medium' ? 'Moyen' : 'Haut')} · ${(value / 1000).toLocaleString(locale, { maximumFractionDigits: 1 })} L`} selected={value > 0 && Math.abs(target - value) < 1} onPress={() => value && updateTargets({ waterMl: value })} />;
+          })}
+        </View>
+        <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 12, lineHeight: 17, marginBottom: 10 }]}>Eau des boissons et des aliments. Le score atteint 100 % dès 80 % de l'objectif. Si tu te sens bien hydraté avec moins, choisis « Bas ».</Text>
         <Card style={styles.targetCard}>
           <Pressable3D onPress={() => changeTarget(-250)} style={[styles.targetControl, { backgroundColor: theme.primarySoft }]}>
             <Icon name="minus" android="remove" size={18} color={theme.primary} />

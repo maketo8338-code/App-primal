@@ -83,9 +83,9 @@ function stateFromPersisted(parsed: unknown): State {
   const completeEnough = Boolean(restored.profile.age && restored.profile.heightCm && restored.profile.weightKg && (restored.profile.sex === 'female' || restored.profile.sex === 'male' || restored.profile.bodyFatPercent));
   const recalculated = completeEnough ? calculateDietTargets(restored.profile, restored.profile.dietStyle || 'classic') : restored.profile.targets;
   const overrides = restored.profile.targetOverrides || {};
-  const targets = { ...recalculated, waterMl: overrides.waterMl ?? recalculated.waterMl, steps: overrides.steps ?? recalculated.steps, sleepH: overrides.sleepH ?? recalculated.sleepH, outdoorMin: overrides.outdoorMin ?? recalculated.outdoorMin };
+  const targets = { ...recalculated, waterMl: overrides.waterMl ?? recalculated.waterMl, steps: overrides.steps ?? recalculated.steps, sleepH: overrides.sleepH ?? recalculated.sleepH, sleepMaxH: overrides.sleepMaxH, outdoorMin: overrides.outdoorMin ?? recalculated.outdoorMin };
   return {
-    profile: completeEnough ? { ...restored.profile, targets, targetOverrides: { waterMl: targets.waterMl, steps: targets.steps, sleepH: targets.sleepH, outdoorMin: targets.outdoorMin } } : restored.profile,
+    profile: completeEnough ? { ...restored.profile, targets, targetOverrides: { waterMl: targets.waterMl, steps: targets.steps, sleepH: targets.sleepH, sleepMaxH: targets.sleepMaxH, outdoorMin: targets.outdoorMin } } : restored.profile,
     entries: restored.entries,
     habits: restored.habits,
     favoriteFoods: restored.favoriteFoods,
@@ -241,8 +241,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const completeEnough = Boolean(profile.age && profile.heightCm && profile.weightKg && (profile.sex === 'female' || profile.sex === 'male' || profile.bodyFatPercent));
       const recalculated = changesTargets && completeEnough ? calculateDietTargets(profile, profile.dietStyle || 'classic') : profile.targets;
       const overrides = profile.targetOverrides || {};
-      const targets = { ...recalculated, waterMl: overrides.waterMl ?? recalculated.waterMl, steps: overrides.steps ?? recalculated.steps, sleepH: overrides.sleepH ?? recalculated.sleepH, outdoorMin: overrides.outdoorMin ?? recalculated.outdoorMin };
-      return { ...s, profile: changesTargets && completeEnough ? { ...profile, targets, targetOverrides: { waterMl: targets.waterMl, steps: targets.steps, sleepH: targets.sleepH, outdoorMin: targets.outdoorMin } } : profile };
+      const targets = { ...recalculated, waterMl: overrides.waterMl ?? recalculated.waterMl, steps: overrides.steps ?? recalculated.steps, sleepH: overrides.sleepH ?? recalculated.sleepH, sleepMaxH: overrides.sleepMaxH, outdoorMin: overrides.outdoorMin ?? recalculated.outdoorMin };
+      return { ...s, profile: changesTargets && completeEnough ? { ...profile, targets, targetOverrides: { waterMl: targets.waterMl, steps: targets.steps, sleepH: targets.sleepH, sleepMaxH: targets.sleepMaxH, outdoorMin: targets.outdoorMin } } : profile };
     });
   }, []);
 
@@ -260,8 +260,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const completeEnough = Boolean(profile.age && profile.heightCm && profile.weightKg && (profile.sex === 'female' || profile.sex === 'male' || profile.bodyFatPercent));
       const recalculated = calculateDietTargets(profile, profile.dietStyle || 'classic');
       const overrides = profile.targetOverrides || {};
-      const targets = { ...recalculated, waterMl: overrides.waterMl ?? recalculated.waterMl, steps: overrides.steps ?? recalculated.steps, sleepH: overrides.sleepH ?? recalculated.sleepH, outdoorMin: overrides.outdoorMin ?? recalculated.outdoorMin };
-      return { ...s, profile: completeEnough ? { ...profile, targets, targetOverrides: { waterMl: targets.waterMl, steps: targets.steps, sleepH: targets.sleepH, outdoorMin: targets.outdoorMin } } : profile };
+      const targets = { ...recalculated, waterMl: overrides.waterMl ?? recalculated.waterMl, steps: overrides.steps ?? recalculated.steps, sleepH: overrides.sleepH ?? recalculated.sleepH, sleepMaxH: overrides.sleepMaxH, outdoorMin: overrides.outdoorMin ?? recalculated.outdoorMin };
+      return { ...s, profile: completeEnough ? { ...profile, targets, targetOverrides: { waterMl: targets.waterMl, steps: targets.steps, sleepH: targets.sleepH, sleepMaxH: targets.sleepMaxH, outdoorMin: targets.outdoorMin } } : profile };
     });
   }, []);
 

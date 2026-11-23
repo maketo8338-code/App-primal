@@ -26,7 +26,7 @@ export interface WaterEntry { id: string; ml: number; }
 export type SleepSource = 'manual' | 'device';
 export interface DayHabits { waterMl: number; waterEntries: WaterEntry[]; steps: number; distanceKm?: number; outdoorMin: number; sleepH: number; sleepBedtime?: string; sleepWakeTime?: string; sleepSource?: SleepSource; weight?: number; activities: ManualActivity[]; }
 
-export interface Targets { kcal: number; protein: number; carbs: number; fat: number; fiber: number; waterMl: number; steps: number; sleepH: number; outdoorMin: number; }
+export interface Targets { kcal: number; protein: number; carbs: number; fat: number; fiber: number; waterMl: number; steps: number; /** Ideal sleep: from sleepH to sleepMaxH (score 100 in between). */ sleepH: number; sleepMaxH?: number; outdoorMin: number; }
 export type TargetOverrides = Partial<Targets>;
 export type NotificationKind = 'hydration' | 'meal' | 'activity' | 'sleep' | 'insight';
 export interface NotificationPreferences { hydration: boolean; meal: boolean; activity: boolean; sleep: boolean; insight: boolean; quietStart: number; quietEnd: number; }
