@@ -1,5 +1,5 @@
 import { DietStyleId, Profile, Targets } from '../types';
-import { baseHydrationTarget, outdoorTargetForActivity, sleepTargetForAge } from './healthTargets';
+import { baseHydrationTarget, outdoorTargetForActivity, sleepGuidelineForAge, sleepTargetForAge } from './healthTargets';
 import { calculateMacroTargets, estimateEnergy } from './energy';
 
 export interface DietStyleOption { id: DietStyleId; label: string; description: string; icon: string; androidIcon: string; }
@@ -17,5 +17,5 @@ function valid(value: number | undefined, min: number, max: number): value is nu
 export function calculateDietTargets(profile: Profile, style: DietStyleId): Targets {
   const energy = estimateEnergy({ ...profile, dietStyle: style }, { waterMl: 0, waterEntries: [], steps: 0, outdoorMin: 0, sleepH: 0, activities: [] }, {});
   const kcal = energy.tdee ? energy.targetCalories : profile.targets.kcal; const macros = calculateMacroTargets({ ...profile, dietStyle: style }, kcal);
-  return { kcal: macros.kcal, protein: macros.protein, carbs: macros.carbs, fat: macros.fat, fiber: macros.fiber, waterMl: baseHydrationTarget(profile), steps: valid(profile.usualStepsPerDay, 1, 100000) ? profile.usualStepsPerDay as number : profile.activityLevel === 'low' ? 7000 : profile.activityLevel === 'high' ? 12000 : 10000, sleepH: sleepTargetForAge(profile.age), outdoorMin: outdoorTargetForActivity(profile.activityLevel) };
+  return { kcal: macros.kcal, protein: macros.protein, carbs: macros.carbs, fat: macros.fat, fiber: macros.fiber, waterMl: baseHydrationTarget(profile), steps: valid(profile.usualStepsPerDay, 1, 100000) ? profile.usualStepsPerDay as number : profile.activityLevel === 'low' ? 7000 : profile.activityLevel === 'high' ? 12000 : 10000, sleepH: sleepTargetForAge(profile.age), sleepMaxH: sleepGuidelineForAge(profile.age).recMax, outdoorMin: outdoorTargetForActivity(profile.activityLevel) };
 }

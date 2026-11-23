@@ -4,10 +4,23 @@ function valid(value: number | undefined, min: number, max: number): value is nu
   return typeof value === 'number' && Number.isFinite(value) && value >= min && value <= max;
 }
 
+/**
+ * Sleep duration guidelines by age (National Sleep Foundation, 2015):
+ * « recommended » range and the wider « may be appropriate » range.
+ * No official guideline separates men and women, so sex is not used.
+ */
+export interface SleepGuideline { recMin: number; recMax: number; okMin: number; okMax: number }
+export function sleepGuidelineForAge(age: number | undefined): SleepGuideline {
+  if (valid(age, 6, 13)) return { recMin: 9, recMax: 11, okMin: 7, okMax: 12 };
+  if (valid(age, 14, 17)) return { recMin: 8, recMax: 10, okMin: 7, okMax: 11 };
+  if (valid(age, 18, 25)) return { recMin: 7, recMax: 9, okMin: 6, okMax: 11 };
+  if (valid(age, 65, 120)) return { recMin: 7, recMax: 8, okMin: 5, okMax: 9 };
+  return { recMin: 7, recMax: 9, okMin: 6, okMax: 10 }; // 26–64 and unknown age
+}
+
+/** Default start of the ideal sleep range (the recommended minimum for the age). */
 export function sleepTargetForAge(age: number | undefined): number {
-  if (valid(age, 13, 17)) return 9;
-  if (valid(age, 65, 120)) return 8;
-  return 8.5;
+  return sleepGuidelineForAge(age).recMin;
 }
 
 export function outdoorTargetForActivity(level: Profile['activityLevel']): number {
