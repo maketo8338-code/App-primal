@@ -32,13 +32,13 @@ function proximityScore(value: number | undefined, target: number): number | und
   return clamp(Math.round(100 - (Math.abs(value - target) / target) * 100));
 }
 
-/** Sleep: 100 inside the personal range [min, max]; −12 points per hour short, −10 per hour over. */
+/** Sleep: 100 inside the personal range [min, max]; −30 points per hour short (30 min short → 85), −15 per hour over. */
 function sleepRangeScore(hours: number | undefined, min: number, max: number): number | undefined {
   if (!known(hours) || hours <= 0) return undefined;
-  if (hours < 4) return 20;
-  if (hours < min) return clamp(Math.round(100 - (min - hours) * 12));
+  if (hours < 4) return 10;
+  if (hours < min) return Math.max(10, Math.round(100 - (min - hours) * 30));
   if (hours <= max) return 100;
-  return Math.max(50, Math.round(100 - (hours - max) * 10));
+  return Math.max(40, Math.round(100 - (hours - max) * 15));
 }
 
 function sleepDurationScore(hours: number | undefined): number | undefined {

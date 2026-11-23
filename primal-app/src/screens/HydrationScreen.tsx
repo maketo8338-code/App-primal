@@ -38,7 +38,7 @@ export default function HydrationScreen({ onBack }: { onBack: () => void }) {
     return { key, total, label: new Date(key + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short' }).slice(0, 1).toUpperCase() };
   });
 
-  const changeTarget = (delta: number) => updateTargets({ waterMl: Math.max(500, target + delta) });
+  const changeTarget = (delta: number) => updateTargets({ waterMl: Math.min(5000, Math.max(1200, target + delta)) });
   const addManualWater = () => {
     const amount = Number(waterInput.replace(',', '.'));
     if (!Number.isFinite(amount) || amount <= 0) return;
