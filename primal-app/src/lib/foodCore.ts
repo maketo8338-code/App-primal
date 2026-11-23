@@ -1,6 +1,7 @@
 import { Food, NutrientKey, Nutrients, RawNutrientValue } from '../types';
 import { CIQUAL_FULL_KEYS, CIQUAL_FULL_ROWS, type CiqualFullRow } from './ciqualFull';
 import { FOOD_EXTRAS } from './foodExtras';
+import { CIQUAL_FILL } from './ciqualFill';
 
 type RawRecord = Record<string, RawNutrientValue>;
 type ImportedFood = {
@@ -189,10 +190,24 @@ function ciqualFullFood([code, name, category, raw, ...values]: CiqualFullRow): 
     name, category, portionLabel: '100 g', portionGrams: 100, per100,
   };
 }
-const CIQUAL_FULL: Food[] = CIQUAL_FULL_ROWS.map(ciqualFullFood);
+/**
+ * Completes a food's missing micronutrients (tools/fill-micros.py): first the same
+ * food in Ciqual 2025, then estimates from similar foods, which are flagged.
+ * Never overwrites a value the food already has.
+ */
+function withFill(food: Food): Food {
+  const fill = food.ciqualCode !== undefined ? CIQUAL_FILL[food.ciqualCode] : undefined;
+  if (!fill) return food;
+  const per100: Nutrients = { ...food.per100 };
+  for (const [key, value] of Object.entries(fill.exact) as Array<[NutrientKey, number]>) if (per100[key] === undefined) per100[key] = value;
+  const estimated: NutrientKey[] = [];
+  for (const [key, value] of Object.entries(fill.estimated) as Array<[NutrientKey, number]>) if (per100[key] === undefined) { per100[key] = value; estimated.push(key); }
+  return { ...food, per100, ...(estimated.length ? { estimated } : {}) };
+}
+const CIQUAL_FULL: Food[] = CIQUAL_FULL_ROWS.map(ciqualFullFood).map(withFill);
 /** Processed Ciqual foods: searchable, but never shown in the category chips. */
 export const CIQUAL_PROCESSED: Food[] = CIQUAL_FULL.filter((food) => food.category === 'PROCESSED');
 
 /** Base PRIMAL: original foods + raw / minimally processed Ciqual foods + estimated extras. */
-export const FOOD_CORE: Food[] = [...IMPORTED_PRIMAL.map(importedFood), ...CIQUAL_FULL.filter((food) => food.category !== 'PROCESSED'), ...FOOD_EXTRAS];
+export const FOOD_CORE: Food[] = [...IMPORTED_PRIMAL.map(importedFood).map(withFill), ...CIQUAL_FULL.filter((food) => food.category !== 'PROCESSED'), ...FOOD_EXTRAS];
 export const FOOD_CATEGORIES: string[] = Array.from(new Set(FOOD_CORE.map((food) => food.category)));

@@ -10,7 +10,7 @@ export type FoodSource = 'core' | 'usda' | 'off' | 'ciqual';
 export type RawNutrientValue = number | string | null;
 export type DietStyleId = 'classic' | 'primal' | 'lowCarb' | 'keto' | 'custom' | 'mediterranean';
 
-export interface Food { id: string; source: FoodSource; ciqualCode?: number; ciqualRaw?: Record<string, RawNutrientValue>; name: string; brand?: string; category: string; portionLabel: string; portionGrams: number; per100: Nutrients; }
+export interface Food { id: string; source: FoodSource; ciqualCode?: number; ciqualRaw?: Record<string, RawNutrientValue>; name: string; brand?: string; category: string; portionLabel: string; portionGrams: number; per100: Nutrients; /** Nutrients estimated from similar foods (shown with ≈). */ estimated?: NutrientKey[]; }
 export type MealId = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 export interface JournalEntry { id: string; date: string; meal: MealId; foodName: string; brand?: string; source: FoodSource; foodId?: string; grams: number; per100: Nutrients; }
 
