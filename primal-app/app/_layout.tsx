@@ -50,6 +50,9 @@ function Root() {
     {gate === 'app' && ambience.enabled ? <NeonBackground /> : null}
     <Stack key={day} screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' }, animation: 'fade_from_bottom' }}>
       <Stack.Screen name="(tabs)" />
+      {/* Heavy screens: a plain fade avoids the overlapping slide over the transparent background. */}
+      <Stack.Screen name="settings" options={{ animation: 'fade', animationDuration: 180 }} />
+      <Stack.Screen name="stats" options={{ animation: 'fade', animationDuration: 180 }} />
       <Stack.Screen name="scan" options={{ animation: 'slide_from_bottom', contentStyle: { backgroundColor: '#050505' } }} />
     </Stack>
     {gate !== 'app' ? <View style={[StyleSheet.absoluteFill, styles.black]}>{ambience.enabled ? <NeonBackground /> : null}{gate === 'language' ? <LanguageSelectionScreen /> : gate === 'onboarding' ? <OnboardingScreen /> : null}</View> : null}
