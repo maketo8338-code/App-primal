@@ -13,90 +13,146 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Permanent+Marker&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- ============ ACCUEIL ============ -->
-<header class="hero" id="accueil">
-  <div class="hero__sky" aria-hidden="true"></div>
+<!-- curseur halo (PC uniquement) -->
+<div class="cursor" aria-hidden="true"><span class="cursor__ring"></span><span class="cursor__dot"></span></div>
 
-  <div class="frame">
-    <svg class="frame__lines" viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden="true">
-      <ellipse cx="500" cy="300" rx="430" ry="300"/>
-      <line x1="0" y1="0" x2="1000" y2="560"/><line x1="1000" y1="0" x2="0" y2="560"/>
-      <line x1="0" y1="250" x2="1000" y2="250"/><line x1="500" y1="0" x2="500" y2="560"/>
+<!-- ============ BARRE DU HAUT ============ -->
+<nav class="topbar" aria-label="Navigation principale">
+  <a class="brand" href="#accueil"><img src="img/logo-or.png" alt="" width="40" height="40"><span>PRIMAL</span></a>
+  <div class="topbar__links">
+    <a href="#rituel">Le rituel</a>
+    <a href="#piliers">Les piliers</a>
+    <a href="#reliques">L'app</a>
+    <a href="#sanctuaire">Confidentialité</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <button class="sound" type="button" aria-pressed="false" aria-label="Activer le son d'ambiance">
+    <span class="sound__bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    <span class="sound__label">Son</span>
+  </button>
+</nav>
+
+<!-- ============ ACCUEIL + RITUEL (téléphone 3D piloté par le défilement) ============ -->
+<section class="story" id="accueil" style="--steps: 6">
+  <div class="stage">
+    <div class="stage__sky" aria-hidden="true"></div>
+    <canvas class="stage__canvas" aria-hidden="true"></canvas>
+    <img class="stage__fallback" src="img/ecran-1.jpg" alt="" aria-hidden="true">
+
+    <svg class="stage__frame" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true">
+      <rect x="0.5" y="0.5" width="999" height="599"/>
+      <ellipse cx="500" cy="320" rx="440" ry="310"/>
+      <line x1="0" y1="0" x2="1000" y2="600"/><line x1="1000" y1="0" x2="0" y2="600"/>
+      <line x1="0" y1="300" x2="1000" y2="300"/><line x1="500" y1="0" x2="500" y2="600"/>
     </svg>
 
-    <nav class="nav">
-      <a href="#piliers">Fonctionnalités</a>
-      <a class="nav__logo" href="#accueil"><img src="img/icone-192.png" alt="" width="28" height="28">PRIMAL</a>
-      <a href="#faq">FAQ</a>
-    </nav>
-
-    <div class="hero__content">
+    <!-- étape 0 : accueil -->
+    <div class="step step--hero is-active" data-step="0">
       <p class="eyebrow">Nutrition · Santé · Performance</p>
       <h1 class="graffiti"><span>Décode</span><span>ta santé</span></h1>
       <p class="hero__sub">Ce que tu manges, bois, dors et bouges, réunis dans une note sur 100.</p>
-      <span class="btn-oval" role="note">Bientôt sur Google Play</span>
+      <span class="btn-oval">Bientôt sur Google Play</span>
     </div>
 
-    <a class="hero__scroll" href="#piliers" aria-label="Descendre">⌄</a>
-  </div>
+    <!-- étapes 1 à 5 : le rituel -->
+    <div class="step" data-step="1" id="rituel">
+      <span class="step__num">I</span>
+      <h2>Ton énergie du jour</h2>
+      <p>Calories, objectif et coach personnalisé. L'objectif s'ajuste à ta dépense réelle quand tu notes ton poids.</p>
+    </div>
+    <div class="step" data-step="2">
+      <span class="step__num">II</span>
+      <h2>Plus de 3&nbsp;000 aliments</h2>
+      <p>La table officielle Ciqual de l'ANSES, plus le scan de code-barres avec Open Food Facts.</p>
+    </div>
+    <div class="step" data-step="3">
+      <span class="step__num">III</span>
+      <h2>Tous tes micronutriments</h2>
+      <p>Vitamines, minéraux, fibres et oméga-3, suivis gratuitement, sans abonnement.</p>
+    </div>
+    <div class="step" data-step="4">
+      <span class="step__num">IV</span>
+      <h2>Ta note sur 100</h2>
+      <p>Sept piliers réunis en un seul chiffre, pour voir ta journée d'un coup d'œil.</p>
+    </div>
+    <div class="step" data-step="5">
+      <span class="step__num">V</span>
+      <h2>Partage ta journée</h2>
+      <p>Une carte stylée à envoyer, sans jamais montrer tes repas ni ton poids.</p>
+    </div>
 
-  <img class="floater floater--a" src="img/panneau-4.jpg" alt="Écran PRIMAL : note santé 55 sur 100" width="540" height="960">
-  <img class="floater floater--b" src="img/panneau-1.jpg" alt="Écran PRIMAL : ton énergie du jour, 2504 kcal" width="540" height="960">
-</header>
+    <ol class="progress" aria-hidden="true">
+      <li class="is-active">·</li><li>I</li><li>II</li><li>III</li><li>IV</li><li>V</li>
+    </ol>
+    <p class="stage__hint" aria-hidden="true">Fais défiler</p>
+  </div>
+</section>
 
 <main>
 
-<!-- ============ FONCTIONNALITÉS ============ -->
+<!-- ============ LES SEPT PILIERS (colonnade) ============ -->
 <section class="section" id="piliers">
-  <p class="eyebrow">Les sept piliers</p>
-  <h2 class="graffiti graffiti--sm">Ta note sur 100</h2>
-  <p class="lead">PRIMAL réunit toute ta journée en un seul chiffre, calculé à partir de sept piliers.</p>
-
-  <ol class="pillars">
-    <li><span class="numeral">I</span><h3>Nutrition</h3><p>Calories et objectif calculés selon ton profil et ton activité.</p></li>
-    <li><span class="numeral">II</span><h3>Macronutriments</h3><p>Protéines, glucides, lipides et fibres, repas par repas.</p></li>
-    <li><span class="numeral">III</span><h3>Micronutriments</h3><p>Vitamines, minéraux et oméga-3 suivis gratuitement, sans abonnement.</p></li>
-    <li><span class="numeral">IV</span><h3>Hydratation</h3><p>Un objectif d'eau calculé selon ton poids.</p></li>
-    <li><span class="numeral">V</span><h3>Sommeil</h3><p>Une plage idéale adaptée à ton âge.</p></li>
-    <li><span class="numeral">VI</span><h3>Activité</h3><p>Tes pas et plus de 15 sports.</p></li>
-    <li><span class="numeral">VII</span><h3>Temps dehors</h3><p>Le temps passé à l'extérieur compte aussi.</p></li>
-  </ol>
+  <div class="temple">
+    <div class="temple__title">
+      <p class="eyebrow">Les sept piliers</p>
+      <h2 class="graffiti graffiti--sm">Ta note sur 100</h2>
+    </div>
+    <div class="pediment-wrap" aria-hidden="true">
+      <svg class="pediment" viewBox="0 0 1000 150" preserveAspectRatio="none">
+        <polygon points="10,145 500,8 990,145"/><polygon points="70,135 500,30 930,135"/>
+      </svg>
+      <img class="pediment__emblem" src="img/logo-or.png" alt="" width="92" height="92">
+    </div>
+    <div class="entablature" aria-hidden="true">MENS SANA IN CORPORE SANO</div>
+    <ol class="colonnade">
+      <li class="column"><span class="column__cap" aria-hidden="true"></span><div class="column__shaft"><span class="numeral">I</span><h3>Nutrition</h3><p>Calories et objectif selon ton profil et ton activité.</p></div><span class="column__base" aria-hidden="true"></span></li>
+      <li class="column"><span class="column__cap" aria-hidden="true"></span><div class="column__shaft"><span class="numeral">II</span><h3>Macros</h3><p>Protéines, glucides, lipides et fibres.</p></div><span class="column__base" aria-hidden="true"></span></li>
+      <li class="column"><span class="column__cap" aria-hidden="true"></span><div class="column__shaft"><span class="numeral">III</span><h3>Micros</h3><p>Vitamines, minéraux et oméga-3.</p></div><span class="column__base" aria-hidden="true"></span></li>
+      <li class="column"><span class="column__cap" aria-hidden="true"></span><div class="column__shaft"><span class="numeral">IV</span><h3>Eau</h3><p>Objectif calculé selon ton poids.</p></div><span class="column__base" aria-hidden="true"></span></li>
+      <li class="column"><span class="column__cap" aria-hidden="true"></span><div class="column__shaft"><span class="numeral">V</span><h3>Sommeil</h3><p>Plage idéale adaptée à ton âge.</p></div><span class="column__base" aria-hidden="true"></span></li>
+      <li class="column"><span class="column__cap" aria-hidden="true"></span><div class="column__shaft"><span class="numeral">VI</span><h3>Activité</h3><p>Tes pas et plus de 15 sports.</p></div><span class="column__base" aria-hidden="true"></span></li>
+      <li class="column"><span class="column__cap" aria-hidden="true"></span><div class="column__shaft"><span class="numeral">VII</span><h3>Dehors</h3><p>Le temps passé à l'extérieur.</p></div><span class="column__base" aria-hidden="true"></span></li>
+    </ol>
+    <div class="stylobate" aria-hidden="true"></div>
+  </div>
 
   <div class="extras">
-    <div class="extra"><h3>Plus de 3 000 aliments</h3><p>Issus de la table officielle Ciqual (ANSES), plus le scan de code-barres via Open Food Facts.</p></div>
-    <div class="extra"><h3>Un objectif qui s'adapte</h3><p>Note ton poids : PRIMAL ajuste ton objectif calorique selon ta dépense réelle.</p></div>
-    <div class="extra"><h3>Un coach</h3><p>Il te propose les aliments qui complètent ta journée.</p></div>
-    <div class="extra"><h3>Bilan de la semaine</h3><p>Score moyen, réussites et manques récurrents.</p></div>
-    <div class="extra"><h3>Partage stylé</h3><p>Une carte de ta journée, sans jamais montrer tes repas ni ton poids.</p></div>
-    <div class="extra extra--neon"><h3>Thèmes secrets</h3><p>5 couleurs néon, plus Galaxie, Or et Chrome à débloquer.</p></div>
+    <div class="extra tilt"><h3>Un objectif qui s'adapte</h3><p>Note ton poids : PRIMAL ajuste ton objectif calorique selon ta dépense réelle.</p></div>
+    <div class="extra tilt"><h3>Un coach</h3><p>Il te propose les aliments qui complètent ta journée.</p></div>
+    <div class="extra tilt"><h3>Bilan de la semaine</h3><p>Score moyen, réussites et manques récurrents.</p></div>
+    <div class="extra extra--neon tilt"><h3>Thèmes secrets</h3><p>5 couleurs néon, plus Galaxie, Or et Chrome à débloquer.</p></div>
   </div>
 </section>
 
-<!-- ============ CAPTURES ============ -->
-<section class="section section--clouds" id="captures">
+<!-- ============ GALERIE 3D ============ -->
+<section class="section section--clouds" id="reliques">
   <p class="eyebrow">L'application</p>
-  <h2 class="graffiti graffiti--sm">En images</h2>
-  <div class="gallery" tabindex="0" aria-label="Captures d'écran de PRIMAL">
-    <img src="img/panneau-1.jpg" alt="Ton énergie du jour en un coup d'œil" loading="lazy" width="540" height="960">
-    <img src="img/panneau-2.jpg" alt="Plus de 3 000 aliments, base Ciqual et scan de code-barres" loading="lazy" width="540" height="960">
-    <img src="img/panneau-3.jpg" alt="Tous tes micronutriments, gratuitement" loading="lazy" width="540" height="960">
-    <img src="img/panneau-4.jpg" alt="Ta note santé sur 100" loading="lazy" width="540" height="960">
-    <img src="img/panneau-5.jpg" alt="Eau et sommeil" loading="lazy" width="540" height="960">
-    <img src="img/panneau-6.jpg" alt="Bouge et sors dehors" loading="lazy" width="540" height="960">
-    <img src="img/panneau-7.jpg" alt="Partage ta journée" loading="lazy" width="540" height="960">
-    <img src="img/panneau-8.jpg" alt="Des thèmes secrets à débloquer" loading="lazy" width="540" height="960">
+  <h2 class="graffiti graffiti--sm">Les reliques</h2>
+  <div class="coverflow">
+    <button class="coverflow__nav coverflow__nav--prev" type="button" aria-label="Image précédente">‹</button>
+    <div class="coverflow__track" tabindex="0" aria-label="Captures d'écran de PRIMAL">
+      <figure><img src="img/panneau-1.jpg" alt="Ton énergie du jour en un coup d'œil" width="540" height="960" loading="lazy"></figure>
+      <figure><img src="img/panneau-2.jpg" alt="Plus de 3 000 aliments, base Ciqual et scan de code-barres" width="540" height="960" loading="lazy"></figure>
+      <figure><img src="img/panneau-3.jpg" alt="Tous tes micronutriments, gratuitement" width="540" height="960" loading="lazy"></figure>
+      <figure><img src="img/panneau-4.jpg" alt="Ta note santé sur 100" width="540" height="960" loading="lazy"></figure>
+      <figure><img src="img/panneau-5.jpg" alt="Eau et sommeil" width="540" height="960" loading="lazy"></figure>
+      <figure><img src="img/panneau-6.jpg" alt="Bouge et sors dehors" width="540" height="960" loading="lazy"></figure>
+      <figure><img src="img/panneau-7.jpg" alt="Partage ta journée" width="540" height="960" loading="lazy"></figure>
+      <figure><img src="img/panneau-8.jpg" alt="Des thèmes secrets à débloquer" width="540" height="960" loading="lazy"></figure>
+    </div>
+    <button class="coverflow__nav coverflow__nav--next" type="button" aria-label="Image suivante">›</button>
   </div>
-  <p class="hint">Fais défiler →</p>
 </section>
 
 <!-- ============ CONFIDENTIALITÉ ============ -->
-<section class="section" id="confidentialite">
+<section class="section" id="sanctuaire">
   <div class="vault">
+    <img class="vault__emblem" src="img/logo-or.png" alt="" width="120" height="120">
     <p class="eyebrow">Confidentialité</p>
     <h2 class="graffiti graffiti--sm">Tes données restent chez toi</h2>
     <ul class="vault__list">
@@ -110,9 +166,11 @@
 </section>
 
 <!-- ============ FAQ ============ -->
-<section class="section" id="faq">
-  <p class="eyebrow">Questions fréquentes</p>
-  <h2 class="graffiti graffiti--sm">FAQ</h2>
+<section class="section faq-wrap" id="faq">
+  <div class="faq-wrap__head">
+    <p class="eyebrow">Questions fréquentes</p>
+    <h2 class="graffiti graffiti--sm">FAQ</h2>
+  </div>
   <div class="faq">
     <details><summary>Faut-il créer un compte ?</summary><p>Non. PRIMAL fonctionne sans compte et sans serveur : tout reste sur ton téléphone.</p></details>
     <details><summary>Le suivi des vitamines et minéraux est-il payant ?</summary><p>Non. Vitamines, minéraux, fibres et oméga-3 sont suivis gratuitement, sans abonnement, et l'app ne contient pas de publicité.</p></details>
@@ -122,23 +180,25 @@
     <details><summary>Sur quels téléphones ?</summary><p>PRIMAL arrive d'abord sur Android, via Google Play.</p></details>
     <details><summary>PRIMAL remplace-t-il un avis médical ?</summary><p>Non. PRIMAL est un outil de suivi : il ne remplace pas l'avis d'un professionnel de santé.</p></details>
   </div>
-  <!-- CONTACT : ajouter ici une adresse e-mail de contact quand elle sera choisie, ex.
-  <p class="contact">Une question ? <a href="mailto:ADRESSE">ADRESSE</a></p> -->
+  <!-- CONTACT : ajouter ici une adresse e-mail de contact quand elle sera choisie. -->
 </section>
 
 </main>
 
 <footer class="footer">
-  <p class="footer__logo">PRIMAL</p>
-  <nav class="footer__nav">
-    <a href="#piliers">Fonctionnalités</a>
-    <a href="#captures">Captures</a>
+  <img class="footer__emblem" src="img/logo-or.png" alt="" width="72" height="72">
+  <p class="footer__motto">Mens sana in corpore sano<small>Juvénal, Satires, X</small></p>
+  <nav class="footer__nav" aria-label="Pied de page">
+    <a href="#rituel">Le rituel</a>
+    <a href="#piliers">Les piliers</a>
+    <a href="#reliques">L'app</a>
     <a href="https://sites.google.com/view/primal-confidentialite" target="_blank" rel="noopener">Confidentialité</a>
     <a href="#faq">FAQ</a>
   </nav>
   <p class="footer__small">Données nutritionnelles : table de composition Ciqual 2025, ANSES (Licence Ouverte) · Open Food Facts.<br>PRIMAL est un outil de suivi et ne remplace pas un avis médical. © 2026 PRIMAL</p>
 </footer>
 
+<script src="vendor/three.min.js" defer></script>
 <script src="script.js" defer></script>
 </body>
 </html>
