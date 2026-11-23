@@ -2,7 +2,7 @@
 // Only a hash of each code is stored, so the codes are not written in clear in the app.
 // To change a code: `node tools/galaxy-code.mjs MONCODE` and paste the printed hash below.
 // This is light protection for a free cosmetic: a determined person could still find them.
-import type { LockedId } from '../lib/theme';
+import { LOCKED_IDS, type LockedId } from '../lib/theme';
 
 /** Normalises what the user typed: case, spaces and accents do not matter. */
 export function normalizeCode(input: string): string {
@@ -29,7 +29,18 @@ export const GALAXY_CODE_HASHES: Record<LockedId, string> = {
   chrome: 'fdwtym3kap',
 };
 
-/** Returns the variant a code unlocks, or null. */
+/** « Cadeau de démarrage »: one code that unlocks every locked theme (kept for the whole v1). */
+const MASTER_CODE_HASH = 'me2kg856fn';
+
+/** Every theme a code unlocks: all of them for the master code, one for an individual code, none otherwise. */
+export function unlockedByCode(input: string): LockedId[] {
+  if (!normalizeCode(input)) return [];
+  if (hashCode(input) === MASTER_CODE_HASH) return [...LOCKED_IDS];
+  const one = variantForCode(input);
+  return one ? [one] : [];
+}
+
+/** Returns the variant an individual code unlocks, or null. */
 export function variantForCode(input: string): LockedId | null {
   if (!normalizeCode(input)) return null;
   const hash = hashCode(input);

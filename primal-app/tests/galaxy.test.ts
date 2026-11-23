@@ -1,7 +1,8 @@
 // Galaxy codes: forgiving input, one distinct hash per variant, locked variants cannot be forced.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { GALAXY_CODE_HASHES, hashCode, normalizeCode, variantForCode } from '../src/galaxy/codes';
+import { GALAXY_CODE_HASHES, hashCode, normalizeCode, unlockedByCode, variantForCode } from '../src/galaxy/codes';
+import { LOCKED_IDS } from '../src/lib/theme';
 import { sanitizeAmbience } from '../src/lib/theme';
 
 test('input is normalised: case, accents, spaces and punctuation do not matter', () => {
@@ -19,4 +20,10 @@ test('a locked galaxy cannot be the active accent', () => {
   assert.equal(sanitizeAmbience({ accent: 'aurore', unlocked: [] }).accent, 'braise');
   assert.equal(sanitizeAmbience({ accent: 'aurore', unlocked: ['aurore', 'fake'] }).accent, 'aurore');
   assert.deepEqual(sanitizeAmbience({ unlocked: ['aurore', 'fake'] }).unlocked, ['aurore']);
+});
+test('the start gift code unlocks every locked theme; individual codes unlock one; junk unlocks nothing', () => {
+  assert.deepEqual(unlockedByCode(' Start-Gift '), LOCKED_IDS);
+  assert.equal(unlockedByCode('startgift').length, 6);
+  assert.equal(unlockedByCode('primalgold').length, 1);
+  assert.deepEqual(unlockedByCode('nope'), []);
 });

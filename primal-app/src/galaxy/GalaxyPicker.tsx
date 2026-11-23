@@ -10,7 +10,7 @@ import { PrimaryButton } from '../components/ui';
 import { glow, isGalaxy, PALETTES, useTheme, type LockedId } from '../lib/theme';
 import { FONTS } from '../lib/fonts';
 import { useI18n } from '../lib/i18n';
-import { variantForCode } from './codes';
+import { unlockedByCode } from './codes';
 
 const SIZE = 44;
 const rgb = (c: [number, number, number]) => `rgb(${c[0]},${c[1]},${c[2]})`;
@@ -83,16 +83,17 @@ export default function GalaxyPicker({ ids, title, hint }: { ids: LockedId[]; ti
     setCode(''); setError(false); setAsking(id);
   };
   const submit = () => {
-    const found = variantForCode(code);
+    const unlockedNow = unlockedByCode(code);
+    // The tapped padlock opens when the code covers it (master code); otherwise the code's own variant opens.
+    const found = asking && unlockedNow.includes(asking) ? asking : unlockedNow[0];
     if (!found) {
       setError(true);
       shake.value = withSequence(withTiming(-10, { duration: 50 }), withTiming(10, { duration: 70 }), withTiming(-6, { duration: 60 }), withTiming(0, { duration: 50 }));
       if (Platform.OS !== 'web') void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => undefined);
       return;
     }
-    // A code unlocks its own variant, even if the user tapped another padlock.
     setAsking(null);
-    setAmbience({ unlocked: Array.from(new Set([...ambience.unlocked, found])), accent: found });
+    setAmbience({ unlocked: Array.from(new Set([...ambience.unlocked, ...unlockedNow])), accent: found });
     setBurst(found);
     if (Platform.OS !== 'web') void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => undefined);
   };
