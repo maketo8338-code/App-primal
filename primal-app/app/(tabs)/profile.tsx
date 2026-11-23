@@ -1,6 +1,6 @@
 import React from 'react';
 import { TabScene } from '../../src/navigation/TabScene';
-import { useRouter } from 'expo-router';
+import { useRouter } from '../../src/navigation/useRouter';
 import ProfileScreen from '../../src/screens/ProfileScreen';
 
 export default function ProfileRoute() {

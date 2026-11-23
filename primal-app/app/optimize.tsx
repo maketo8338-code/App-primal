@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter } from '../src/navigation/useRouter';
 import OptimizeDayScreen from '../src/screens/OptimizeDayScreen';
 import { useSession } from '../src/navigation/session';
 import { todayKey } from '../src/lib/nutrition';

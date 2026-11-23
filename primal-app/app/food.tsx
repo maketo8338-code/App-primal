@@ -1,5 +1,6 @@
 import React from 'react';
-import { Redirect, useRouter } from 'expo-router';
+import { Redirect } from 'expo-router';
+import { useRouter } from '../src/navigation/useRouter';
 import FoodDetailScreen from '../src/screens/FoodDetailScreen';
 import { useSession } from '../src/navigation/session';
 import { useStore } from '../src/lib/store';

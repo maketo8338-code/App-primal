@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter } from '../src/navigation/useRouter';
 import SettingsScreen from '../src/screens/SettingsScreen';
 
 export default function Route() {

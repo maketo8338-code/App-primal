@@ -1,6 +1,6 @@
 import React from 'react';
 import { TabScene } from '../../src/navigation/TabScene';
-import { useRouter } from 'expo-router';
+import { useRouter } from '../../src/navigation/useRouter';
 import HomeScreen from '../../src/screens/HomeScreen';
 import { useSession } from '../../src/navigation/session';
 import { todayKey } from '../../src/lib/nutrition';
