@@ -105,9 +105,21 @@ export function knownTotalForEntries(entries: JournalEntry[], key: NutrientKey):
   return { amount: knownEntries ? amount : undefined, knownEntries, totalEntries: entries.length };
 }
 
+/** Macros whose « traces » (value missing in the source tables) count as 0 g, as long as the food has its calories. */
+const TRACE_TOLERANT: NutrientKey[] = ['protein', 'carbs', 'fat'];
+
 export function completeTotalForEntries(entries: JournalEntry[], key: NutrientKey): number | undefined {
-  if (!entries.length || entries.some((entry) => typeof entry.per100[key] !== 'number' || !Number.isFinite(entry.per100[key]))) return undefined;
-  return entries.reduce((sum, entry) => sum + ((entry.per100[key] as number) * entry.grams) / 100, 0);
+  if (!entries.length) return undefined;
+  const tolerant = TRACE_TOLERANT.includes(key);
+  let sum = 0;
+  for (const entry of entries) {
+    const value = entry.per100[key];
+    if (typeof value === 'number' && Number.isFinite(value)) { sum += (value * entry.grams) / 100; continue; }
+    const kcal = entry.per100.kcal;
+    if (tolerant && typeof kcal === 'number' && Number.isFinite(kcal)) continue; // trace: not counted, the day's total stays visible
+    return undefined;
+  }
+  return sum;
 }
 
 export function scoreTotalsForEntries(entries: JournalEntry[]): Nutrients {
