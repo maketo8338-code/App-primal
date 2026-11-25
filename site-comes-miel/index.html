@@ -90,6 +90,8 @@ section{padding-block:5rem;position:relative}
 
 /* histoire */
 .story{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center}
+.photo .inner img{display:block;width:100%;height:auto}
+.story-time{margin-top:3rem;max-width:760px;margin-inline:auto}
 .kraft{background:linear-gradient(135deg,#e3c690,#d4b278);border-radius:6px;padding:2.2rem;box-shadow:var(--shadow);transform:rotate(-1.2deg);position:relative}
 .kraft::before{content:"";position:absolute;top:-14px;left:50%;width:110px;height:28px;margin-left:-55px;background:rgba(255,250,235,.7);box-shadow:0 1px 3px rgba(0,0,0,.15);transform:rotate(2deg)}
 .timeline{list-style:none;margin:0;padding:0;display:grid;gap:1.3rem}
@@ -284,6 +286,17 @@ footer{padding-block:2.5rem;font-size:.9rem;color:var(--ink-soft);text-align:cen
       <p>Bruno a découvert les abeilles dans les années 2000, en autodidacte, alors qu'il était pompier. La passion a pris le dessus : en 2016, il en a fait son métier.</p>
       <p>Aujourd'hui, il s'occupe lui-même de ses ruches et vend son miel sans intermédiaire, à ceux qui viennent le voir à Jaumard.</p>
     </div>
+    <div class="frame photo tilt">
+      <div class="drip"><svg><use href="#dripShape"/></svg>
+        <i class="drop" style="left:53.75%;top:59px;animation-delay:.6s"></i><i class="drop" style="left:91.25%;top:47px;animation-delay:2.4s"></i>
+      </div>
+      <div class="inner">
+        <img src="bruno.jpg" width="1200" height="900" alt="Bruno Comes en tenue d'apiculteur, tenant un cadre couvert d'abeilles au-dessus d'une ruche ouverte">
+        <span class="caption">Bruno au rucher, cadre en main</span>
+      </div>
+    </div>
+  </div>
+  <div class="wrap story-time">
     <div class="kraft">
       <ul class="timeline">
         <li><b>Années 2000</b><span>Premières ruches, en autodidacte, à côté de son métier de pompier.</span></li>
