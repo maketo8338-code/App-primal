@@ -2,7 +2,7 @@
   "expo": {
     "name": "VISOLIS",
     "slug": "primal",
-    "scheme": "primal",
+    "scheme": "visolis",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/logo/logo-braise.png",
@@ -11,10 +11,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "app.primal.nutrition"
+      "bundleIdentifier": "app.visolis.nutrition"
     },
     "android": {
-      "package": "app.primal.nutrition",
+      "package": "app.visolis.nutrition",
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo/logo-braise-adaptive.png",
         "backgroundColor": "#050505"
