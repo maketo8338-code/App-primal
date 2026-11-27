@@ -24,7 +24,7 @@ const STROKE = 12;
 interface Props { summary: DaySummary; showCalories: boolean }
 
 /**
- * « Ma journée PRIMAL » — the image people share. Drawn with plain views and
+ * « Ma journée VISOLIS » — the image people share. Drawn with plain views and
  * SVG so it renders the same on screen, in the captured PNG and on the web.
  * Never shows weight or the list of foods.
  */
@@ -82,7 +82,7 @@ export const ShareCard = forwardRef<View, Props>(function ShareCard({ summary, s
     </Svg>
 
     <View style={styles.top}>
-      <Text style={[FONTS.text.bold, styles.brand, { color: theme.primary }]}>PRIMAL</Text>
+      <Text style={[FONTS.text.bold, styles.brand, { color: theme.primary }]}>VISOLIS</Text>
       <Text style={[FONTS.text.semibold, styles.date]}>{date}</Text>
     </View>
 
@@ -120,7 +120,7 @@ export const ShareCard = forwardRef<View, Props>(function ShareCard({ summary, s
     </View>
 
     <View style={styles.footer}>
-      <Text style={[FONTS.text.semibold, styles.footerText]}>Ma journée avec PRIMAL</Text>
+      <Text style={[FONTS.text.semibold, styles.footerText]}>Ma journée avec VISOLIS</Text>
       <Text style={[FONTS.text.regular, styles.footerSub]}>nutrition · performance</Text>
     </View>
   </View>;

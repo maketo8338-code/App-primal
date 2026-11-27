@@ -11,7 +11,7 @@ export const DIET_STYLE_OPTIONS: DietStyleOption[] = [
   { id: 'mediterranean', label: 'Méditerranéen', description: 'Végétaux, poissons, huile d’olive, légumineuses et aliments peu transformés.', icon: 'sun.max.fill', androidIcon: 'sunny' },
   { id: 'custom', label: 'Personnalisé', description: 'Conserve les recommandations générales et laisse les objectifs ajustables dans le Profil.', icon: 'slider.horizontal.3', androidIcon: 'options' },
 ];
-export const DIET_STYLE_DISCLAIMER = 'PRIMAL est une application de suivi et d’information nutritionnelle. Les styles alimentaires sont proposés à titre informatif et ne remplacent pas l’avis d’un professionnel de santé.';
+export const DIET_STYLE_DISCLAIMER = 'VISOLIS est une application de suivi et d’information nutritionnelle. Les styles alimentaires sont proposés à titre informatif et ne remplacent pas l’avis d’un professionnel de santé.';
 export function getDietStyleOption(style: DietStyleId | undefined): DietStyleOption { return DIET_STYLE_OPTIONS.find((option) => option.id === style) || DIET_STYLE_OPTIONS[0]; }
 function valid(value: number | undefined, min: number, max: number): value is number { return typeof value === 'number' && Number.isFinite(value) && value >= min && value <= max; }
 export function calculateDietTargets(profile: Profile, style: DietStyleId): Targets {

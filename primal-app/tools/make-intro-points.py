@@ -15,7 +15,7 @@ spec = importlib.util.spec_from_file_location('logos', 'tools/make-logos.py')
 logos = importlib.util.module_from_spec(spec); spec.loader.exec_module(logos)
 
 random.seed(7)
-masks = {k: np.asarray(m, float) / 255 for k, m in logos.unmix(Image.open(logos.SRC)).items()}
+masks = {k: np.asarray(m.resize((256, 256), Image.LANCZOS), float) / 255 for k, m in logos.build_masks().items()}
 H, W = masks['white'].shape
 STEP = 4  # sampling grid in source pixels (256 px logo)
 points = []

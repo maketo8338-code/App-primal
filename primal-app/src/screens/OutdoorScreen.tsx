@@ -107,7 +107,7 @@ export default function OutdoorScreen({ onBack }: { onBack: () => void }) {
         <View style={[styles.noteBox, { backgroundColor: theme.cardAlt }]}>
           <Icon name="info.circle" android="information-circle" size={18} color={theme.sub} />
           <Text style={[FONTS.text.regular, { color: theme.sub, fontSize: 13, flex: 1, lineHeight: 18 }]}>
-            Cette habitude suit uniquement le temps passé dehors. PRIMAL ne calcule pas la vitamine D produite et ne donne aucune recommandation médicale d'exposition solaire.
+            Cette habitude suit uniquement le temps passé dehors. VISOLIS ne calcule pas la vitamine D produite et ne donne aucune recommandation médicale d'exposition solaire.
           </Text>
         </View>
       </ScrollView>

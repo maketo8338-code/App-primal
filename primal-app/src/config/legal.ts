@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// À REMPLIR : liens légaux de PRIMAL.
+// À REMPLIR : liens légaux de VISOLIS.
 // Les anciennes pages étaient hébergées par Bloxks et ne sont plus disponibles.
 // Une app publiée sur l'App Store / Google Play DOIT avoir une politique de
 // confidentialité accessible. Tant qu'un lien est vide, sa ligne est masquée

@@ -1,13 +1,13 @@
-# Fiche Google Play — PRIMAL
+# Fiche Google Play — VISOLIS
 
 ## Nom (30 car. max)
-PRIMAL : nutrition et santé
+VISOLIS : nutrition et santé
 
 ## Description courte (80 car. max)
 Calories, micronutriments, eau, sommeil et activité : ta note santé sur 100.
 
 ## Description longue
-PRIMAL t'aide à comprendre ta journée en un coup d'œil : ce que tu manges, ce que tu bois, comment tu dors et combien tu bouges, réunis dans une note santé sur 100.
+VISOLIS t'aide à comprendre ta journée en un coup d'œil : ce que tu manges, ce que tu bois, comment tu dors et combien tu bouges, réunis dans une note santé sur 100.
 
 NUTRITION
 • Plus de 3 000 aliments issus de la table officielle Ciqual (ANSES)
@@ -18,7 +18,7 @@ NUTRITION
 
 TON OBJECTIF CALORIQUE S'ADAPTE
 • Calculé selon ton profil et ton activité
-• Note ton poids : PRIMAL ajuste l'objectif avec ta dépense réelle
+• Note ton poids : VISOLIS ajuste l'objectif avec ta dépense réelle
 
 LES 7 PILIERS DE TA NOTE
 Nutrition, macronutriments, micronutriments, hydratation, sommeil, activité et temps dehors.
@@ -37,7 +37,7 @@ AMBIANCE
 TES DONNÉES RESTENT CHEZ TOI
 Pas de compte, pas de serveur, pas de publicité. Tout est stocké sur ton téléphone, avec sauvegarde exportable.
 
-PRIMAL est un outil de suivi : il ne remplace pas un avis médical.
+VISOLIS est un outil de suivi : il ne remplace pas un avis médical.
 
 ## Fichiers
 - icone-512.png (icône 512×512)

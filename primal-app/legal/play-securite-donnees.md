@@ -1,6 +1,6 @@
 # Google Play : formulaire « Sécurité des données » (brouillon pré-rempli)
 
-Brouillon établi à partir du code de PRIMAL au 21/11/2026. À relire avant envoi.
+Brouillon établi à partir du code de VISOLIS au 21/11/2026. À relire avant envoi.
 
 ## Collecte et partage
 - **L'app collecte-t-elle ou partage-t-elle des données utilisateur ?** Non.

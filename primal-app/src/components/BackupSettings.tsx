@@ -30,7 +30,7 @@ export default function BackupSettings() {
     setMessage(null);
     const result = await pickBackup();
     if (result.ok) { setPending(result.backup); return; }
-    if (result.reason !== 'cancelled') setMessage({ text: result.reason === 'invalid' ? "Ce fichier n'est pas une sauvegarde PRIMAL." : "Le fichier n'a pas pu être lu.", tone: 'error' });
+    if (result.reason !== 'cancelled') setMessage({ text: result.reason === 'invalid' ? "Ce fichier n'est pas une sauvegarde VISOLIS." : "Le fichier n'a pas pu être lu.", tone: 'error' });
   };
   const confirmRestore = () => {
     if (!pending) return;

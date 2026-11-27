@@ -1,4 +1,4 @@
-# PRIMAL 2 — nutrition & santé (version indépendante, sans Bloxks)
+# VISOLIS 2 — nutrition & santé (version indépendante, sans Bloxks)
 
 Thème unique « Néon braise » : fond noir, particules de lumière néon rouge qui
 réagissent au toucher (onde de choc), au glissé, au défilement et aux

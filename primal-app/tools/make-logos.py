@@ -82,6 +82,9 @@ def render(primary, halo, masks):
         g = union.filter(ImageFilter.GaussianBlur(radius))
         g = Image.fromarray(np.clip(np.asarray(g, float) * strength, 0, 255).astype(np.uint8))
         canvas = Image.alpha_composite(canvas, solid(halo, g))
+    sun_glow = masks['sun'].filter(ImageFilter.GaussianBlur(70))  # rayonnement du soleil
+    sun_glow = Image.fromarray(np.clip(np.asarray(sun_glow, float) * 1.4, 0, 255).astype(np.uint8))
+    canvas = Image.alpha_composite(canvas, solid(halo, sun_glow))
 
     accent_soft = tuple(int(c * 0.85 + 255 * 0.15) for c in primary)
     canvas = Image.alpha_composite(canvas, solid(accent_soft, masks['sun']))
@@ -91,8 +94,51 @@ def render(primary, halo, masks):
     return canvas.convert('RGB')
 
 
+WORDMARK = 'VISOLIS'
+FONT = 'node_modules/@expo-google-fonts/space-grotesk/700Bold/SpaceGrotesk_700Bold.ttf'
+TEXT_TOP = 188  # source rows (256 px) below the DNA: the old wordmark, removed
+SUN_SCALE, SUN_LIFT = 1.18, 14  # VISOLIS = « la force du soleil » : soleil plus présent
+
+
+def wordmark_mask(width=540, cap=70, center_y=806):
+    from PIL import ImageDraw, ImageFont
+    font = ImageFont.truetype(FONT, 100)
+    scale = cap / font.getbbox('V')[3]
+    font = ImageFont.truetype(FONT, int(100 * scale))
+    widths = [font.getbbox(c)[2] - font.getbbox(c)[0] for c in WORDMARK]
+    gap = (width - sum(widths)) / (len(WORDMARK) - 1)
+    mask = Image.new('L', (SIZE, SIZE), 0)
+    d = ImageDraw.Draw(mask)
+    x = (SIZE - width) / 2
+    for c, w in zip(WORDMARK, widths):
+        d.text((x - font.getbbox(c)[0], center_y), c, font=font, fill=255)
+        x += w + gap
+    # vertically centre the drawn line on center_y
+    arr = np.asarray(mask); rows = np.where(arr.max(1) > 0)[0]
+    shift = int(center_y - (rows.min() + rows.max()) / 2)
+    return mask.transform(mask.size, Image.AFFINE, (1, 0, 0, 0, 1, -shift)).filter(ImageFilter.MaxFilter(3)).filter(ImageFilter.GaussianBlur(0.6))
+
+
+def scale_about(mask, scale, cx, cy, lift):
+    # Inverse affine: output (x, y) samples input ((x - cx) / s + cx, (y + lift - cy) / s + cy).
+    s = scale
+    return mask.transform(mask.size, Image.AFFINE, (1 / s, 0, cx - cx / s, 0, 1 / s, cy - (cy - lift) / s), Image.BICUBIC)
+
+
+def build_masks():
+    """1024 px masks: logo figure + bigger sun + VISOLIS wordmark."""
+    raw = unmix(Image.open(SRC))
+    for k in raw:  # drop the old wordmark
+        a = np.asarray(raw[k]).copy(); a[TEXT_TOP:] = 0; raw[k] = Image.fromarray(a)
+    masks = {k: up(m) for k, m in raw.items()}
+    sun = np.asarray(masks['sun']); ys, xs = np.where(sun > 60)
+    masks['sun'] = scale_about(masks['sun'], SUN_SCALE, xs.mean(), ys.mean(), SUN_LIFT)
+    masks['white'] = Image.fromarray(np.maximum(np.asarray(masks['white']), np.asarray(wordmark_mask())))
+    return masks
+
+
 if __name__ == '__main__':
-    masks = {k: up(m) for k, m in unmix(Image.open(SRC)).items()}
+    masks = build_masks()
     for name, (primary, halo) in PALETTES.items():
         logo = render(primary, halo, masks)
         logo.save(f'assets/logo/logo-{name}.png', optimize=True)

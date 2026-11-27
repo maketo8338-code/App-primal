@@ -27,7 +27,7 @@ export function buildBackup(data: State, ambience: unknown): BackupFile {
 
 const MAX_BACKUP_BYTES = 25 * 1024 * 1024;
 
-/** Reads a backup file's text. Returns null when it is not a PRIMAL backup. */
+/** Reads a backup file's text. Returns null when it is not a VISOLIS backup. */
 export function parseBackup(text: string): BackupFile | null {
   try {
     const value = JSON.parse(text) as Partial<BackupFile>;
@@ -51,7 +51,7 @@ export async function exportBackup(backup: BackupFile): Promise<ExportResult> {
     file.create();
     file.write(JSON.stringify(backup));
     if (!(await Sharing.isAvailableAsync())) return { ok: false, reason: 'unavailable' };
-    await Sharing.shareAsync(file.uri, { mimeType: 'application/json', UTI: 'public.json', dialogTitle: 'Sauvegarder mes données PRIMAL' });
+    await Sharing.shareAsync(file.uri, { mimeType: 'application/json', UTI: 'public.json', dialogTitle: 'Sauvegarder mes données VISOLIS' });
     return { ok: true };
   } catch {
     return { ok: false, reason: 'error' };

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "PRIMAL",
+    "name": "VISOLIS",
     "slug": "primal",
     "scheme": "primal",
     "version": "1.0.0",
@@ -39,19 +39,19 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "PRIMAL utilise l'appareil photo pour scanner les codes-barres des produits."
+          "cameraPermission": "VISOLIS utilise l'appareil photo pour scanner les codes-barres des produits."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "PRIMAL accède à tes photos pour choisir ta photo de profil."
+          "photosPermission": "VISOLIS accède à tes photos pour choisir ta photo de profil."
         }
       ],
       [
         "expo-sensors",
         {
-          "motionPermission": "PRIMAL utilise les mouvements du téléphone pour animer les particules lumineuses."
+          "motionPermission": "VISOLIS utilise les mouvements du téléphone pour animer les particules lumineuses."
         }
       ],
       "expo-notifications",

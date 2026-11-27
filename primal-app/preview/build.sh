@@ -7,7 +7,7 @@ trap 'rm -rf "$TMP"' EXIT
 cp -r "$ROOT/src" "$ROOT/assets" "$ROOT/preview" "$ROOT/app.json" "$ROOT/tsconfig.json" "$TMP/"
 ln -s "$ROOT/node_modules" "$TMP/node_modules"
 node -e "const p=require('$ROOT/package.json');p.main='preview/entry.js';require('fs').writeFileSync('$TMP/package.json',JSON.stringify(p,null,2))"
-node -e "const a=require('$TMP/app.json');a.expo.plugins=a.expo.plugins.filter(p=>p!=='expo-router');a.expo.name='PRIMAL';require('fs').writeFileSync('$TMP/app.json',JSON.stringify(a,null,2))"
+node -e "const a=require('$TMP/app.json');a.expo.plugins=a.expo.plugins.filter(p=>p!=='expo-router');a.expo.name='VISOLIS';require('fs').writeFileSync('$TMP/app.json',JSON.stringify(a,null,2))"
 (cd "$TMP" && CI=1 npx expo export --platform web --output-dir out --clear >/dev/null)
 rm -rf "$ROOT/preview-build" && mv "$TMP/out" "$ROOT/preview-build"
 cd "$ROOT/preview-build"

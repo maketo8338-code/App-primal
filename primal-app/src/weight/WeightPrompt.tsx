@@ -68,7 +68,7 @@ export default function WeightPrompt() {
     <View style={[styles.sheet, { backgroundColor: theme.cardSolid, borderColor: theme.outline }]}>
       <Text style={[FONTS.text.bold, styles.eyebrow, { color: theme.primary }]}>PESÉE DU JOUR</Text>
       <Text style={[FONTS.display.semibold, styles.title, { color: theme.text }]}>Un changement ?</Text>
-      <Text style={[FONTS.text.regular, styles.sub, { color: theme.sub }]}>Si ton poids a bougé, note-le : PRIMAL ajuste ton objectif calorique avec ta dépense réelle.</Text>
+      <Text style={[FONTS.text.regular, styles.sub, { color: theme.sub }]}>Si ton poids a bougé, note-le : VISOLIS ajuste ton objectif calorique avec ta dépense réelle.</Text>
       <View style={styles.row}>
         <Pressable3D accessibilityLabel="−0,1 kg" onPress={() => step(-0.1)} style={[styles.round, { borderColor: theme.border, backgroundColor: theme.cardAlt }]}><Icon name="minus" android="remove" size={22} color={theme.text} /></Pressable3D>
         <View style={styles.valueBox}>

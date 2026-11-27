@@ -36,7 +36,7 @@ import LanguageSelectionScreen from '../screens/LanguageSelectionScreen';
 import ShareDayScreen from '../share/ShareDayScreen';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Shareable web preview of PRIMAL 2.
+// Shareable web preview of VISOLIS 2.
 // Same screens, theme and particles as the real app, but navigation is kept in
 // state (like the v1 App.tsx) instead of in the URL, so the preview works from
 // any link. The phone app itself uses Expo Router (see app/).

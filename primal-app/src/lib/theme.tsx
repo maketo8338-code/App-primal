@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { ViewStyle } from 'react-native';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PRIMAL design system — « Néon braise »
+// VISOLIS design system — « Néon braise »
 // One dark theme only: deep black, neon-red light, ember accents.
 // Every colour, radius, spacing, shadow and motion value lives here.
 // Token names are shared with the previous app so screens stay portable.

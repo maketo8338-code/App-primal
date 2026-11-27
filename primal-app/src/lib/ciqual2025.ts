@@ -75,7 +75,7 @@ const MAPPING: Array<[keyof Ciqual2025Record, NutrientKey]> = [
 
 function numeric(value: CiqualValue): number | undefined { return typeof value === 'number' && Number.isFinite(value) ? value : undefined; }
 function category(name: string): string {
-  // Whole words on an accent-free name (« boeuf » must not be read as « oeuf »), PRIMAL category codes.
+  // Whole words on an accent-free name (« boeuf » must not be read as « oeuf »), VISOLIS category codes.
   const text = ` ${name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/œ/g, 'oe').replace(/[^a-z0-9]+/g, ' ').trim()} `;
   const has = (...words: string[]) => words.some((w) => text.includes(` ${w} `) || text.includes(` ${w}s `) || text.includes(` ${w}x `));
   if (has('foie', 'cervelle', 'coeur', 'rognon', 'boeuf', 'porc', 'agneau', 'mouton', 'veau', 'poulet', 'dinde', 'canard', 'lapin', 'cheval', 'cerf', 'sanglier')) return 'MEAT';

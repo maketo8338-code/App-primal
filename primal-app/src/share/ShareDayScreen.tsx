@@ -13,7 +13,7 @@ import { glow, RADIUS, useTheme } from '../lib/theme';
 import { CARD_HEIGHT, CARD_WIDTH, ShareCard } from './ShareCard';
 import { useDaySummary } from './useDaySummary';
 
-/** Preview the « Ma journée PRIMAL » card and send it through the phone's share sheet. */
+/** Preview the « Ma journée VISOLIS » card and send it through the phone's share sheet. */
 export default function ShareDayScreen({ onBack }: { onBack: () => void }) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();

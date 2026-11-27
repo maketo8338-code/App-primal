@@ -2,7 +2,7 @@
 
 _Last updated: 23 November 2026_
 
-PRIMAL is designed to work without an account and without a server. This page explains, simply, which data the app uses, where it is kept and what leaves your phone.
+VISOLIS is designed to work without an account and without a server. This page explains, simply, which data the app uses, where it is kept and what leaves your phone.
 
 ## 1. Controller
 
@@ -24,7 +24,7 @@ This data is only used to compute your guidelines (energy, nutrients, score) and
 
 ## 3. Where it is kept
 
-Everything is saved in your phone’s local storage. PRIMAL has no account, no server and no online database: we do not receive your data.
+Everything is saved in your phone’s local storage. VISOLIS has no account, no server and no online database: we do not receive your data.
 
 Deleting the app erases this data. Export a backup first if you want to keep it.
 
@@ -54,7 +54,7 @@ Notifications: reminders computed and scheduled on the phone, never during your 
 
 Motion (accelerometer): only to animate the background particles. Nothing is recorded.
 
-## 7. What PRIMAL does not do
+## 7. What VISOLIS does not do
 
 No ads, no ad trackers, no analytics.
 
@@ -66,7 +66,7 @@ No connection to Apple Health, Health Connect or a watch for now. If that change
 
 Some information (weight, sleep, food) may be considered health data. It stays on your device and is never sent to the publisher.
 
-PRIMAL is a tracking tool: it does not diagnose and does not replace medical advice.
+VISOLIS is a tracking tool: it does not diagnose and does not replace medical advice.
 
 ## 9. Your rights
 
@@ -80,7 +80,7 @@ Ciqual 2025 food composition table, ANSES (Licence Ouverte). Open Food Facts (OD
 
 ## 11. Children
 
-PRIMAL is not intended for children under 15 without a parent’s consent.
+VISOLIS is not intended for children under 15 without a parent’s consent.
 
 ## 12. Changes
 

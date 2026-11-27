@@ -1,5 +1,5 @@
 /**
- * Politique de confidentialité de PRIMAL — source unique.
+ * Politique de confidentialité de VISOLIS — source unique.
  * Affichée dans l'app (Réglages › Légal) et exportée en Markdown par
  * `node tools/export-privacy.mjs` → legal/politique-confidentialite.md.
  *
@@ -14,7 +14,7 @@ export const PRIVACY_UPDATED = '2026-11-23';
 export const PRIVACY_FR: Policy = {
   title: 'Politique de confidentialité',
   updated: 'Dernière mise à jour : 23 novembre 2026',
-  intro: 'PRIMAL est conçu pour fonctionner sans compte et sans serveur. Cette page explique, simplement, quelles données l’app utilise, où elles sont conservées et ce qui sort de ton téléphone.',
+  intro: 'VISOLIS est conçu pour fonctionner sans compte et sans serveur. Cette page explique, simplement, quelles données l’app utilise, où elles sont conservées et ce qui sort de ton téléphone.',
   sections: [
     { title: '1. Responsable', body: ['Éditeur de l’app : Suella.', 'Contact pour toute question sur tes données : primal.health.app@gmail.com.'] },
     { title: '2. Données que tu saisis', body: [
@@ -25,7 +25,7 @@ export const PRIVACY_FR: Policy = {
       'Ces données servent uniquement à calculer tes repères (énergie, nutriments, score) et à afficher ton suivi.',
     ] },
     { title: '3. Où elles sont conservées', body: [
-      'Tout est enregistré dans le stockage local de ton téléphone. PRIMAL n’a ni compte, ni serveur, ni base de données en ligne : nous ne recevons pas tes données.',
+      'Tout est enregistré dans le stockage local de ton téléphone. VISOLIS n’a ni compte, ni serveur, ni base de données en ligne : nous ne recevons pas tes données.',
       'Supprimer l’app efface ces données. Pense à exporter une sauvegarde avant si tu veux les garder.',
     ] },
     { title: '4. Ce qui sort de ton téléphone', body: [
@@ -44,14 +44,14 @@ export const PRIVACY_FR: Policy = {
       'Notifications : rappels calculés et programmés sur le téléphone, jamais pendant tes heures calmes.',
       'Mouvement (accéléromètre) : uniquement pour animer les particules du fond. Aucune donnée n’est enregistrée.',
     ] },
-    { title: '7. Ce que PRIMAL ne fait pas', body: [
+    { title: '7. Ce que VISOLIS ne fait pas', body: [
       'Pas de publicité, pas de traceur publicitaire, pas d’outil de mesure d’audience.',
       'Pas de vente ni de location de données.',
       'Pas de connexion à Apple Santé, Health Connect ou une montre pour l’instant. Si cela arrive, cette page sera mise à jour avant.',
     ] },
     { title: '8. Données de santé', body: [
       'Certaines informations (poids, sommeil, alimentation) peuvent être considérées comme des données de santé. Elles restent sur ton appareil et ne sont jamais transmises à l’éditeur.',
-      'PRIMAL est un outil de suivi : il ne pose pas de diagnostic et ne remplace pas un avis médical.',
+      'VISOLIS est un outil de suivi : il ne pose pas de diagnostic et ne remplace pas un avis médical.',
     ] },
     { title: '9. Tes droits', body: [
       'Comme tes données sont sur ton téléphone, tu en gardes le contrôle : tu peux les modifier dans l’app, les exporter (sauvegarde) ou les effacer (en supprimant l’app).',
@@ -60,7 +60,7 @@ export const PRIVACY_FR: Policy = {
     { title: '10. Sources des données nutritionnelles', body: [
       'Table de composition nutritionnelle Ciqual 2025, ANSES (Licence Ouverte). Open Food Facts (ODbL). USDA FoodData Central (domaine public).',
     ] },
-    { title: '11. Enfants', body: ['PRIMAL n’est pas destiné aux enfants de moins de 15 ans sans l’accord d’un parent.'] },
+    { title: '11. Enfants', body: ['VISOLIS n’est pas destiné aux enfants de moins de 15 ans sans l’accord d’un parent.'] },
     { title: '12. Modifications', body: ['Si cette politique change, la date en haut de page sera mise à jour et le changement signalé dans l’app.'] },
   ],
 };
@@ -68,7 +68,7 @@ export const PRIVACY_FR: Policy = {
 export const PRIVACY_EN: Policy = {
   title: 'Privacy policy',
   updated: 'Last updated: 23 November 2026',
-  intro: 'PRIMAL is designed to work without an account and without a server. This page explains, simply, which data the app uses, where it is kept and what leaves your phone.',
+  intro: 'VISOLIS is designed to work without an account and without a server. This page explains, simply, which data the app uses, where it is kept and what leaves your phone.',
   sections: [
     { title: '1. Controller', body: ['App publisher: Suella.', 'Contact for any question about your data: primal.health.app@gmail.com.'] },
     { title: '2. Data you enter', body: [
@@ -79,7 +79,7 @@ export const PRIVACY_EN: Policy = {
       'This data is only used to compute your guidelines (energy, nutrients, score) and show your progress.',
     ] },
     { title: '3. Where it is kept', body: [
-      'Everything is saved in your phone’s local storage. PRIMAL has no account, no server and no online database: we do not receive your data.',
+      'Everything is saved in your phone’s local storage. VISOLIS has no account, no server and no online database: we do not receive your data.',
       'Deleting the app erases this data. Export a backup first if you want to keep it.',
     ] },
     { title: '4. What leaves your phone', body: [
@@ -98,14 +98,14 @@ export const PRIVACY_EN: Policy = {
       'Notifications: reminders computed and scheduled on the phone, never during your quiet hours.',
       'Motion (accelerometer): only to animate the background particles. Nothing is recorded.',
     ] },
-    { title: '7. What PRIMAL does not do', body: [
+    { title: '7. What VISOLIS does not do', body: [
       'No ads, no ad trackers, no analytics.',
       'No selling or renting of data.',
       'No connection to Apple Health, Health Connect or a watch for now. If that changes, this page will be updated first.',
     ] },
     { title: '8. Health data', body: [
       'Some information (weight, sleep, food) may be considered health data. It stays on your device and is never sent to the publisher.',
-      'PRIMAL is a tracking tool: it does not diagnose and does not replace medical advice.',
+      'VISOLIS is a tracking tool: it does not diagnose and does not replace medical advice.',
     ] },
     { title: '9. Your rights', body: [
       'Because your data is on your phone, you stay in control: you can edit it in the app, export it (backup) or erase it (by deleting the app).',
@@ -114,7 +114,7 @@ export const PRIVACY_EN: Policy = {
     { title: '10. Nutrition data sources', body: [
       'Ciqual 2025 food composition table, ANSES (Licence Ouverte). Open Food Facts (ODbL). USDA FoodData Central (public domain).',
     ] },
-    { title: '11. Children', body: ['PRIMAL is not intended for children under 15 without a parent’s consent.'] },
+    { title: '11. Children', body: ['VISOLIS is not intended for children under 15 without a parent’s consent.'] },
     { title: '12. Changes', body: ['If this policy changes, the date at the top will be updated and the change shown in the app.'] },
   ],
 };

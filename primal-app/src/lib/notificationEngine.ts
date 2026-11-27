@@ -18,7 +18,7 @@ function candidates(state: NotificationState, now = new Date()): Candidate[] { c
   if (state.preferences.hydration && state.targets.waterMl > 0 && habits.waterMl < state.targets.waterMl * 0.65) out.push({ kind: 'hydration', title: 'Un petit rappel d’eau', body: 'Tu es encore un peu en dessous de ta cible aujourd’hui.', hour: 15, minute: 30 });
   if (state.preferences.meal && entries.length < 2) out.push({ kind: 'meal', title: 'Ton journal t’attend', body: 'Ajoute ton prochain repas quand tu as un moment.', hour: 12, minute: 45 });
   if (state.preferences.activity && state.targets.steps > 0 && habits.steps < state.targets.steps * 0.55 && habits.activities.length === 0) out.push({ kind: 'activity', title: 'Un peu de mouvement ?', body: 'Quelques minutes d’activité peuvent compléter ta journée.', hour: 17, minute: 30 });
-  if (state.preferences.sleep && habits.sleepH <= 0) out.push({ kind: 'sleep', title: 'Pense à renseigner ton sommeil', body: 'Cela aide PRIMAL à suivre ta journée plus justement.', hour: 20, minute: 30 });
+  if (state.preferences.sleep && habits.sleepH <= 0) out.push({ kind: 'sleep', title: 'Pense à renseigner ton sommeil', body: 'Cela aide VISOLIS à suivre ta journée plus justement.', hour: 20, minute: 30 });
   if (state.preferences.insight && entries.length > 0 && state.targets.protein > 0 && protein !== undefined && protein < state.targets.protein * 0.55) out.push({ kind: 'insight', title: 'Repère nutritionnel', body: 'Une source de protéines peut compléter ton prochain repas.', hour: 18, minute: 15 });
   return out;
 }

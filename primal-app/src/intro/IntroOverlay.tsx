@@ -202,7 +202,7 @@ function Intro({ onDone }: { onDone: () => void }) {
     const waitOpacity = waitPulse.interpolate({ inputRange: [0, 1], outputRange: [0.55, 1] });
     const waitScale = waitPulse.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1.02] });
     const small = size * 0.62;
-    return <Pressable accessibilityRole="button" accessibilityLabel="Entrer dans PRIMAL" onPress={enter} style={[StyleSheet.absoluteFill, styles.gate]}>
+    return <Pressable accessibilityRole="button" accessibilityLabel="Entrer dans VISOLIS" onPress={enter} style={[StyleSheet.absoluteFill, styles.gate]}>
       <Animated.View style={[{ width: small, height: small, borderRadius: small / 2, overflow: 'hidden', opacity: waitOpacity, transform: [{ scale: waitScale }] }, glow(theme.neon, 0.8)]}>
         <Image source={logo} style={{ width: small, height: small }} />
       </Animated.View>

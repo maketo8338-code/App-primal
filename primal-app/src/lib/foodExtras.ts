@@ -7,7 +7,7 @@ export const FOOD_EXTRAS: Food[] = [
     "id": "primal-x-corossol",
     "source": "core",
     "ciqualRaw": {
-      "source": "Estimation PRIMAL (USDA SR Legacy 09315, Soursop, raw)",
+      "source": "Estimation VISOLIS (USDA SR Legacy 09315, Soursop, raw)",
       "sourceName": "Corossol (soursop), chair crue (estimation)",
       "category": "FRUITS",
       "reference": "100 g"
@@ -48,7 +48,7 @@ export const FOOD_EXTRAS: Food[] = [
     "id": "primal-x-sapotille",
     "source": "core",
     "ciqualRaw": {
-      "source": "Estimation PRIMAL (USDA SR Legacy 09313, Sapodilla, raw)",
+      "source": "Estimation VISOLIS (USDA SR Legacy 09313, Sapodilla, raw)",
       "sourceName": "Sapotille, chair crue (estimation)",
       "category": "FRUITS",
       "reference": "100 g"
@@ -86,7 +86,7 @@ export const FOOD_EXTRAS: Food[] = [
     "id": "primal-x-faisselle-lait-cru",
     "source": "core",
     "ciqualRaw": {
-      "source": "Estimation PRIMAL (d'après Ciqual 2025 : Faisselle, 6% MG environ — même composition, lait non pasteurisé)",
+      "source": "Estimation VISOLIS (d'après Ciqual 2025 : Faisselle, 6% MG environ — même composition, lait non pasteurisé)",
       "sourceName": "Faisselle au lait cru (estimation)",
       "category": "DAIRY",
       "reference": "100 g"
@@ -131,7 +131,7 @@ export const FOOD_EXTRAS: Food[] = [
   }
 ];
 
-/** Extra search names (food id → aliases), including existing PRIMAL foods known under another name. */
+/** Extra search names (food id → aliases), including existing VISOLIS foods known under another name. */
 export const EXTRA_ALIASES: Record<string, string[]> = {
   "primal-x-corossol": [
     "corossol",

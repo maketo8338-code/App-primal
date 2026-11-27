@@ -2,7 +2,7 @@
 
 _Dernière mise à jour : 23 novembre 2026_
 
-PRIMAL est conçu pour fonctionner sans compte et sans serveur. Cette page explique, simplement, quelles données l’app utilise, où elles sont conservées et ce qui sort de ton téléphone.
+VISOLIS est conçu pour fonctionner sans compte et sans serveur. Cette page explique, simplement, quelles données l’app utilise, où elles sont conservées et ce qui sort de ton téléphone.
 
 ## 1. Responsable
 
@@ -24,7 +24,7 @@ Ces données servent uniquement à calculer tes repères (énergie, nutriments, 
 
 ## 3. Où elles sont conservées
 
-Tout est enregistré dans le stockage local de ton téléphone. PRIMAL n’a ni compte, ni serveur, ni base de données en ligne : nous ne recevons pas tes données.
+Tout est enregistré dans le stockage local de ton téléphone. VISOLIS n’a ni compte, ni serveur, ni base de données en ligne : nous ne recevons pas tes données.
 
 Supprimer l’app efface ces données. Pense à exporter une sauvegarde avant si tu veux les garder.
 
@@ -54,7 +54,7 @@ Notifications : rappels calculés et programmés sur le téléphone, jamais pend
 
 Mouvement (accéléromètre) : uniquement pour animer les particules du fond. Aucune donnée n’est enregistrée.
 
-## 7. Ce que PRIMAL ne fait pas
+## 7. Ce que VISOLIS ne fait pas
 
 Pas de publicité, pas de traceur publicitaire, pas d’outil de mesure d’audience.
 
@@ -66,7 +66,7 @@ Pas de connexion à Apple Santé, Health Connect ou une montre pour l’instant.
 
 Certaines informations (poids, sommeil, alimentation) peuvent être considérées comme des données de santé. Elles restent sur ton appareil et ne sont jamais transmises à l’éditeur.
 
-PRIMAL est un outil de suivi : il ne pose pas de diagnostic et ne remplace pas un avis médical.
+VISOLIS est un outil de suivi : il ne pose pas de diagnostic et ne remplace pas un avis médical.
 
 ## 9. Tes droits
 
@@ -80,7 +80,7 @@ Table de composition nutritionnelle Ciqual 2025, ANSES (Licence Ouverte). Open F
 
 ## 11. Enfants
 
-PRIMAL n’est pas destiné aux enfants de moins de 15 ans sans l’accord d’un parent.
+VISOLIS n’est pas destiné aux enfants de moins de 15 ans sans l’accord d’un parent.
 
 ## 12. Modifications
 

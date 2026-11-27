@@ -4,7 +4,7 @@ import { MOTION } from '../lib/theme';
 import { touchPoint, useNeonOptional } from '../neon/NeonProvider';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Motion primitives for PRIMAL: moderate, purely visual animations.
+// Motion primitives for VISOLIS: moderate, purely visual animations.
 // They never change what a component does — only how it appears.
 // All of them switch off when the phone's « reduce motion » setting is on.
 // ─────────────────────────────────────────────────────────────────────────────

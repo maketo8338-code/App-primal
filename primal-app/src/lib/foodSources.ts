@@ -280,4 +280,4 @@ export async function searchFoods(query: string): Promise<SearchOutcome> {
   return { results: ranked, onlineOk: settled.some((item) => item.status === 'fulfilled') };
 }
 
-export const SOURCE_LABEL: Record<string, string> = { core: 'Base PRIMAL', usda: 'USDA FoodData Central', off: 'Open Food Facts', ciqual: 'Ciqual 2025 — ANSES' };
+export const SOURCE_LABEL: Record<string, string> = { core: 'Base VISOLIS', usda: 'USDA FoodData Central', off: 'Open Food Facts', ciqual: 'Ciqual 2025 — ANSES' };
