@@ -1,6 +1,6 @@
 # Politique de confidentialité
 
-_Dernière mise à jour : 23 novembre 2026_
+_Dernière mise à jour : 27 novembre 2026_
 
 VISOLIS est conçu pour fonctionner sans compte et sans serveur. Cette page explique, simplement, quelles données l’app utilise, où elles sont conservées et ce qui sort de ton téléphone.
 

@@ -1,6 +1,6 @@
 # Privacy policy
 
-_Last updated: 23 November 2026_
+_Last updated: 27 November 2026_
 
 VISOLIS is designed to work without an account and without a server. This page explains, simply, which data the app uses, where it is kept and what leaves your phone.
 

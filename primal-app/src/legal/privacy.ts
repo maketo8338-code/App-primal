@@ -13,7 +13,7 @@ export const PRIVACY_UPDATED = '2026-11-23';
 
 export const PRIVACY_FR: Policy = {
   title: 'Politique de confidentialité',
-  updated: 'Dernière mise à jour : 23 novembre 2026',
+  updated: 'Dernière mise à jour : 27 novembre 2026',
   intro: 'VISOLIS est conçu pour fonctionner sans compte et sans serveur. Cette page explique, simplement, quelles données l’app utilise, où elles sont conservées et ce qui sort de ton téléphone.',
   sections: [
     { title: '1. Responsable', body: ['Éditeur de l’app : Suella.', 'Contact pour toute question sur tes données : primal.health.app@gmail.com.'] },
@@ -67,7 +67,7 @@ export const PRIVACY_FR: Policy = {
 
 export const PRIVACY_EN: Policy = {
   title: 'Privacy policy',
-  updated: 'Last updated: 23 November 2026',
+  updated: 'Last updated: 27 November 2026',
   intro: 'VISOLIS is designed to work without an account and without a server. This page explains, simply, which data the app uses, where it is kept and what leaves your phone.',
   sections: [
     { title: '1. Controller', body: ['App publisher: Suella.', 'Contact for any question about your data: primal.health.app@gmail.com.'] },
